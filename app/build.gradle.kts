@@ -51,6 +51,10 @@ android {
 }
 
 dependencies {
+    implementation("androidx.credentials:credentials:1.2.2>")
+    implementation("androidx.credentials:credentials-play-services-auth:1.2.2")
+    implementation("com.google.android.libraries.identity.googleid:googleid:1.1.0")
+
     // firebase
     implementation(platform("com.google.firebase:firebase-bom:33.3.0"))
     implementation("com.google.firebase:firebase-analytics")
