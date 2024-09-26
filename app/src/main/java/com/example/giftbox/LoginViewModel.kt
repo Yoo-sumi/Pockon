@@ -1,6 +1,5 @@
 package com.example.giftbox
 
-import android.util.Log
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
 import androidx.credentials.CustomCredential
@@ -11,9 +10,12 @@ import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.GoogleAuthProvider
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.ktx.Firebase
+import dagger.hilt.android.lifecycle.HiltViewModel
+import javax.inject.Inject
 
-class LoginViewModel(
-    private val auth: FirebaseAuth = Firebase.auth,
+@HiltViewModel
+class LoginViewModel @Inject constructor(
+    private val auth: FirebaseAuth,
 ) : ViewModel() {
     private val _isLoginState = mutableStateOf(false)
     val isLoginState: State<Boolean> = _isLoginState
