@@ -8,8 +8,6 @@ import androidx.lifecycle.ViewModel
 import com.google.android.libraries.identity.googleid.GoogleIdTokenCredential
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.GoogleAuthProvider
-import com.google.firebase.auth.ktx.auth
-import com.google.firebase.ktx.Firebase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
 
@@ -19,6 +17,11 @@ class LoginViewModel @Inject constructor(
 ) : ViewModel() {
     private val _isLoginState = mutableStateOf(false)
     val isLoginState: State<Boolean> = _isLoginState
+
+    init {
+        if (auth.currentUser != null) _isLoginState.value = true
+        else _isLoginState.value = false
+    }
 
     fun login(result: GetCredentialResponse) {
         when (val credential = result.credential) {
@@ -33,7 +36,7 @@ class LoginViewModel @Inject constructor(
                             if (task.isSuccessful) {
                                 _isLoginState.value = true
                             } else {
-                                // 로그인 실패
+                                _isLoginState.value = false
                             }
                         }
                 }
