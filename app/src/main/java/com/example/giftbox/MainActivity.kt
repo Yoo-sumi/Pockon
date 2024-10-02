@@ -6,6 +6,14 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.viewModels
 import androidx.annotation.StringRes
+import androidx.compose.animation.AnimatedContentTransitionScope
+import androidx.compose.animation.core.EaseIn
+import androidx.compose.animation.core.EaseOut
+import androidx.compose.animation.core.LinearEasing
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.slideIn
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -94,35 +102,41 @@ fun BottomNavigationBar(onLogout: () -> Unit) {
     val navController = rememberNavController()
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     val currentRoute = navBackStackEntry?.destination
+    val bottomScreens = BottomNavigationItem().bottomNavigationItems()
+    val showBottomBar = navController
+        .currentBackStackEntryAsState().value?.destination?.route in bottomScreens.map { it.route }
+
     Scaffold(
         modifier = Modifier.fillMaxSize(),
         bottomBar = {
-            NavigationBar {
-                BottomNavigationItem().bottomNavigationItems().forEach { bottomNavigationItem ->
-                    NavigationBarItem(
-                        selected = currentRoute?.hierarchy?.any { it.route == bottomNavigationItem.route } == true,
-                        alwaysShowLabel = false,
-                        onClick = {
-                            navController.navigate(route = bottomNavigationItem.route) {
-                                popUpTo(navController.graph.findStartDestination().id) {
-                                    saveState = true
+            if (showBottomBar) {
+                NavigationBar {
+                    bottomScreens.forEach { bottomNavigationItem ->
+                        NavigationBarItem(
+                            selected = currentRoute?.hierarchy?.any { it.route == bottomNavigationItem.route } == true,
+                            alwaysShowLabel = false,
+                            onClick = {
+                                navController.navigate(route = bottomNavigationItem.route) {
+                                    popUpTo(navController.graph.findStartDestination().id) {
+                                        saveState = true
+                                    }
+                                    launchSingleTop = true
+                                    restoreState = true
                                 }
-                                launchSingleTop = true
-                                restoreState = true
+                            },
+                            icon = {
+                                Icon(
+                                    imageVector = bottomNavigationItem.icon,
+                                    contentDescription = stringResource(id = bottomNavigationItem.label)
+                                )
+                            },
+                            label = {
+                                Text(
+                                    text = stringResource(id = bottomNavigationItem.label)
+                                )
                             }
-                        },
-                        icon = {
-                            Icon(
-                                imageVector = bottomNavigationItem.icon,
-                                contentDescription = stringResource(id = bottomNavigationItem.label)
-                            )
-                        },
-                        label = {
-                            Text(
-                                text = stringResource(id = bottomNavigationItem.label)
-                            )
-                        }
-                    )
+                        )
+                    }
                 }
             }
         }
@@ -132,28 +146,33 @@ fun BottomNavigationBar(onLogout: () -> Unit) {
             startDestination = Screen.Home.route,
             modifier = Modifier.padding(innerPadding)
         ) {
-            composable(Screen.Home.route) { HomeScreen() }
+            composable(Screen.Home.route) {
+                HomeScreen {
+                    navController.navigate(route = Screen.Add.route)
+                }
+            }
             composable(Screen.List.route) { ListScreen() }
             composable(Screen.Setting.route) { SettingScreen(onLogout) }
+            composable(
+                Screen.Add.route,
+                enterTransition = {
+                    fadeIn(animationSpec = tween(300, easing = LinearEasing)) +
+                            slideIntoContainer(
+                                animationSpec = tween(300, easing = EaseIn),
+                                towards = AnimatedContentTransitionScope.SlideDirection.Start
+                            )
+                },
+                popExitTransition = {
+                    fadeOut(animationSpec = tween(300, easing = LinearEasing)) +
+                            slideOutOfContainer(
+                                animationSpec = tween(300, easing = EaseOut),
+                                towards = AnimatedContentTransitionScope.SlideDirection.End
+                            )
+                }
+            ) {
+                AddGifticon { navController.popBackStack() }
+            }
         }
-
-    }
-}
-
-@Composable
-fun HomeScreen() {
-    Box(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(MaterialTheme.colorScheme.background)
-    ) {
-        Text(
-            text = stringResource(id = R.string.home),
-            style = MaterialTheme.typography.bodyLarge,
-            textAlign = TextAlign.Center,
-            color = Color.Black,
-            modifier = Modifier.align(Alignment.Center)
-        )
     }
 }
 
@@ -204,6 +223,7 @@ sealed class Screen(val route: String, @StringRes val resourceId: Int) {
     object Home : Screen("home", R.string.home)
     object List : Screen("list", R.string.list)
     object Setting : Screen("setting", R.string.setting)
+    object Add : Screen("add", R.string.setting)
 }
 
 data class BottomNavigationItem(
