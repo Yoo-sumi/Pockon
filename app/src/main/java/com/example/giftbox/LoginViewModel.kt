@@ -13,14 +13,13 @@ import javax.inject.Inject
 
 @HiltViewModel
 class LoginViewModel @Inject constructor(
-    private val auth: FirebaseAuth,
+    private val loginRepository: LoginRepository
 ) : ViewModel() {
     private val _isLoginState = mutableStateOf(false)
     val isLoginState: State<Boolean> = _isLoginState
 
     init {
-        if (auth.currentUser != null) _isLoginState.value = true
-        else _isLoginState.value = false
+        _isLoginState.value = loginRepository.getCurrentUser() != null
     }
 
     fun login(result: GetCredentialResponse) {
@@ -31,32 +30,22 @@ class LoginViewModel @Inject constructor(
                     val idToken = googleIdTokenCredential.idToken
                     val firebaseCredential = GoogleAuthProvider.getCredential(idToken, null)
 
-                    auth.signInWithCredential(firebaseCredential)
-                        .addOnCompleteListener { task ->
-                            if (task.isSuccessful) {
-                                _isLoginState.value = true
-                            } else {
-                                _isLoginState.value = false
-                            }
-                        }
+                    loginRepository.login(firebaseCredential) {
+                        _isLoginState.value = it
+                    }
                 }
             }
         }
     }
 
     fun logout() {
-        auth.signOut()
+        loginRepository.logout()
         _isLoginState.value = false
     }
 
     fun removeAccount() {
-        auth.currentUser?.delete()?.addOnCompleteListener { task ->
-            if (task.isSuccessful) {
-                _isLoginState.value = false
-            } else {
-                // 탈퇴 실패
-            }
+        loginRepository.removeAccount { result ->
+            _isLoginState.value = !result
         }
-
     }
 }

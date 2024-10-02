@@ -21,7 +21,13 @@ class DiModule {
     fun provideFirebaseAuth() : FirebaseAuth {
         return Firebase.auth
     }
-    
+
+    @Singleton
+    @Provides
+    fun provideLoginRepository(auth: FirebaseAuth) : LoginRepository {
+        return LoginRepository(auth)
+    }
+
 // SharedPref
 //    @Singleton
 //    @Provides
