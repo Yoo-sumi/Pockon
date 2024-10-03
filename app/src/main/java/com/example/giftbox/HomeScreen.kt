@@ -2,9 +2,11 @@ package com.example.giftbox
 
 import android.net.Uri
 import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -31,6 +33,10 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SmallFloatingActionButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -39,6 +45,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import coil.compose.AsyncImage
 
 @Composable
 fun HomeScreen(onAdd: () -> Unit) {
@@ -73,8 +80,11 @@ fun HomeScreen(onAdd: () -> Unit) {
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AddGifticon(onBack: () -> Unit, onAddPhoto: (String) -> Unit) {
-    val galleryLauncher = rememberLauncherForActivityResult(ActivityResultContracts.GetContent()) { uri: Uri? ->
-        uri?.let { onAddPhoto(it.toString()) }
+    var selectedImageUri by remember {
+        mutableStateOf<Uri?>(null)
+    }
+    val galleryLauncher = rememberLauncherForActivityResult(contract = ActivityResultContracts.PickVisualMedia()) { uri ->
+        selectedImageUri = uri
     }
 
     Scaffold(
@@ -110,20 +120,36 @@ fun AddGifticon(onBack: () -> Unit, onAddPhoto: (String) -> Unit) {
                     horizontalArrangement = Arrangement.Center,
                     modifier = Modifier.fillMaxWidth()
                 ) {
-                    IconButton(onClick = { galleryLauncher.launch("image/*") },
+                    Box(
+                        contentAlignment = Alignment.Center,
                         modifier = Modifier
                             .width(200.dp)
                             .height(200.dp)
                             .background(Color.LightGray)
+                            .clickable {
+                                galleryLauncher.launch(
+                                    PickVisualMediaRequest(
+                                        ActivityResultContracts.PickVisualMedia.ImageOnly
+                                    )
+                                )
+                            }
                     ) {
-                        Image(
-                            modifier = Modifier
-                                .width(80.dp)
-                                .height(80.dp),
-                            painter = painterResource(id = R.drawable.icon_add_photo),
-                            contentDescription = "add gallery",
-                            contentScale = ContentScale.Crop
-                        )
+                        if (selectedImageUri == null) {
+                            Image(
+                                modifier = Modifier
+                                    .width(80.dp)
+                                    .height(80.dp),
+                                painter = painterResource(id = R.drawable.icon_add_photo),
+                                contentDescription = "add photo",
+                                contentScale = ContentScale.Crop
+                            )
+                        } else {
+                            AsyncImage(
+                                model = selectedImageUri,
+                                contentDescription = "selected photo",
+                                contentScale = ContentScale.Crop
+                            )
+                        }
                     }
                 }
             }

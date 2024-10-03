@@ -57,6 +57,9 @@ android {
 }
 
 dependencies {
+    //coil
+    implementation(libs.coil.compose)
+
     // hilt
     implementation("com.google.dagger:hilt-android:2.50")
     implementation(libs.androidx.navigation.compose)
