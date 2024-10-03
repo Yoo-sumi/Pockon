@@ -93,6 +93,7 @@ fun HomeScreen(onAdd: () -> Unit) {
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AddGifticon(onBack: () -> Unit, onAddPhoto: (String) -> Unit) {
+    // snackbar
     val snackbarHostState = remember { SnackbarHostState() }
     val scope = rememberCoroutineScope()
 
