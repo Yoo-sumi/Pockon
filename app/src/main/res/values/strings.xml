@@ -8,4 +8,5 @@
     <string name="list">목록</string>
     <string name="add">추가</string>
     <string name="title_add_gift">기프티콘 추가</string>
+    <string name="msg_permission_photo">사진 접근 권한이 거부되었습니다.</string>
 </resources>
