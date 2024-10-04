@@ -1,5 +1,6 @@
 package com.example.giftbox
 
+import android.util.Log
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
 import androidx.credentials.CustomCredential
@@ -20,6 +21,7 @@ class LoginViewModel @Inject constructor(
 
     init {
         _isLoginState.value = loginRepository.getCurrentUser() != null
+        Log.d("로그인정보", "정보: ${loginRepository.getCurrentUser()?.uid}")
     }
 
     fun login(result: GetCredentialResponse) {

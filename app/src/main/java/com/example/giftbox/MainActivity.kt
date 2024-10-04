@@ -20,6 +20,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.List
+import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.Button
@@ -37,6 +38,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.giftbox.ui.theme.GiftBoxTheme
 import androidx.navigation.NavDestination.Companion.hierarchy
 import androidx.navigation.NavGraph.Companion.findStartDestination
@@ -70,10 +72,16 @@ class MainActivity : ComponentActivity() {
 
 @Composable
 fun BottomNavigationBar(onLogout: () -> Unit) {
+    val homeViewModel = viewModel<HomeViewModel>()
+
     val navController = rememberNavController()
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     val currentRoute = navBackStackEntry?.destination
-    val bottomScreens = BottomNavigationItem().bottomNavigationItems()
+    val bottomScreens = listOf(
+        Screen.List,
+        Screen.Home,
+        Screen.Setting
+    )
     val showBottomBar = navController
         .currentBackStackEntryAsState().value?.destination?.route in bottomScreens.map { it.route }
 
@@ -118,7 +126,7 @@ fun BottomNavigationBar(onLogout: () -> Unit) {
             modifier = Modifier.padding(innerPadding)
         ) {
             composable(Screen.Home.route) {
-                HomeScreen {
+                HomeScreen(viewModel = homeViewModel) {
                     navController.navigate(route = Screen.Add.route)
                 }
             }
@@ -142,6 +150,7 @@ fun BottomNavigationBar(onLogout: () -> Unit) {
                 }
             ) {
                 AddGifticon(
+                    viewModel = homeViewModel,
                     onBack = {
                         navController.popBackStack()
                     },
@@ -197,35 +206,10 @@ fun SettingScreen(onLogout: () -> Unit) {
     }
 }
 
-sealed class Screen(val route: String, @StringRes val resourceId: Int) {
-    data object Home : Screen("home", R.string.home)
-    data object List : Screen("list", R.string.list)
-    data object Setting : Screen("setting", R.string.setting)
-    data object Add : Screen("add", R.string.setting)
-}
+sealed class Screen(val route: String, val icon: ImageVector, @StringRes val label: Int) {
+    data object Home : Screen("home", Icons.Filled.Home, R.string.home)
+    data object List : Screen("list", Icons.AutoMirrored.Filled.List, R.string.list)
+    data object Setting : Screen("setting", Icons.Filled.Settings, R.string.setting)
 
-data class BottomNavigationItem(
-    val label: Int = 0,
-    val icon: ImageVector = Icons.Filled.Home,
-    val route: String = ""
-) {
-    fun bottomNavigationItems(): List<BottomNavigationItem> {
-        return listOf(
-            BottomNavigationItem(
-                label = R.string.list,
-                icon = Icons.AutoMirrored.Filled.List,
-                route = "list"
-            ),
-            BottomNavigationItem(
-                label = R.string.home,
-                icon = Icons.Filled.Home,
-                route = "home"
-            ),
-            BottomNavigationItem(
-                label = R.string.setting,
-                icon = Icons.Filled.Settings,
-                route = "setting"
-            )
-        )
-    }
+    data object Add : Screen("add", Icons.Filled.Add, R.string.setting)
 }

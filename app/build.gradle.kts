@@ -62,7 +62,6 @@ dependencies {
 
     // hilt
     implementation("com.google.dagger:hilt-android:2.50")
-    implementation(libs.androidx.navigation.compose)
     kapt("com.google.dagger:hilt-android-compiler:2.50")
 
     // credentials
@@ -75,8 +74,10 @@ dependencies {
     implementation("com.google.firebase:firebase-analytics")
     implementation("com.google.firebase:firebase-auth:23.0.0")
     implementation("com.google.android.gms:play-services-auth:21.2.0")
+    implementation(libs.firebase.firestore)
 
     implementation("androidx.lifecycle:lifecycle-viewmodel-compose:2.4.1")
+    implementation(libs.androidx.navigation.compose)
 
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)

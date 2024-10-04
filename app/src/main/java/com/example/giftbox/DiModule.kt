@@ -5,6 +5,7 @@ import android.content.SharedPreferences
 import androidx.core.content.ContextCompat.getString
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.ktx.auth
+import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.ktx.Firebase
 import dagger.Module
 import dagger.Provides
@@ -24,8 +25,20 @@ class DiModule {
 
     @Singleton
     @Provides
+    fun provideFirebaseFirestore() : FirebaseFirestore {
+        return FirebaseFirestore.getInstance()
+    }
+
+    @Singleton
+    @Provides
     fun provideLoginRepository(auth: FirebaseAuth) : LoginRepository {
         return LoginRepository(auth)
+    }
+
+    @Singleton
+    @Provides
+    fun provideGiftRepository(firestore: FirebaseFirestore) : GiftRepository {
+        return GiftRepository(firestore)
     }
 
 // SharedPref
