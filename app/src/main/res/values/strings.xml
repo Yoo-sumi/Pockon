@@ -13,4 +13,5 @@
     <string name="txt_brand">브랜드</string>
     <string name="txt_end_date">유효기간</string>
     <string name="txt_memo">메모</string>
+    <string name="btn_register">등록하기</string>
 </resources>

@@ -150,7 +150,6 @@ fun BottomNavigationBar(onLogout: () -> Unit) {
                 }
             ) {
                 AddGifticon(
-                    viewModel = homeViewModel,
                     onBack = {
                         navController.popBackStack()
                     },
