@@ -14,4 +14,6 @@
     <string name="txt_end_date">유효기간</string>
     <string name="txt_memo">메모</string>
     <string name="btn_register">등록하기</string>
+    <string name="btn_cancel">취소</string>
+    <string name="btn_confirm">확인</string>
 </resources>

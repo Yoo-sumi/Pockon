@@ -152,9 +152,6 @@ fun BottomNavigationBar(onLogout: () -> Unit) {
                 AddGifticon(
                     onBack = {
                         navController.popBackStack()
-                    },
-                    onAddPhoto = { imagePath ->
-
                     }
                 )
             }

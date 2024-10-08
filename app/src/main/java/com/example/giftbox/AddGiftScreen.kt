@@ -71,7 +71,7 @@ import java.util.TimeZone
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun AddGifticon(onBack: () -> Unit, onAddPhoto: (String) -> Unit) {
+fun AddGifticon(onBack: () -> Unit) {
     val addViewModel = hiltViewModel<AddViewModel>()
 
 //    val isLoad by viewModel.isLoad.collectAsStateWithLifecycle()
@@ -155,7 +155,6 @@ fun AddGifticon(onBack: () -> Unit, onAddPhoto: (String) -> Unit) {
             )
         },
         modifier = Modifier
-            .padding(25.dp)
             .fillMaxSize()
     ) { innerPadding ->
         Column(
@@ -164,6 +163,7 @@ fun AddGifticon(onBack: () -> Unit, onAddPhoto: (String) -> Unit) {
                 .background(MaterialTheme.colorScheme.background)
                 .padding(innerPadding)
                 .verticalScroll(scrollSate)
+                .padding(25.dp)
         ) {
             // gift image
             GiftImgae(context, selectedImageUri, launcherMultiplePermissions, galleryLauncher)
@@ -194,7 +194,7 @@ fun AddGifticon(onBack: () -> Unit, onAddPhoto: (String) -> Unit) {
                         brand = inputDataList[1],
                         endDate = inputDataList[2],
                         memo = inputDataList[3]
-                    )
+                    ) { onBack() }
                 },
                 shape = RectangleShape,
                 modifier = Modifier
@@ -334,7 +334,7 @@ fun CustomDatePickerDialog(
             Button(onClick = {
                 onCancel()
             }) {
-                Text(text = "취소")
+                Text(text = stringResource(id = R.string.btn_cancel))
             }
 
             Spacer(modifier = Modifier.width(5.dp))
@@ -345,17 +345,14 @@ fun CustomDatePickerDialog(
                         "yyyyMMdd",
                         Locale.getDefault()
                     ).format(Date(selectedDateMillis))
-
                     onConfirm(yyyyMMdd)
                 }
             }) {
-                Text(text = "확인")
+                Text(text = stringResource(id = R.string.btn_confirm))
             }
         }
     }
 }
-
-
 
 fun checkPermission(
     context: Context,

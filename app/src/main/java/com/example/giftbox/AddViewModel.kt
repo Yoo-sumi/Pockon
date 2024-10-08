@@ -51,7 +51,7 @@ class AddViewModel @Inject constructor(
         }
     }
 
-    fun addGift(photo: String, name: String, brand: String, endDate: String, memo: String) {
+    fun addGift(photo: String, name: String, brand: String, endDate: String, memo: String, onComplete: (Boolean) -> Unit) {
         val gift = Gift(photo = photo, name = name, brand = brand, endDate = endDate, memo = memo)
         giftRepository.addGift(uid, gift) { result ->
             if (result) {
@@ -60,6 +60,7 @@ class AddViewModel @Inject constructor(
                 _endDate.value = endDate
                 _memo.value = memo
             }
+            onComplete(result)
         }
     }
 
