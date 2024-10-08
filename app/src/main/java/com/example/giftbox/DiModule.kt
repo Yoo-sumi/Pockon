@@ -41,10 +41,9 @@ class DiModule {
         return GiftRepository(firestore)
     }
 
-// SharedPref
-//    @Singleton
-//    @Provides
-//    fun provideSharedPref(@ApplicationContext context: Context): SharedPreferences {
-//        return context.getSharedPreferences(getString(context, R.string.preference_file_key), Context.MODE_PRIVATE)
-//    }
+    @Singleton
+    @Provides
+    fun provideSharedPref(@ApplicationContext context: Context): SharedPreferences {
+        return context.getSharedPreferences(getString(context, R.string.preference_file_key), Context.MODE_PRIVATE)
+    }
 }

@@ -1,5 +1,6 @@
 package com.example.giftbox
 
+import android.content.SharedPreferences
 import android.util.Log
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
@@ -14,14 +15,17 @@ import javax.inject.Inject
 
 @HiltViewModel
 class LoginViewModel @Inject constructor(
-    private val loginRepository: LoginRepository
+    private val loginRepository: LoginRepository,
+    private val sharedPref: SharedPreferences
 ) : ViewModel() {
     private val _isLoginState = mutableStateOf(false)
     val isLoginState: State<Boolean> = _isLoginState
 
     init {
-        _isLoginState.value = loginRepository.getCurrentUser() != null
-        Log.d("로그인정보", "정보: ${loginRepository.getCurrentUser()?.uid}")
+        loginRepository.getCurrentUser()?.let {
+            _isLoginState.value = true
+            saveMyUid(it.uid)
+        }
     }
 
     fun login(result: GetCredentialResponse) {
@@ -49,5 +53,9 @@ class LoginViewModel @Inject constructor(
         loginRepository.removeAccount { result ->
             _isLoginState.value = !result
         }
+    }
+
+    fun saveMyUid(uid: String) {
+        sharedPref.edit().putString("uid", uid).apply()
     }
 }

@@ -82,7 +82,11 @@ fun AddGifticon(onBack: () -> Unit, onAddPhoto: (String) -> Unit) {
 
     // select photo
     var selectedImageUri by remember {
-        mutableStateOf<Uri?>(null)
+        if (addViewModel.photo.value.isEmpty()) {
+            mutableStateOf<Uri?>(null)
+        } else {
+            mutableStateOf<Uri?>(Uri.parse(addViewModel.photo.value))
+        }
     }
     val galleryLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.PickVisualMedia()
@@ -114,10 +118,10 @@ fun AddGifticon(onBack: () -> Unit, onAddPhoto: (String) -> Unit) {
 
     // input data
     val inputDataList = listOf(
-        remember { mutableStateOf("") },
-        remember { mutableStateOf("") },
-        remember { mutableStateOf("") },
-        remember { mutableStateOf("") }
+        addViewModel.name.value,
+        addViewModel.brand.value,
+        addViewModel.endDate.value,
+        addViewModel.memo.value
     )
     val labelList = listOf(
         stringResource(id = R.string.txt_name),
@@ -167,12 +171,11 @@ fun AddGifticon(onBack: () -> Unit, onAddPhoto: (String) -> Unit) {
             // text field
             for (i in inputDataList.indices) {
                 InputDataTextField(
-                    value = inputDataList[i].value,
+                    value = inputDataList[i],
                     label = labelList[i],
                     index = i,
-                    onValueChange = {
-                            index, value ->
-                        inputDataList[index].value = value
+                    onValueChange = { index, value ->
+                        addViewModel.setGift(index, value)
                     },
                     onDatePicker = {
                         if (i == 2) {
@@ -187,10 +190,10 @@ fun AddGifticon(onBack: () -> Unit, onAddPhoto: (String) -> Unit) {
                 onClick = {
                     addViewModel.addGift(
                         photo = selectedImageUri.toString(),
-                        name = inputDataList[0].value,
-                        brand = inputDataList[1].value,
-                        endDate = inputDataList[2].value,
-                        memo = inputDataList[3].value
+                        name = inputDataList[0],
+                        brand = inputDataList[1],
+                        endDate = inputDataList[2],
+                        memo = inputDataList[3]
                     )
                 },
                 shape = RectangleShape,
@@ -209,7 +212,7 @@ fun AddGifticon(onBack: () -> Unit, onAddPhoto: (String) -> Unit) {
                 onCancel = { addViewModel.changeDatePickerState() },
                 onConfirm = {
                     addViewModel.changeDatePickerState()
-
+                    addViewModel.setGift(2, value = it)
                 }
             )
         }
