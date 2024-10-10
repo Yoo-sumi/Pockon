@@ -46,6 +46,11 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
+import com.example.giftbox.ui.add.AddGifticon
+import com.example.giftbox.ui.home.HomeScreen
+import com.example.giftbox.ui.home.HomeViewModel
+import com.example.giftbox.ui.login.LoginScreen
+import com.example.giftbox.ui.login.LoginViewModel
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint

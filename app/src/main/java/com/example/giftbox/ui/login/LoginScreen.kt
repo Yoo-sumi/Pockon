@@ -1,4 +1,4 @@
-package com.example.giftbox
+package com.example.giftbox.ui.login
 
 import android.util.Log
 import androidx.compose.foundation.Image
@@ -30,6 +30,7 @@ import androidx.credentials.GetCredentialRequest
 import androidx.credentials.GetCredentialResponse
 import androidx.credentials.exceptions.GetCredentialException
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.example.giftbox.R
 import com.google.android.libraries.identity.googleid.GetGoogleIdOption
 import kotlinx.coroutines.launch
 

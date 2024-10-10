@@ -1,4 +1,4 @@
-package com.example.giftbox
+package com.example.giftbox.ui.utils
 
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.input.OffsetMapping

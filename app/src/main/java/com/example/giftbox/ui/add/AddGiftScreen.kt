@@ -1,4 +1,4 @@
-package com.example.giftbox
+package com.example.giftbox.ui.add
 
 import android.Manifest
 import android.content.Context
@@ -24,6 +24,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
@@ -45,11 +46,8 @@ import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.material3.rememberDatePickerState
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -58,11 +56,15 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat
+import androidx.core.net.toUri
 import androidx.hilt.navigation.compose.hiltViewModel
 import coil.compose.AsyncImage
+import com.example.giftbox.ui.utils.DateTransformation
+import com.example.giftbox.R
 import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
 import java.util.Date
@@ -81,17 +83,10 @@ fun AddGifticon(onBack: () -> Unit) {
     val scope = rememberCoroutineScope()
 
     // select photo
-    var selectedImageUri by remember {
-        if (addViewModel.photo.value.isEmpty()) {
-            mutableStateOf<Uri?>(null)
-        } else {
-            mutableStateOf<Uri?>(Uri.parse(addViewModel.photo.value))
-        }
-    }
     val galleryLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.PickVisualMedia()
     ) { uri ->
-        selectedImageUri = uri
+        addViewModel.setPhoto(uri)
     }
 
     // check permission
@@ -122,12 +117,6 @@ fun AddGifticon(onBack: () -> Unit) {
         addViewModel.brand.value,
         addViewModel.endDate.value,
         addViewModel.memo.value
-    )
-    val labelList = listOf(
-        stringResource(id = R.string.txt_name),
-        stringResource(id = R.string.txt_brand),
-        stringResource(id = R.string.txt_end_date),
-        stringResource(id = R.string.txt_memo)
     )
 
     Scaffold(
@@ -166,13 +155,13 @@ fun AddGifticon(onBack: () -> Unit) {
                 .padding(25.dp)
         ) {
             // gift image
-            GiftImgae(context, selectedImageUri, launcherMultiplePermissions, galleryLauncher)
+            GiftImgae(context, addViewModel.photo.value, launcherMultiplePermissions, galleryLauncher)
 
             // text field
             for (i in inputDataList.indices) {
                 InputDataTextField(
                     value = inputDataList[i],
-                    label = labelList[i],
+                    label = addViewModel.getlabelList(i),
                     index = i,
                     onValueChange = { index, value ->
                         addViewModel.setGift(index, value)
@@ -188,13 +177,22 @@ fun AddGifticon(onBack: () -> Unit) {
             // add button
             Button(
                 onClick = {
-                    addViewModel.addGift(
-                        photo = selectedImageUri.toString(),
-                        name = inputDataList[0],
-                        brand = inputDataList[1],
-                        endDate = inputDataList[2],
-                        memo = inputDataList[3]
-                    ) { onBack() }
+                    val msg = addViewModel.isValid()
+                    if (msg != null) {
+                        scope.launch {
+                            snackbarHostState.showSnackbar(message = context.getString(msg))
+                        }
+                    } else {
+                        addViewModel.addGift()
+//                        { result ->
+//                            if (result) onBack()
+//                            else {
+//                                scope.launch {
+//                                    snackbarHostState.showSnackbar(message = context.getString(R.string.mgs_no_register))
+//                                }
+//                            }
+//                        }
+                    }
                 },
                 shape = RectangleShape,
                 modifier = Modifier
@@ -220,7 +218,7 @@ fun AddGifticon(onBack: () -> Unit) {
 }
 
 @Composable
-fun InputDataTextField(value: String, label: String, index: Int, onValueChange: (Int, String) -> Unit, onDatePicker: () -> Unit) {
+fun InputDataTextField(value: String, label: Int, index: Int, onValueChange: (Int, String) -> Unit, onDatePicker: () -> Unit) {
     var modifier = Modifier
         .fillMaxWidth()
         .padding(top = 5.dp)
@@ -236,7 +234,7 @@ fun InputDataTextField(value: String, label: String, index: Int, onValueChange: 
             onValueChange(index, it)
         },
         maxLines = if (index == 3) 50 else 1,
-        label = { Text(label) },
+        label = { Text(stringResource(id = label)) },
         visualTransformation = if (index == 2) DateTransformation() else VisualTransformation.None,
         trailingIcon = {
             if (index == 2) {
@@ -247,7 +245,8 @@ fun InputDataTextField(value: String, label: String, index: Int, onValueChange: 
                     )
                 }
             }
-        }
+        },
+        keyboardOptions = if (index == 2) KeyboardOptions.Default.copy(keyboardType = KeyboardType.Number) else KeyboardOptions.Default
     )
 }
 

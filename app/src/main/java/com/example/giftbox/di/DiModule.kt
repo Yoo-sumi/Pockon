@@ -1,12 +1,19 @@
-package com.example.giftbox
+package com.example.giftbox.di
 
 import android.content.Context
 import android.content.SharedPreferences
 import androidx.core.content.ContextCompat.getString
+import com.example.giftbox.data.GiftRepository
+import com.example.giftbox.data.LoginRepository
+import com.example.giftbox.R
+import com.example.giftbox.data.GiftDataSource
+import com.example.giftbox.data.GiftPhotoDataSource
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.ktx.Firebase
+import com.google.firebase.storage.FirebaseStorage
+import com.google.firebase.storage.ktx.storage
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -31,14 +38,32 @@ class DiModule {
 
     @Singleton
     @Provides
+    fun provideFirebaseStorage() : FirebaseStorage {
+        return Firebase.storage
+    }
+
+    @Singleton
+    @Provides
     fun provideLoginRepository(auth: FirebaseAuth) : LoginRepository {
         return LoginRepository(auth)
     }
 
     @Singleton
     @Provides
-    fun provideGiftRepository(firestore: FirebaseFirestore) : GiftRepository {
-        return GiftRepository(firestore)
+    fun provideGiftRepository(giftDataSource: GiftDataSource, giftPhotoDataSource: GiftPhotoDataSource) : GiftRepository {
+        return GiftRepository(giftDataSource, giftPhotoDataSource)
+    }
+
+    @Singleton
+    @Provides
+    fun provideGiftDataSource(firestore: FirebaseFirestore) : GiftDataSource {
+        return GiftDataSource(firestore)
+    }
+
+    @Singleton
+    @Provides
+    fun provideGiftPhotoDataSource(firebaseStorage: FirebaseStorage) : GiftPhotoDataSource {
+        return GiftPhotoDataSource(firebaseStorage)
     }
 
     @Singleton

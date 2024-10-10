@@ -1,4 +1,4 @@
-package com.example.giftbox
+package com.example.giftbox.data
 
 import com.google.firebase.auth.AuthCredential
 import com.google.firebase.auth.FirebaseAuth

@@ -1,14 +1,13 @@
-package com.example.giftbox
+package com.example.giftbox.ui.login
 
 import android.content.SharedPreferences
-import android.util.Log
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
 import androidx.credentials.CustomCredential
 import androidx.credentials.GetCredentialResponse
 import androidx.lifecycle.ViewModel
+import com.example.giftbox.data.LoginRepository
 import com.google.android.libraries.identity.googleid.GoogleIdTokenCredential
-import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.GoogleAuthProvider
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject

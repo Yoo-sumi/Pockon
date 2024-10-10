@@ -13,7 +13,12 @@
     <string name="txt_brand">브랜드</string>
     <string name="txt_end_date">유효기간</string>
     <string name="txt_memo">메모</string>
-    <string name="btn_register">등록하기</string>
+    <string name="btn_register">추가하기</string>
     <string name="btn_cancel">취소</string>
     <string name="btn_confirm">확인</string>
+    <string name="mgs_no_photo">사진을 추가해주세요.</string>
+    <string name="mgs_no_name">이름을 입력해주세요.</string>
+    <string name="mgs_no_brand">브랜드를 입력해주세요.</string>
+    <string name="mgs_no_end_date">유효기간을 입력해주세요.</string>
+    <string name="mgs_no_register">기프티콘 추가에 실패했습니다.</string>
 </resources>
