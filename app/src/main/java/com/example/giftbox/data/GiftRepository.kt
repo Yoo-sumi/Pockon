@@ -14,4 +14,8 @@ class GiftRepository @Inject constructor(
     fun getGift(document:String): Flow<Gift?> {
         return giftDataSource.loadData(document)
     }
+
+    fun getAllGift(uid: String): Flow<List<Gift>> {
+        return giftDataSource.loadAllData(uid)
+    }
 }

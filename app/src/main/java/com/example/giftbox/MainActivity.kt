@@ -49,6 +49,7 @@ import androidx.navigation.compose.rememberNavController
 import com.example.giftbox.ui.add.AddGifticon
 import com.example.giftbox.ui.home.HomeScreen
 import com.example.giftbox.ui.home.HomeViewModel
+import com.example.giftbox.ui.list.ListScreen
 import com.example.giftbox.ui.login.LoginScreen
 import com.example.giftbox.ui.login.LoginViewModel
 import dagger.hilt.android.AndroidEntryPoint
@@ -161,23 +162,6 @@ fun BottomNavigationBar(onLogout: () -> Unit) {
                 )
             }
         }
-    }
-}
-
-@Composable
-fun ListScreen() {
-    Box(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(MaterialTheme.colorScheme.background)
-    ) {
-        Text(
-            text = stringResource(id = R.string.list),
-            style = MaterialTheme.typography.bodyLarge,
-            textAlign = TextAlign.Center,
-            color = Color.Black,
-            modifier = Modifier.align(Alignment.Center)
-        )
     }
 }
 

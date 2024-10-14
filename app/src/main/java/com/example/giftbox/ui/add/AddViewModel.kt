@@ -107,10 +107,4 @@ class AddViewModel @Inject constructor(
             else -> R.string.txt_memo
         }
     }
-
-    fun getNowDate(): String {
-        val current = LocalDateTime.now()
-        val formatter = DateTimeFormatter.BASIC_ISO_DATE
-        return current.format(formatter)
-    }
 }

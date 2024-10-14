@@ -44,4 +44,23 @@ class GiftDataSource @Inject constructor(
             awaitClose()
         }
     }
+
+    fun loadAllData(uid: String): Flow<List<Gift>> {
+        return callbackFlow {
+            firestore
+                .collection("gift")
+                .whereEqualTo("uid", uid)
+                .get()
+                .addOnCompleteListener { task ->
+                    val giftList: MutableList<Gift>  = mutableListOf()
+                    if (task.isSuccessful) {
+                        for (document in task.result) {
+                            giftList.add(document.toObject(Gift::class.java))
+                        }
+                    }
+                    trySend(giftList)
+                }
+            awaitClose()
+        }
+    }
 }
