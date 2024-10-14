@@ -1,10 +1,9 @@
 package com.example.giftbox.model
 
-import android.net.Uri
-
 data class Gift(
+    var document: String = "",
     val uid: String = "",
-    val photo: Uri? = null,
+    val photo: String = "",
     val name: String = "",
     val brand: String = "",
     val endDate: String = "",

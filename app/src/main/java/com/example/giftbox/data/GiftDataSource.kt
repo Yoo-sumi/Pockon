@@ -1,5 +1,6 @@
 package com.example.giftbox.data
 
+import android.util.Log
 import com.example.giftbox.model.Gift
 import com.google.firebase.firestore.FirebaseFirestore
 import kotlinx.coroutines.channels.awaitClose
@@ -15,29 +16,32 @@ class GiftDataSource @Inject constructor(
         val document = firestore
             .collection("gift")
             .document()
+        gift.document = document.id
         return callbackFlow {
             document
                 .set(gift)
-                .addOnCompleteListener {
-                    if (it.isSuccessful) trySend(document.id) else trySend(null)
+                .addOnCompleteListener { task ->
+                    if (task.isSuccessful) trySend(document.id) else trySend(null)
                 }
             awaitClose()
         }
     }
 
-    fun loadData(uid:String, onComplete: (Gift?) -> Unit) {
-        firestore
-            .collection("gift")
-            .document()
-            .get()
-            .addOnCompleteListener { task ->
-                var gift: Gift? = null
-                if (task.isSuccessful) {
-                    gift = task.result.toObject(Gift::class.java)
-                    onComplete(gift)
+    fun loadData(document:String): Flow<Gift?> {
+        return callbackFlow {
+            firestore
+                .collection("gift")
+                .document(document)
+                .get()
+                .addOnCompleteListener { task ->
+                    var gift: Gift? = null
+                    if (task.isSuccessful) {
+                        gift = task.result.toObject(Gift::class.java)
+                        trySend(gift)
+                    }
+                    trySend(gift)
                 }
-                onComplete(gift)
-            }
+            awaitClose()
+        }
     }
-
 }

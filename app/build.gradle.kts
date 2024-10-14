@@ -33,6 +33,8 @@ android {
         }
     }
     compileOptions {
+        isCoreLibraryDesugaringEnabled = true   // LocalDateTime 이 Api 26 이하 지원을 위해 추가
+
         sourceCompatibility = JavaVersion.VERSION_1_8
         targetCompatibility = JavaVersion.VERSION_1_8
     }
@@ -57,6 +59,9 @@ android {
 }
 
 dependencies {
+    // LocalDateTime Api 26 lower
+    coreLibraryDesugaring("com.android.tools:desugar_jdk_libs:1.1.5")
+
     //coil
     implementation(libs.coil.compose)
 
@@ -76,7 +81,6 @@ dependencies {
     implementation("com.google.firebase:firebase-auth:23.0.0")
     implementation("com.google.android.gms:play-services-auth:21.2.0")
     implementation(libs.firebase.firestore)
-    implementation(libs.firebase.storage.ktx)
 
     implementation("androidx.lifecycle:lifecycle-viewmodel-compose:2.4.1")
     implementation(libs.androidx.navigation.compose)

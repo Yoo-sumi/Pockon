@@ -1,8 +1,7 @@
 package com.example.giftbox.ui.add
 
 import android.content.SharedPreferences
-import android.net.Uri
-import android.util.Log
+import android.graphics.Bitmap
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
@@ -10,9 +9,13 @@ import androidx.lifecycle.viewModelScope
 import com.example.giftbox.model.Gift
 import com.example.giftbox.data.GiftRepository
 import com.example.giftbox.R
+import com.example.giftbox.ui.utils.bitmapToString
+import com.example.giftbox.ui.utils.stringTobitmap
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.flow.count
 import kotlinx.coroutines.launch
+import java.time.Clock
+import java.time.LocalDateTime
+import java.time.format.DateTimeFormatter
 import javax.inject.Inject
 
 @HiltViewModel
@@ -25,8 +28,8 @@ class AddViewModel @Inject constructor(
     private val _isShowDatePicker = mutableStateOf(false)
     val isShowDatePicker: State<Boolean> = _isShowDatePicker
 
-    private val _photo = mutableStateOf<Uri?>(null)
-    val photo: State<Uri?> = _photo
+    private val _photo = mutableStateOf<Bitmap?>(null)
+    val photo: State<Bitmap?> = _photo
     private val _name = mutableStateOf("")
     val name: State<String> = _name
     private val _brand = mutableStateOf("")
@@ -40,13 +43,18 @@ class AddViewModel @Inject constructor(
         getGift()
     }
 
-    private fun getGift() {
-        giftRepository.getGift(uid) { gift ->
-            _photo.value = gift?.photo
-            _name.value = gift?.name ?: ""
-            _brand.value = gift?.brand ?: ""
-            _endDate.value = gift?.endDate ?: ""
-            _memo.value = gift?.memo ?: ""
+    private fun getGift(document: String? = null) {
+        if (document == null) return
+        viewModelScope.launch {
+            giftRepository.getGift(uid).collect { gift->
+                gift?.let {
+                    _photo.value = stringTobitmap(gift.photo)
+                    _name.value = gift.name
+                    _brand.value = gift.brand
+                    _endDate.value = gift.endDate
+                    _memo.value = gift.memo
+                }
+            }
         }
     }
 
@@ -59,22 +67,16 @@ class AddViewModel @Inject constructor(
         }
     }
 
-    fun addGift() {
-        val gift = Gift(uid = uid, photo = _photo.value, name = _name.value, brand = _brand.value, endDate = _endDate.value, memo = _memo.value)
+    fun addGift(onAddComplete: (Boolean) -> Unit) {
+        val gift = Gift(uid = uid, photo = bitmapToString(_photo.value!!), name = _name.value, brand = _brand.value, endDate = _endDate.value, memo = _memo.value)
         viewModelScope.launch {
             giftRepository.addGift(gift).collect { docId ->
-                Log.d("업로드", "docId ${docId}")
-
-                if (docId == null) {
-
-                } else {
-                    giftRepository.addPhoto(docId, _photo.value!!)
-                }
+                onAddComplete(docId != null)
             }
         }
     }
 
-    fun setPhoto(photo: Uri?) {
+    fun setPhoto(photo: Bitmap?) {
         _photo.value = photo
     }
 
@@ -97,12 +99,18 @@ class AddViewModel @Inject constructor(
         return msg
     }
 
-    fun getlabelList(index: Int): Int {
+    fun getLabelList(index: Int): Int {
         return when (index) {
             0 -> R.string.txt_name
             1 -> R.string.txt_brand
             2 -> R.string.txt_end_date
             else -> R.string.txt_memo
         }
+    }
+
+    fun getNowDate(): String {
+        val current = LocalDateTime.now()
+        val formatter = DateTimeFormatter.BASIC_ISO_DATE
+        return current.format(formatter)
     }
 }

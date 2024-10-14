@@ -3,6 +3,7 @@ package com.example.giftbox.ui.add
 import android.Manifest
 import android.content.Context
 import android.content.pm.PackageManager
+import android.graphics.Bitmap
 import android.net.Uri
 import android.os.Build
 import androidx.activity.compose.ManagedActivityResultLauncher
@@ -52,6 +53,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.RectangleShape
+import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
@@ -60,11 +62,10 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat
-import androidx.core.net.toUri
 import androidx.hilt.navigation.compose.hiltViewModel
-import coil.compose.AsyncImage
 import com.example.giftbox.ui.utils.DateTransformation
 import com.example.giftbox.R
+import com.example.giftbox.ui.utils.getBitmapFromUri
 import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
 import java.util.Date
@@ -75,8 +76,7 @@ import java.util.TimeZone
 @Composable
 fun AddGifticon(onBack: () -> Unit) {
     val addViewModel = hiltViewModel<AddViewModel>()
-
-//    val isLoad by viewModel.isLoad.collectAsStateWithLifecycle()
+    val context = LocalContext.current
 
     // snackbar
     val snackbarHostState = remember { SnackbarHostState() }
@@ -86,11 +86,13 @@ fun AddGifticon(onBack: () -> Unit) {
     val galleryLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.PickVisualMedia()
     ) { uri ->
-        addViewModel.setPhoto(uri)
+        uri?.let {
+            val photo = getBitmapFromUri(context, it)
+            addViewModel.setPhoto(photo)
+        }
     }
 
     // check permission
-    val context = LocalContext.current
     val launcherMultiplePermissions = rememberLauncherForActivityResult(
         ActivityResultContracts.RequestMultiplePermissions()
     ) { permissionsMap ->
@@ -155,13 +157,13 @@ fun AddGifticon(onBack: () -> Unit) {
                 .padding(25.dp)
         ) {
             // gift image
-            GiftImgae(context, addViewModel.photo.value, launcherMultiplePermissions, galleryLauncher)
+            GiftImage(context, addViewModel.photo.value, launcherMultiplePermissions, galleryLauncher)
 
             // text field
             for (i in inputDataList.indices) {
                 InputDataTextField(
                     value = inputDataList[i],
-                    label = addViewModel.getlabelList(i),
+                    label = addViewModel.getLabelList(i),
                     index = i,
                     onValueChange = { index, value ->
                         addViewModel.setGift(index, value)
@@ -183,15 +185,14 @@ fun AddGifticon(onBack: () -> Unit) {
                             snackbarHostState.showSnackbar(message = context.getString(msg))
                         }
                     } else {
-                        addViewModel.addGift()
-//                        { result ->
-//                            if (result) onBack()
-//                            else {
-//                                scope.launch {
-//                                    snackbarHostState.showSnackbar(message = context.getString(R.string.mgs_no_register))
-//                                }
-//                            }
-//                        }
+                        addViewModel.addGift { result ->
+                            if (result) onBack()
+                            else {
+                                scope.launch {
+                                    snackbarHostState.showSnackbar(message = context.getString(R.string.mgs_no_register))
+                                }
+                            }
+                        }
                     }
                 },
                 shape = RectangleShape,
@@ -206,7 +207,7 @@ fun AddGifticon(onBack: () -> Unit) {
         // DatePicker
         if (addViewModel.isShowDatePicker.value) {
             CustomDatePickerDialog(
-                selectedDate = "20241008",
+                selectedDate = addViewModel.endDate.value,
                 onCancel = { addViewModel.changeDatePickerState() },
                 onConfirm = {
                     addViewModel.changeDatePickerState()
@@ -251,8 +252,8 @@ fun InputDataTextField(value: String, label: Int, index: Int, onValueChange: (In
 }
 
 @Composable
-fun GiftImgae(context: Context,
-              selectedImageUri: Uri?,
+fun GiftImage(context: Context,
+              selectedImage: Bitmap?,
               launcherMultiplePermissions:  ManagedActivityResultLauncher<Array<String>, Map<String, @JvmSuppressWildcards Boolean>>,
               galleryLauncher:  ManagedActivityResultLauncher<PickVisualMediaRequest, Uri?>) {
     Row(
@@ -279,7 +280,7 @@ fun GiftImgae(context: Context,
                     }
                 }
         ) {
-            if (selectedImageUri == null) {
+            if (selectedImage == null) {
                 Image(
                     modifier = Modifier
                         .width(80.dp)
@@ -289,9 +290,9 @@ fun GiftImgae(context: Context,
                     contentScale = ContentScale.Crop
                 )
             } else {
-                AsyncImage(
-                    model = selectedImageUri,
-                    contentDescription = "selected photo",
+                Image(
+                    bitmap = selectedImage.asImageBitmap(),
+                    contentDescription = "add photo",
                     contentScale = ContentScale.Crop
                 )
             }
@@ -302,7 +303,7 @@ fun GiftImgae(context: Context,
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun CustomDatePickerDialog(
-    selectedDate: String?,
+    selectedDate: String,
     onCancel: () -> Unit,
     onConfirm: (String) -> Unit
 ) {
@@ -316,12 +317,12 @@ fun CustomDatePickerDialog(
     ) {
         val datePickerState = rememberDatePickerState(
             initialDisplayMode = DisplayMode.Picker,
-            initialSelectedDateMillis = selectedDate?.let {
+            initialSelectedDateMillis = if (selectedDate.isNotEmpty()) {
                 val formatter = SimpleDateFormat("yyyyMMdd", Locale.getDefault()).apply {
                     timeZone = TimeZone.getTimeZone("UTC")
                 }
-                formatter.parse(it)?.time ?: System.currentTimeMillis()
-            } ?: System.currentTimeMillis(),
+                formatter.parse(selectedDate)?.time ?: System.currentTimeMillis()
+            } else System.currentTimeMillis(),
         )
 
         DatePicker(state = datePickerState)
@@ -353,7 +354,7 @@ fun CustomDatePickerDialog(
     }
 }
 
-fun checkPermission(
+private fun checkPermission(
     context: Context,
     launcher: ManagedActivityResultLauncher<Array<String>, Map<String, Boolean>>,
     result: (Boolean) -> Unit
@@ -378,3 +379,4 @@ fun checkPermission(
         launcher.launch(permissions)
     }
 }
+
