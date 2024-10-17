@@ -1,22 +1,16 @@
 package com.example.giftbox.ui.list
 
 import android.content.SharedPreferences
-import android.graphics.Bitmap
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.giftbox.model.Gift
 import com.example.giftbox.data.GiftRepository
-import com.example.giftbox.R
-import com.example.giftbox.ui.utils.bitmapToString
-import com.example.giftbox.ui.utils.stringTobitmap
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
-import java.time.Clock
 import java.time.LocalDateTime
-import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 import java.util.Locale
 import javax.inject.Inject
@@ -29,10 +23,15 @@ class ListViewModel @Inject constructor(
     private var uid = sharedPref.getString("uid", "") ?: ""
 
     private val _giftList = mutableStateOf<List<Gift>>(listOf())
-    val giftList: State<List<Gift>> = _giftList
 
-    private val _pullRefreshState = mutableStateOf(false)
-    val pullRefreshState: State<Boolean> = _pullRefreshState
+    private val _copyGiftList = mutableStateOf<List<Gift>>(listOf())
+    val copyGiftList: State<List<Gift>> = _copyGiftList
+
+    private val _filterList = mutableStateOf(listOf<String>())
+    val filterList: State<List<String>> = _filterList
+
+    private var _chipElement = mutableStateOf<Map<String, Boolean>?>(null)
+    val chipElement: State<Map<String, Boolean>?> = _chipElement
 
     init {
         getGiftList()
@@ -43,6 +42,13 @@ class ListViewModel @Inject constructor(
             giftRepository.getAllGift(uid).collect { giftList ->
                 if (giftList.isNotEmpty()) {
                     _giftList.value = giftList
+                    _copyGiftList.value = _giftList.value
+
+                    val element = mutableMapOf("" to true)
+                    giftList.forEach {
+                        if (!element.containsKey(it.brand)) element[it.brand] = false
+                    }
+                    _chipElement.value = element
                 }
             }
         }
@@ -60,9 +66,9 @@ class ListViewModel @Inject constructor(
 
         val dateFormat = SimpleDateFormat("yyyyMMdd", Locale.KOREA)
         val startDate = dateFormat.parse(current)?.time
-        val endDate = dateFormat.parse(endDate)?.time
-        if (endDate != null && startDate != null) {
-            val diff = (startDate - endDate) / (24 * 60 * 60 * 1000)
+        val parseEndDate = dateFormat.parse(endDate)?.time
+        if (parseEndDate != null && startDate != null) {
+            val diff = (startDate - parseEndDate) / (24 * 60 * 60 * 1000)
             return if (diff.toInt() > 0) {
                 "+$diff"
             } else if (diff.toInt() == 0) {
@@ -72,5 +78,35 @@ class ListViewModel @Inject constructor(
             }
         }
         return ""
+    }
+
+    fun changeChipState(target: String) {
+        val beforeElements = mutableMapOf<String, Boolean>()
+        val beforeFilters = mutableListOf<String>()
+
+        _chipElement.value?.keys?.forEach { key ->
+            val state = _chipElement.value!![key]
+            if (target == key) beforeElements[key] = !state!! else beforeElements[key] = state!!
+
+            if (target.isEmpty() && key.isNotEmpty()) {
+                beforeElements[key] = false
+            }
+            if (target.isNotEmpty() && key.isEmpty()) {
+                beforeElements[key] = false
+            }
+
+            if (beforeElements[key] == true && key.isNotEmpty()) beforeFilters.add(key)
+        }
+        _chipElement.value = beforeElements
+        _filterList.value = beforeFilters
+        filterList()
+    }
+
+    private fun filterList() {
+        val filtered = mutableListOf<Gift>()
+        _giftList.value.forEach {
+            if (_filterList.value.contains(it.brand) || _filterList.value.isEmpty()) filtered.add(it)
+        }
+        _copyGiftList.value = filtered
     }
 }
