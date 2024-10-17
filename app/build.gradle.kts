@@ -62,7 +62,10 @@ dependencies {
     // LocalDateTime Api 26 lower
     coreLibraryDesugaring("com.android.tools:desugar_jdk_libs:1.1.5")
 
-    //coil
+    // gson
+    implementation("com.google.code.gson:gson:2.10.1")
+
+    // coil
     implementation(libs.coil.compose)
 
     // hilt

@@ -1,5 +1,6 @@
 package com.example.giftbox
 
+import android.net.Uri
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -22,6 +23,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.List
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Home
+import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.Button
 import androidx.compose.material3.Icon
@@ -34,24 +36,27 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.style.TextAlign
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.giftbox.ui.theme.GiftBoxTheme
 import androidx.navigation.NavDestination.Companion.hierarchy
 import androidx.navigation.NavGraph.Companion.findStartDestination
+import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
+import androidx.navigation.navArgument
+import com.example.giftbox.model.Gift
 import com.example.giftbox.ui.add.AddGifticon
+import com.example.giftbox.ui.detail.DetailScreen
 import com.example.giftbox.ui.home.HomeScreen
 import com.example.giftbox.ui.home.HomeViewModel
 import com.example.giftbox.ui.list.ListScreen
 import com.example.giftbox.ui.login.LoginScreen
 import com.example.giftbox.ui.login.LoginViewModel
+import com.google.gson.Gson
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
@@ -136,7 +141,10 @@ fun BottomNavigationBar(onLogout: () -> Unit) {
                     navController.navigate(route = Screen.Add.route)
                 }
             }
-            composable(Screen.List.route) { ListScreen() }
+            composable(Screen.List.route) { ListScreen { gift ->
+                val gifJson = Uri.encode(Gson().toJson(gift))
+                navController.navigate(route = "${Screen.Detail.route}/${gifJson}")
+            } }
             composable(Screen.Setting.route) { SettingScreen(onLogout) }
             composable(
                 Screen.Add.route,
@@ -160,6 +168,18 @@ fun BottomNavigationBar(onLogout: () -> Unit) {
                         navController.popBackStack()
                     }
                 )
+            }
+            composable(
+                route = "${Screen.Detail.route}/{gift}",
+                arguments = listOf(
+                    navArgument("gift") {
+                        type = NavType.StringType
+                    }
+                )
+            ) { navBackStackEntry ->
+                val giftJson = navBackStackEntry.arguments?.getString("gift")
+                val gift = Gson().fromJson(giftJson, Gift::class.java)
+                DetailScreen(gift) { navController.popBackStack() }
             }
         }
     }
@@ -197,4 +217,5 @@ sealed class Screen(val route: String, val icon: ImageVector, @StringRes val lab
     data object Setting : Screen("setting", Icons.Filled.Settings, R.string.setting)
 
     data object Add : Screen("add", Icons.Filled.Add, R.string.setting)
+    data object Detail : Screen("detail", Icons.Filled.Search, R.string.detail)
 }

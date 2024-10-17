@@ -3,6 +3,7 @@ package com.example.giftbox.ui.list
 import com.example.giftbox.R
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -46,14 +47,9 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.giftbox.model.Gift
 import com.example.giftbox.ui.utils.stringTobitmap
 
-data class ChipState(
-    var text: String,
-    var isSelected: MutableState<Boolean>
-)
-
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun ListScreen(modifier: Modifier = Modifier) {
+fun ListScreen(onDetail: (Gift) -> Unit) {
     val listViewModel = hiltViewModel<ListViewModel>()
     val refreshState = rememberPullToRefreshState()
 
@@ -108,7 +104,7 @@ fun ListScreen(modifier: Modifier = Modifier) {
             }
 
             LazyColumn(
-                modifier = modifier
+                modifier = Modifier
                     .fillMaxSize()
                     .background(
                         color = MaterialTheme.colorScheme.surfaceContainerLow,
@@ -117,7 +113,7 @@ fun ListScreen(modifier: Modifier = Modifier) {
                 items(items = listViewModel.copyGiftList.value,
                     key = { gift -> gift.document }
                 ) { gift ->
-                    GiftItem(gift = gift, listViewModel.formatString(gift.endDate), listViewModel.getDday(gift.endDate))
+                    GiftItem(gift = gift, listViewModel.formatString(gift.endDate), listViewModel.getDday(gift.endDate)) { onDetail(it) }
                 }
             }
         }
@@ -132,10 +128,13 @@ fun ListScreen(modifier: Modifier = Modifier) {
 }
 
 @Composable
-fun GiftItem(gift: Gift, formattedEndDate: String, dDay: String, modifier: Modifier = Modifier) {
+fun GiftItem(gift: Gift, formattedEndDate: String, dDay: String, onDetail: (Gift) -> Unit) {
     Card(
-        modifier = modifier
+        modifier = Modifier
             .padding(3.dp)
+            .clickable {
+                onDetail(gift)
+            }
     ) {
         Box {
             Row(
@@ -193,10 +192,4 @@ fun GiftItem(gift: Gift, formattedEndDate: String, dDay: String, modifier: Modif
             )
         }
     }
-}
-
-@Preview
-@Composable
-fun ListScreenPrieview() {
-    ListScreen()
 }
