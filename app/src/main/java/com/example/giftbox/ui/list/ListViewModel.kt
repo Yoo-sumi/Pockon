@@ -31,11 +31,14 @@ class ListViewModel @Inject constructor(
     private val _giftList = mutableStateOf<List<Gift>>(listOf())
     val giftList: State<List<Gift>> = _giftList
 
+    private val _pullRefreshState = mutableStateOf(false)
+    val pullRefreshState: State<Boolean> = _pullRefreshState
+
     init {
         getGiftList()
     }
 
-    private fun getGiftList() {
+    fun getGiftList() {
         viewModelScope.launch {
             giftRepository.getAllGift(uid).collect { giftList ->
                 if (giftList.isNotEmpty()) {
