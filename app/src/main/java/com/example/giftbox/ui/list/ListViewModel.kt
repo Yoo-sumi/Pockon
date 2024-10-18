@@ -1,7 +1,9 @@
 package com.example.giftbox.ui.list
 
+import com.example.giftbox.R
 import android.content.SharedPreferences
 import androidx.compose.runtime.State
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -33,8 +35,15 @@ class ListViewModel @Inject constructor(
     private var _chipElement = mutableStateOf<Map<String, Boolean>?>(null)
     val chipElement: State<Map<String, Boolean>?> = _chipElement
 
+    private val _topTitle = mutableIntStateOf(R.string.top_app_bar_recent)
+    val topTitle: State<Int> = _topTitle
+
     init {
         getGiftList()
+    }
+
+    fun setTopTitle(title: Int) {
+        _topTitle.intValue = title
     }
 
     fun getGiftList() {
@@ -49,6 +58,8 @@ class ListViewModel @Inject constructor(
                         if (!element.containsKey(it.brand)) element[it.brand] = false
                     }
                     _chipElement.value = element
+
+                    orderBy()
                 }
             }
         }
@@ -97,9 +108,15 @@ class ListViewModel @Inject constructor(
 
             if (beforeElements[key] == true && key.isNotEmpty()) beforeFilters.add(key)
         }
+
+        if (beforeFilters.isEmpty() && beforeElements[""] == false) {
+            beforeElements[""] = true
+        }
+
         _chipElement.value = beforeElements
         _filterList.value = beforeFilters
         filterList()
+        orderBy()
     }
 
     private fun filterList() {
@@ -108,5 +125,20 @@ class ListViewModel @Inject constructor(
             if (_filterList.value.contains(it.brand) || _filterList.value.isEmpty()) filtered.add(it)
         }
         _copyGiftList.value = filtered
+    }
+
+    fun orderBy() {
+
+        if (_topTitle.intValue == R.string.top_app_bar_recent) {
+            _copyGiftList.value = _copyGiftList.value.sortedByDescending {
+                val dateFormat = SimpleDateFormat("yyyyMMddHHmmss", Locale.KOREA)
+                dateFormat.parse(it.addDate)?.time
+            }
+        } else { // 디데이순
+            val dateFormat = SimpleDateFormat("yyyyMMdd", Locale.KOREA)
+            _copyGiftList.value = _copyGiftList.value.sortedBy {
+                dateFormat.parse(it.endDate)?.time
+            }
+        }
     }
 }

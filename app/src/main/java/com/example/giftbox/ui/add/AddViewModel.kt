@@ -13,9 +13,12 @@ import com.example.giftbox.ui.utils.bitmapToString
 import com.example.giftbox.ui.utils.stringTobitmap
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
+import java.text.SimpleDateFormat
 import java.time.Clock
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
+import java.util.Date
+import java.util.Locale
 import javax.inject.Inject
 
 @HiltViewModel
@@ -68,7 +71,12 @@ class AddViewModel @Inject constructor(
     }
 
     fun addGift(onAddComplete: (Boolean) -> Unit) {
-        val gift = Gift(uid = uid, photo = bitmapToString(_photo.value!!), name = _name.value, brand = _brand.value, endDate = _endDate.value, memo = _memo.value)
+        val addDate = SimpleDateFormat(
+            "yyyyMMddHHmmss",
+            Locale.getDefault()
+        ).format(Date(System.currentTimeMillis()))
+
+        val gift = Gift(uid = uid, photo = bitmapToString(_photo.value!!), name = _name.value, brand = _brand.value, endDate = _endDate.value, addDate = addDate, memo = _memo.value)
         viewModelScope.launch {
             giftRepository.addGift(gift).collect { docId ->
                 onAddComplete(docId != null)

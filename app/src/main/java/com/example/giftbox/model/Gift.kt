@@ -7,5 +7,6 @@ data class Gift(
     val name: String = "",
     val brand: String = "",
     val endDate: String = "",
+    val addDate: String = "",
     val memo: String = ""
 )
