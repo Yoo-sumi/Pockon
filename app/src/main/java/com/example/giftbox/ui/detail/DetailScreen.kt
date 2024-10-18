@@ -8,6 +8,8 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -23,13 +25,22 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SheetState
 import androidx.compose.material3.Text
+import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.layout.ContentScale
@@ -41,23 +52,28 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.giftbox.ui.utils.DateTransformation
 import com.example.giftbox.R
 import com.example.giftbox.model.Gift
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun DetailScreen(gift: Gift, onBack: () -> Unit) {
-    val addViewModel = hiltViewModel<DetailViewModel>()
-    addViewModel.setGift(gift)
+    val detailViewModel = hiltViewModel<DetailViewModel>()
+    detailViewModel.setGift(gift)
 
     // scroll
     val scrollSate = rememberScrollState()
 
     // input data
     val inputDataList = listOf(
-        addViewModel.name.value,
-        addViewModel.brand.value,
-        addViewModel.endDate.value,
-        addViewModel.memo.value
+        detailViewModel.name.value,
+        detailViewModel.brand.value,
+        detailViewModel.endDate.value,
+        detailViewModel.memo.value
     )
+
+    val sheetState = rememberModalBottomSheetState()
+    val scope = rememberCoroutineScope()
 
     Scaffold(
         topBar = {
@@ -92,13 +108,13 @@ fun DetailScreen(gift: Gift, onBack: () -> Unit) {
                 .padding(25.dp)
         ) {
             // gift image
-            GiftImage(addViewModel.photo.value)
+            GiftImage(detailViewModel.photo.value)
 
             // text field
             for (i in inputDataList.indices) {
                 InputDataTextField(
                     value = inputDataList[i],
-                    label = addViewModel.getLabelList(i),
+                    label = detailViewModel.getLabelList(i),
                     index = i
                 )
             }
@@ -106,7 +122,7 @@ fun DetailScreen(gift: Gift, onBack: () -> Unit) {
             // use button
             Button(
                 onClick = {
-
+                    detailViewModel.setIsShowBottomSheet(true)
                 },
                 shape = RectangleShape,
                 modifier = Modifier
@@ -114,6 +130,12 @@ fun DetailScreen(gift: Gift, onBack: () -> Unit) {
                     .padding(top = 20.dp)
             ) {
                 Text(text = stringResource(id = R.string.btn_use))
+            }
+        }
+
+        if (detailViewModel.isShowBottomSheet.value) {
+            GiftBottomSheet(detailViewModel.photo.value, scope, sheetState) {
+                detailViewModel.setIsShowBottomSheet(false)
             }
         }
     }
@@ -175,5 +197,77 @@ fun GiftImage(selectedImage: Bitmap?) {
                 )
             }
         }
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun GiftBottomSheet(image: Bitmap?, scope: CoroutineScope, sheetState: SheetState, onDismiss: () -> Unit) {
+    // scroll
+    val scrollSate = rememberScrollState()
+
+    ModalBottomSheet(
+        modifier = Modifier.fillMaxHeight(),
+        onDismissRequest = {
+            onDismiss()
+        },
+        sheetState = sheetState
+    ) {
+
+        Column(
+            modifier = Modifier
+                .verticalScroll(scrollSate)
+                .fillMaxHeight()
+                .padding(5.dp),
+            verticalArrangement = Arrangement.Center,
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+            ) {
+                if (image == null) {
+                    Image(
+                        modifier = Modifier.fillMaxWidth(),
+                        painter = painterResource(id = R.drawable.icon_add_photo),
+                        contentDescription = "use photo",
+                        contentScale = ContentScale.Crop
+                    )
+                } else {
+                    Image(
+                        modifier = Modifier.fillMaxWidth(),
+                        bitmap = image.asImageBitmap(),
+                        contentDescription = "use photo",
+                        contentScale = ContentScale.Crop
+                    )
+                }
+            }
+
+            Button(
+                modifier = Modifier.fillMaxWidth(),
+                shape = RectangleShape,
+                onClick = {
+                    scope.launch { sheetState.hide() }.invokeOnCompletion {
+                        if (!sheetState.isVisible) {
+                            onDismiss()
+                        }
+                    }
+                }
+            ) {
+                Text(text = stringResource(id = R.string.btn_use_complete))
+            }
+        }
+        // Sheet content
+//        Button(
+//            onClick = {
+//            scope.launch { sheetState.hide() }.invokeOnCompletion {
+//                if (!sheetState.isVisible) {
+//                    onDismiss()
+//                }
+//            }
+//        }) {
+//            Text("Hide bottom sheet")
+//            Spacer(modifier = Modifier.height(100.dp))
+//        }
     }
 }

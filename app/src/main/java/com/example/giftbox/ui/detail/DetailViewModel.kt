@@ -23,6 +23,9 @@ class DetailViewModel @Inject constructor() : ViewModel() {
     private val _memo = mutableStateOf("")
     val memo: State<String> = _memo
 
+    private val _isShowBottomSheet = mutableStateOf(false)
+    val isShowBottomSheet: State<Boolean> = _isShowBottomSheet
+
     fun setGift(gift: Gift) {
         _photo.value = stringTobitmap(gift.photo)
         _name.value = gift.name
@@ -38,5 +41,9 @@ class DetailViewModel @Inject constructor() : ViewModel() {
             2 -> R.string.txt_end_date
             else -> R.string.txt_memo
         }
+    }
+
+    fun setIsShowBottomSheet(flag: Boolean) {
+        _isShowBottomSheet.value = flag
     }
 }

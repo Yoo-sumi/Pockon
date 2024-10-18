@@ -21,6 +21,7 @@
     <string name="btn_use">기프티콘 사용</string>
     <string name="btn_cancel">취소</string>
     <string name="btn_confirm">확인</string>
+    <string name="btn_use_complete">사용 완료</string>
     <string name="mgs_no_photo">사진을 추가해주세요.</string>
     <string name="mgs_no_name">이름을 입력해주세요.</string>
     <string name="mgs_no_brand">브랜드를 입력해주세요.</string>
