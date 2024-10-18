@@ -8,6 +8,7 @@
     <string name="list">목록</string>
     <string name="add">추가</string>
     <string name="detail">상세</string>
+    <string name="empty">초기</string>
     <string name="title_add_gift">기프티콘 추가</string>
     <string name="title_detail_gift">상세정보</string>
     <string name="msg_permission_photo">사진 접근 권한이 거부되었습니다.</string>
@@ -15,7 +16,8 @@
     <string name="txt_brand">브랜드</string>
     <string name="txt_end_date">유효기간</string>
     <string name="txt_memo">메모</string>
-    <string name="btn_register">추가하기</string>
+    <string name="btn_add">추가하기</string>
+    <string name="btn_register">등록하기</string>
     <string name="btn_use">기프티콘 사용</string>
     <string name="btn_cancel">취소</string>
     <string name="btn_confirm">확인</string>
@@ -27,4 +29,5 @@
     <string name="chip_all">전체</string>
     <string name="top_app_bar_recent">최신순</string>
     <string name="top_app_bar_end_date">디데이순</string>
+    <string name="txt_no_gift">현재 사용 가능한 쿠폰이 존재하지 않습니다.</string>
 </resources>

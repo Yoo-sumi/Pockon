@@ -141,9 +141,6 @@ fun ListScreen(listViewModel: ListViewModel = viewModel(), onDetail: (Gift) -> U
                 LazyColumn(
                     modifier = Modifier
                         .fillMaxSize()
-                        .background(
-                            color = MaterialTheme.colorScheme.surfaceContainerLow,
-                        )
                 ) {
                     items(items = listViewModel.copyGiftList.value,
                         key = { gift -> gift.document }

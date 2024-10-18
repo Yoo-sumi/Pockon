@@ -200,7 +200,7 @@ fun AddGifticon(onBack: (Boolean) -> Unit) {
                     .fillMaxWidth()
                     .padding(top = 20.dp)
             ) {
-                Text(text = stringResource(id = R.string.btn_register))
+                Text(text = stringResource(id = R.string.btn_add))
             }
         }
 
