@@ -57,7 +57,7 @@ class ListViewModel @Inject constructor(
                     giftList.forEach {
                         if (!element.containsKey(it.brand)) element[it.brand] = false
                     }
-                    _chipElement.value = element
+                    _chipElement.value = element.toList().sortedWith(compareBy({it.first})).toMap()
 
                     orderBy()
                 }

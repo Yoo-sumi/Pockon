@@ -74,7 +74,7 @@ import java.util.TimeZone
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun AddGifticon(onBack: () -> Unit) {
+fun AddGifticon(onBack: (Boolean) -> Unit) {
     val addViewModel = hiltViewModel<AddViewModel>()
     val context = LocalContext.current
 
@@ -135,7 +135,7 @@ fun AddGifticon(onBack: () -> Unit) {
                 },
                 navigationIcon = {
                     IconButton(onClick = {
-                        onBack()
+                        onBack(false)
                     }) {
                         Icon(
                             imageVector = Icons.AutoMirrored.Filled.ArrowBack
@@ -186,7 +186,7 @@ fun AddGifticon(onBack: () -> Unit) {
                         }
                     } else {
                         addViewModel.addGift { result ->
-                            if (result) onBack()
+                            if (result) onBack(true)
                             else {
                                 scope.launch {
                                     snackbarHostState.showSnackbar(message = context.getString(R.string.mgs_no_register))

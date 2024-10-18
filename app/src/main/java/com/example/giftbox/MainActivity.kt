@@ -38,6 +38,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.giftbox.ui.theme.GiftBoxTheme
 import androidx.navigation.NavDestination.Companion.hierarchy
@@ -54,6 +55,7 @@ import com.example.giftbox.ui.detail.DetailScreen
 import com.example.giftbox.ui.home.HomeScreen
 import com.example.giftbox.ui.home.HomeViewModel
 import com.example.giftbox.ui.list.ListScreen
+import com.example.giftbox.ui.list.ListViewModel
 import com.example.giftbox.ui.login.LoginScreen
 import com.example.giftbox.ui.login.LoginViewModel
 import com.google.gson.Gson
@@ -84,6 +86,7 @@ class MainActivity : ComponentActivity() {
 @Composable
 fun BottomNavigationBar(onLogout: () -> Unit) {
     val homeViewModel = viewModel<HomeViewModel>()
+    val listViewModel = hiltViewModel<ListViewModel>()
 
     val navController = rememberNavController()
     val navBackStackEntry by navController.currentBackStackEntryAsState()
@@ -104,7 +107,6 @@ fun BottomNavigationBar(onLogout: () -> Unit) {
                     bottomScreens.forEach { bottomNavigationItem ->
                         NavigationBarItem(
                             selected = currentRoute?.hierarchy?.any { it.route == bottomNavigationItem.route } == true,
-                            alwaysShowLabel = false,
                             onClick = {
                                 navController.navigate(route = bottomNavigationItem.route) {
                                     popUpTo(navController.graph.findStartDestination().id) {
@@ -141,10 +143,18 @@ fun BottomNavigationBar(onLogout: () -> Unit) {
                     navController.navigate(route = Screen.Add.route)
                 }
             }
-            composable(Screen.List.route) { ListScreen { gift ->
-                val gifJson = Uri.encode(Gson().toJson(gift))
-                navController.navigate(route = "${Screen.Detail.route}/${gifJson}")
-            } }
+            composable(Screen.List.route) {
+                ListScreen(
+                    listViewModel = listViewModel,
+                    onDetail = { gift ->
+                        val gifJson = Uri.encode(Gson().toJson(gift))
+                        navController.navigate(route = "${Screen.Detail.route}/${gifJson}")
+                    },
+                    onAdd = {
+                        navController.navigate(route = Screen.Add.route)
+                    }
+                )
+            }
             composable(Screen.Setting.route) { SettingScreen(onLogout) }
             composable(
                 Screen.Add.route,
@@ -164,7 +174,8 @@ fun BottomNavigationBar(onLogout: () -> Unit) {
                 }
             ) {
                 AddGifticon(
-                    onBack = {
+                    onBack = { isRefresh ->
+                        if (isRefresh) listViewModel.getGiftList()
                         navController.popBackStack()
                     }
                 )

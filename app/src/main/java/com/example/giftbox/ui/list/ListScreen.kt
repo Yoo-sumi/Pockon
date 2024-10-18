@@ -18,8 +18,10 @@ import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material3.Button
@@ -37,6 +39,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SmallFloatingActionButton
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.pulltorefresh.PullToRefreshContainer
@@ -57,14 +60,13 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.giftbox.model.Gift
 import com.example.giftbox.ui.utils.stringTobitmap
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun ListScreen(onDetail: (Gift) -> Unit) {
-    val listViewModel = hiltViewModel<ListViewModel>()
+fun ListScreen(listViewModel: ListViewModel = viewModel(), onDetail: (Gift) -> Unit, onAdd: () -> Unit) {
     val refreshState = rememberPullToRefreshState()
 
     if (refreshState.isRefreshing) {
@@ -157,6 +159,20 @@ fun ListScreen(onDetail: (Gift) -> Unit) {
                 contentColor = MaterialTheme.colorScheme.primary,
                 modifier = Modifier.align(Alignment.TopCenter)
             )
+
+            SmallFloatingActionButton(
+                onClick = {
+                    onAdd()
+                },
+                containerColor = MaterialTheme.colorScheme.secondaryContainer,
+                contentColor = MaterialTheme.colorScheme.secondary,
+                shape = CircleShape,
+                modifier = Modifier
+                    .align(Alignment.BottomEnd)
+                    .padding(15.dp)
+            ) {
+                Icon(imageVector = Icons.Filled.Add, contentDescription = "")
+            }
         }
     }
 }
