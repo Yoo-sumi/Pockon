@@ -63,4 +63,17 @@ class GiftDataSource @Inject constructor(
             awaitClose()
         }
     }
+
+    fun updateData(gift: Gift): Flow<Boolean> {
+        return callbackFlow {
+            firestore
+                .collection("gift")
+                .document(gift.document)
+                .set(gift)
+                .addOnCompleteListener { task ->
+                    trySend(task.isSuccessful)
+                }
+            awaitClose()
+        }
+    }
 }

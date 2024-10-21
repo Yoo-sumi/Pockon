@@ -3,23 +3,27 @@ package com.example.giftbox.ui.detail
 import android.graphics.Bitmap
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -30,24 +34,25 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SheetState
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.VisualTransformation
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.giftbox.ui.utils.DateTransformation
 import com.example.giftbox.R
@@ -57,7 +62,7 @@ import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun DetailScreen(gift: Gift, onBack: () -> Unit) {
+fun DetailScreen(gift: Gift, onBack: (Gift) -> Unit) {
     val detailViewModel = hiltViewModel<DetailViewModel>()
     detailViewModel.setGift(gift)
 
@@ -72,7 +77,9 @@ fun DetailScreen(gift: Gift, onBack: () -> Unit) {
         detailViewModel.memo.value
     )
 
-    val sheetState = rememberModalBottomSheetState()
+    val sheetState = rememberModalBottomSheetState(
+        skipPartiallyExpanded = true
+    )
     val scope = rememberCoroutineScope()
 
     Scaffold(
@@ -86,7 +93,7 @@ fun DetailScreen(gift: Gift, onBack: () -> Unit) {
                 },
                 navigationIcon = {
                     IconButton(onClick = {
-                        onBack()
+                        onBack(detailViewModel.gift.value)
                     }) {
                         Icon(
                             imageVector = Icons.AutoMirrored.Filled.ArrowBack
@@ -108,7 +115,8 @@ fun DetailScreen(gift: Gift, onBack: () -> Unit) {
                 .padding(25.dp)
         ) {
             // gift image
-            GiftImage(detailViewModel.photo.value)
+            GiftImage(detailViewModel.photo.value, detailViewModel.usedDt.value)
+//            detailViewModel.setIsShowBottomSheet(!detailViewModel.isShowBottomSheet.value)
 
             // text field
             for (i in inputDataList.indices) {
@@ -119,24 +127,41 @@ fun DetailScreen(gift: Gift, onBack: () -> Unit) {
                 )
             }
 
-            // use button
+            // use or cancel button
             Button(
                 onClick = {
-                    detailViewModel.setIsShowBottomSheet(true)
+                    if (detailViewModel.usedDt.value.isEmpty()) {
+                        detailViewModel.setIsShowBottomSheet(true)
+                    } else {
+                        detailViewModel.setIsShowCancelDialog(true)
+                    }
                 },
                 shape = RectangleShape,
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(top = 20.dp)
+                    .padding(top = 20.dp),
+                colors = if (detailViewModel.usedDt.value.isNotEmpty()) ButtonDefaults.buttonColors(containerColor = Color.LightGray) else ButtonDefaults.buttonColors()
             ) {
-                Text(text = stringResource(id = R.string.btn_use))
+                if (detailViewModel.usedDt.value.isEmpty()) Text(text = stringResource(id = R.string.btn_use))
+                else Text(text = stringResource(id = R.string.btn_use_cancel), color = Color.White, fontWeight = FontWeight.Bold)
             }
         }
 
         if (detailViewModel.isShowBottomSheet.value) {
             GiftBottomSheet(detailViewModel.photo.value, scope, sheetState) {
-                detailViewModel.setIsShowBottomSheet(false)
+                detailViewModel.setIsUsed(true)
             }
+        }
+        if (detailViewModel.isShowCancelDialog.value) {
+            UsedCancelDialog(
+                onConfirm = {
+                    detailViewModel.setIsUsed(false)
+                    detailViewModel.setIsShowCancelDialog(false)
+                },
+                onDismiss = {
+                    detailViewModel.setIsShowCancelDialog(false)
+                }
+            )
         }
     }
 }
@@ -162,7 +187,7 @@ fun InputDataTextField(value: String, label: Int, index: Int) {
 }
 
 @Composable
-fun GiftImage(selectedImage: Bitmap?) {
+fun GiftImage(selectedImage: Bitmap?, usedDt: String) {
     Row(
         horizontalArrangement = Arrangement.Center,
         modifier = Modifier
@@ -174,10 +199,6 @@ fun GiftImage(selectedImage: Bitmap?) {
             modifier = Modifier
                 .width(200.dp)
                 .height(200.dp)
-                .background(Color.LightGray)
-                .clickable {
-
-                }
         ) {
             if (selectedImage == null) {
                 Image(
@@ -196,6 +217,10 @@ fun GiftImage(selectedImage: Bitmap?) {
                     contentScale = ContentScale.Crop
                 )
             }
+
+            if (usedDt.isNotEmpty()) {
+                UsedStamp(usedDt)
+            }
         }
     }
 }
@@ -203,11 +228,12 @@ fun GiftImage(selectedImage: Bitmap?) {
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun GiftBottomSheet(image: Bitmap?, scope: CoroutineScope, sheetState: SheetState, onDismiss: () -> Unit) {
-    // scroll
-    val scrollSate = rememberScrollState()
+    val screenHeight = LocalConfiguration.current.screenHeightDp.dp
 
     ModalBottomSheet(
-        modifier = Modifier.fillMaxHeight(),
+        modifier = Modifier
+            .heightIn(max = screenHeight - 10.dp)
+            .fillMaxSize(),
         onDismissRequest = {
             onDismiss()
         },
@@ -216,15 +242,15 @@ fun GiftBottomSheet(image: Bitmap?, scope: CoroutineScope, sheetState: SheetStat
 
         Column(
             modifier = Modifier
-                .verticalScroll(scrollSate)
-                .fillMaxHeight()
-                .padding(5.dp),
-            verticalArrangement = Arrangement.Center,
-            horizontalAlignment = Alignment.CenterHorizontally
+                .fillMaxSize()
+                .padding(top = 20.dp, start = 25.dp, end = 25.dp)
+                .navigationBarsPadding()
         ) {
             Box(
                 modifier = Modifier
-                    .fillMaxWidth()
+                    .weight(8f)
+                    .padding(bottom = 10.dp),
+                contentAlignment = Alignment.Center
             ) {
                 if (image == null) {
                     Image(
@@ -244,7 +270,8 @@ fun GiftBottomSheet(image: Bitmap?, scope: CoroutineScope, sheetState: SheetStat
             }
 
             Button(
-                modifier = Modifier.fillMaxWidth(),
+                modifier = Modifier
+                    .fillMaxWidth(),
                 shape = RectangleShape,
                 onClick = {
                     scope.launch { sheetState.hide() }.invokeOnCompletion {
@@ -257,17 +284,84 @@ fun GiftBottomSheet(image: Bitmap?, scope: CoroutineScope, sheetState: SheetStat
                 Text(text = stringResource(id = R.string.btn_use_complete))
             }
         }
-        // Sheet content
-//        Button(
-//            onClick = {
-//            scope.launch { sheetState.hide() }.invokeOnCompletion {
-//                if (!sheetState.isVisible) {
-//                    onDismiss()
-//                }
-//            }
-//        }) {
-//            Text("Hide bottom sheet")
-//            Spacer(modifier = Modifier.height(100.dp))
-//        }
     }
+}
+
+
+@Composable
+fun UsedStamp(usedDate: String) {
+    Box(modifier = Modifier
+        .size(200.dp)
+        .background(Color.Black.copy(0.3f)),
+        contentAlignment = Alignment.Center
+    ) {
+        Box(
+            modifier = Modifier
+                .width(140.dp)
+                .height(80.dp)
+                .rotate(-20f)
+                .border(
+                    width = 3.dp,
+                    color = Color.White
+                )
+        )
+        Box(
+            modifier = Modifier
+                .width(130.dp)
+                .height(70.dp)
+                .rotate(-20f)
+        )
+        Box(
+            modifier = Modifier
+                .width(125.dp)
+                .height(65.dp)
+                .rotate(-20f)
+                .border(
+                    width = 7.dp,
+                    color = Color.White
+                )
+        )
+
+        Text(
+            textAlign = TextAlign.Center,
+            fontWeight = FontWeight.Bold,
+            color = Color.White,
+            text = stringResource(id = R.string.txt_used_stamp, usedDate),
+            fontSize = 20.sp,
+            modifier = Modifier
+                .width(110.dp)
+                .height(50.dp)
+                .rotate(-20f)
+        )
+    }
+}
+
+@Composable
+fun UsedCancelDialog(onConfirm: () -> Unit, onDismiss: () -> Unit) {
+    AlertDialog(
+        onDismissRequest = {},
+        text = {
+            Text(
+                textAlign = TextAlign.Center,
+                text = stringResource(id = R.string.dlg_msg_use_cancel),
+                fontSize = 18.sp
+            )
+        },
+        confirmButton = {
+            TextButton(
+                onClick = { onConfirm() }
+            ) {
+                Text(text = stringResource(id = R.string.btn_confirm))
+            }
+        },
+        dismissButton = {
+            TextButton(
+                onClick = { onDismiss() }
+            ) {
+                Text(text = stringResource(id = R.string.btn_cancel))
+            }
+        },
+//        shape = RectangleShape
+        shape = RoundedCornerShape(10.dp)
+    )
 }

@@ -2,6 +2,7 @@ package com.example.giftbox.ui.list
 
 import com.example.giftbox.R
 import android.content.SharedPreferences
+import android.util.Log
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
@@ -132,12 +133,12 @@ class ListViewModel @Inject constructor(
         if (_topTitle.intValue == R.string.top_app_bar_recent) {
             _copyGiftList.value = _copyGiftList.value.sortedByDescending {
                 val dateFormat = SimpleDateFormat("yyyyMMddHHmmss", Locale.KOREA)
-                dateFormat.parse(it.addDate)?.time
+                dateFormat.parse(it.addDt)?.time
             }
         } else { // 디데이순
             val dateFormat = SimpleDateFormat("yyyyMMdd", Locale.KOREA)
             _copyGiftList.value = _copyGiftList.value.sortedBy {
-                dateFormat.parse(it.endDate)?.time
+                dateFormat.parse(it.endDt)?.time
             }
         }
     }

@@ -4,14 +4,26 @@ import android.graphics.Bitmap
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import com.example.giftbox.R
+import com.example.giftbox.data.GiftDataSource
+import com.example.giftbox.data.GiftRepository
 import com.example.giftbox.model.Gift
 import com.example.giftbox.ui.utils.stringTobitmap
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.launch
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
 import javax.inject.Inject
 
 @HiltViewModel
-class DetailViewModel @Inject constructor() : ViewModel() {
+class DetailViewModel @Inject constructor(
+    private val giftRepository: GiftRepository
+) : ViewModel() {
+    private val _gift = mutableStateOf<Gift>(Gift())
+    val gift: State<Gift> = _gift
+
     private val _photo = mutableStateOf<Bitmap?>(null)
     val photo: State<Bitmap?> = _photo
     private val _name = mutableStateOf("")
@@ -22,16 +34,23 @@ class DetailViewModel @Inject constructor() : ViewModel() {
     val endDate: State<String> = _endDate
     private val _memo = mutableStateOf("")
     val memo: State<String> = _memo
+    private val _usedDt = mutableStateOf("")
+    val usedDt: State<String> = _usedDt
 
     private val _isShowBottomSheet = mutableStateOf(false)
     val isShowBottomSheet: State<Boolean> = _isShowBottomSheet
 
+    private val _isShowCancelDialog = mutableStateOf(false)
+    val isShowCancelDialog: State<Boolean> = _isShowCancelDialog
+
     fun setGift(gift: Gift) {
+        this._gift.value = gift
         _photo.value = stringTobitmap(gift.photo)
         _name.value = gift.name
         _brand.value = gift.brand
-        _endDate.value = gift.endDate
+        _endDate.value = gift.endDt
         _memo.value = gift.memo
+        _usedDt.value = gift.usedDt
     }
 
     fun getLabelList(index: Int): Int {
@@ -45,5 +64,28 @@ class DetailViewModel @Inject constructor() : ViewModel() {
 
     fun setIsShowBottomSheet(flag: Boolean) {
         _isShowBottomSheet.value = flag
+    }
+
+    fun setIsShowCancelDialog(flag: Boolean) {
+        _isShowCancelDialog.value = flag
+    }
+
+    fun setIsUsed(flag: Boolean) {
+        viewModelScope.launch {
+            var nowDt = ""
+            if (flag) {
+                nowDt = SimpleDateFormat(
+                    "yyyy.MM.dd",
+                    Locale.getDefault()
+                ).format(Date(System.currentTimeMillis()))
+            }
+            _gift.value = _gift.value.copy(usedDt = nowDt)
+            giftRepository.updateGift(_gift.value).collect { result ->
+                if (result) {
+                    _usedDt.value = _gift.value.usedDt
+                    _isShowBottomSheet.value = false
+                }
+            }
+        }
     }
 }

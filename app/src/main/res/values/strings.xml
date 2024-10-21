@@ -22,6 +22,8 @@
     <string name="btn_cancel">취소</string>
     <string name="btn_confirm">확인</string>
     <string name="btn_use_complete">사용 완료</string>
+    <string name="btn_use_cancel">사용 취소</string>
+    <string name="dlg_msg_use_cancel">기프티콘 사용을 취소하시겠습니까?</string>
     <string name="mgs_no_photo">사진을 추가해주세요.</string>
     <string name="mgs_no_name">이름을 입력해주세요.</string>
     <string name="mgs_no_brand">브랜드를 입력해주세요.</string>
@@ -31,4 +33,5 @@
     <string name="top_app_bar_recent">최신순</string>
     <string name="top_app_bar_end_date">디데이순</string>
     <string name="txt_no_gift">현재 사용 가능한 쿠폰이 존재하지 않습니다.</string>
+    <string name="txt_used_stamp">사용완료\n%1$s</string>
 </resources>

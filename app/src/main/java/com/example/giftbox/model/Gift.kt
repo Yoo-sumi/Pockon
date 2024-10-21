@@ -6,7 +6,8 @@ data class Gift(
     val photo: String = "",
     val name: String = "",
     val brand: String = "",
-    val endDate: String = "",
-    val addDate: String = "",
-    val memo: String = ""
+    val endDt: String = "",
+    val addDt: String = "",
+    val memo: String = "",
+    val usedDt: String = ""
 )

@@ -32,7 +32,6 @@ import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.Button
-import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.NavigationBar
@@ -68,7 +67,6 @@ import com.example.giftbox.ui.home.HomeScreen
 import com.example.giftbox.ui.home.HomeViewModel
 import com.example.giftbox.ui.list.ListScreen
 import com.example.giftbox.ui.list.ListViewModel
-import com.example.giftbox.ui.list.TopAppBarDropDownMenu
 import com.example.giftbox.ui.login.LoginScreen
 import com.example.giftbox.ui.login.LoginViewModel
 import com.google.gson.Gson
@@ -90,7 +88,6 @@ class MainActivity : ComponentActivity() {
                 } else {
                     BottomNavigationBar(onLogout = {loginViewModel.logout()})
                 }
-
             }
         }
     }
@@ -208,7 +205,10 @@ fun BottomNavigationBar(onLogout: () -> Unit) {
             ) { navBackStackEntry ->
                 val giftJson = navBackStackEntry.arguments?.getString("gift")
                 val gift = Gson().fromJson(giftJson, Gift::class.java)
-                DetailScreen(gift) { navController.popBackStack() }
+                DetailScreen(gift) { detailGift ->
+                    navController.popBackStack()
+                    if (detailGift != gift) listViewModel.getGiftList()
+                }
             }
         }
     }

@@ -18,4 +18,8 @@ class GiftRepository @Inject constructor(
     fun getAllGift(uid: String): Flow<List<Gift>> {
         return giftDataSource.loadAllData(uid)
     }
+
+    fun updateGift(gift: Gift): Flow<Boolean> {
+        return giftDataSource.updateData(gift)
+    }
 }
