@@ -20,11 +20,35 @@ class LoginViewModel @Inject constructor(
     private val _isLoginState = mutableStateOf(false)
     val isLoginState: State<Boolean> = _isLoginState
 
+    private val _isPinAuthUse = mutableStateOf(sharedPref.getBoolean("auth_pin", false))
+    val isPinAuthUse: State<Boolean> = _isPinAuthUse
+
+    private val _isPinAuth = mutableStateOf(false)
+    val isPinAuth: State<Boolean> = _isPinAuth
+
+    private val _pinNumber = mutableStateOf("")
+    val pinNumber: State<String> = _pinNumber
+
     init {
         loginRepository.getCurrentUser()?.let {
             _isLoginState.value = true
             saveMyUid(it.uid)
         }
+    }
+
+    fun getCurrentUser(): Boolean {
+        loginRepository.getCurrentUser()?.let {
+//            _isLoginState.value = true
+            saveMyUid(it.uid)
+            return true
+        } ?: return false
+    }
+
+
+    fun reFreshAuthState() {
+        _isPinAuthUse.value = sharedPref.getBoolean("auth_pin", false)
+        _pinNumber.value = sharedPref.getString("pin_num", "") ?: ""
+        _isPinAuth.value = true
     }
 
     fun login(result: GetCredentialResponse) {
@@ -37,6 +61,7 @@ class LoginViewModel @Inject constructor(
 
                     loginRepository.login(firebaseCredential) {
                         _isLoginState.value = it
+                        _isPinAuthUse.value = it
                     }
                 }
             }
@@ -46,6 +71,10 @@ class LoginViewModel @Inject constructor(
     fun logout() {
         loginRepository.logout()
         _isLoginState.value = false
+        sharedPref.edit().clear().apply()
+        _isPinAuthUse.value = sharedPref.getBoolean("auth_pin", false)
+        _pinNumber.value = sharedPref.getString("pin_num", "") ?: ""
+        _isPinAuth.value = false
     }
 
     fun removeAccount() {
@@ -54,7 +83,7 @@ class LoginViewModel @Inject constructor(
         }
     }
 
-    fun saveMyUid(uid: String) {
+    private fun saveMyUid(uid: String) {
         sharedPref.edit().putString("uid", uid).apply()
     }
 }

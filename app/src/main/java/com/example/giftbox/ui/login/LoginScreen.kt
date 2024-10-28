@@ -29,7 +29,7 @@ import androidx.credentials.CredentialManager
 import androidx.credentials.GetCredentialRequest
 import androidx.credentials.GetCredentialResponse
 import androidx.credentials.exceptions.GetCredentialException
-import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.giftbox.R
 import com.google.android.libraries.identity.googleid.GetGoogleIdOption
 import kotlinx.coroutines.launch
@@ -37,27 +37,18 @@ import kotlinx.coroutines.launch
 @Composable
 fun LoginScreen(
     modifier: Modifier = Modifier,
-    mainViewModel: LoginViewModel = viewModel()
+    onSuccess: (GetCredentialResponse) -> Unit
 ) {
     Surface(
         modifier = Modifier.fillMaxSize(),
         color = MaterialTheme.colorScheme.background
     ) {
-        if (mainViewModel.isLoginState.value) {
-            LogoutWithGoggle(
-                modifier = modifier,
-                logout = {
-                    mainViewModel.logout()
-                }
-            )
-        } else {
-            LoginWithGoggle(
-                modifier = modifier,
-                login = { result ->
-                    mainViewModel.login(result)
-                },
-            )
-        }
+        LoginWithGoggle(
+            modifier = modifier,
+            login = { result ->
+                onSuccess(result)
+            }
+        )
     }
 }
 

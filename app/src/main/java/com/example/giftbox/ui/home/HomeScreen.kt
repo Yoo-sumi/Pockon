@@ -18,11 +18,15 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.giftbox.R
+import com.example.giftbox.ui.pin.PinSettingDialog
 
 @Composable
-fun HomeScreen(viewModel: HomeViewModel = viewModel(), onAdd: () -> Unit) {
+fun HomeScreen(onAdd: () -> Unit) {
+    val homeViewModel = hiltViewModel<HomeViewModel>()
+
     Box(
         modifier = Modifier
             .fillMaxSize()

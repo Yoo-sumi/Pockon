@@ -27,7 +27,6 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.List
 import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.DateRange
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Settings
@@ -50,7 +49,6 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
-import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.giftbox.ui.theme.GiftBoxTheme
 import androidx.navigation.NavDestination.Companion.hierarchy
 import androidx.navigation.NavGraph.Companion.findStartDestination
@@ -64,11 +62,11 @@ import com.example.giftbox.model.Gift
 import com.example.giftbox.ui.add.AddGifticon
 import com.example.giftbox.ui.detail.DetailScreen
 import com.example.giftbox.ui.home.HomeScreen
-import com.example.giftbox.ui.home.HomeViewModel
 import com.example.giftbox.ui.list.ListScreen
 import com.example.giftbox.ui.list.ListViewModel
 import com.example.giftbox.ui.login.LoginScreen
 import com.example.giftbox.ui.login.LoginViewModel
+import com.example.giftbox.ui.pin.PinScreen
 import com.google.gson.Gson
 import dagger.hilt.android.AndroidEntryPoint
 
@@ -81,12 +79,20 @@ class MainActivity : ComponentActivity() {
         setContent {
             GiftBoxTheme {
                 if (!loginViewModel.isLoginState.value) {
-                    LoginScreen(
-                        modifier = Modifier,
-                        mainViewModel = loginViewModel
-                    )
+                    LoginScreen { result ->
+                        loginViewModel.login(result)
+                    }
+                } else if (loginViewModel.isLoginState.value && loginViewModel.isPinAuthUse.value && !loginViewModel.isPinAuth.value) {
+                    PinScreen {
+                        // 핀 로그인 성공
+                        loginViewModel.reFreshAuthState()
+                    }
                 } else {
-                    BottomNavigationBar(onLogout = {loginViewModel.logout()})
+                    BottomNavigationBar(
+                        onLogout = {
+                            loginViewModel.logout()
+                        }
+                    )
                 }
             }
         }
@@ -95,10 +101,10 @@ class MainActivity : ComponentActivity() {
 
 @Composable
 fun BottomNavigationBar(onLogout: () -> Unit) {
-    val homeViewModel = viewModel<HomeViewModel>()
+    val navController = rememberNavController()
+
     val listViewModel = hiltViewModel<ListViewModel>()
 
-    val navController = rememberNavController()
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     val currentRoute = navBackStackEntry?.destination
     val bottomScreens = listOf(
@@ -145,11 +151,11 @@ fun BottomNavigationBar(onLogout: () -> Unit) {
     ) { innerPadding ->
         NavHost(
             navController = navController,
-            startDestination = Screen.Home.route,
+            startDestination = "home",
             modifier = Modifier.padding(innerPadding)
         ) {
             composable(Screen.Home.route) {
-                HomeScreen(viewModel = homeViewModel) {
+                HomeScreen {
                     navController.navigate(route = Screen.Add.route)
                 }
             }
@@ -170,7 +176,11 @@ fun BottomNavigationBar(onLogout: () -> Unit) {
                     }
                 )
             }
-            composable(Screen.Setting.route) { SettingScreen(onLogout) }
+            composable(Screen.Setting.route) {
+                SettingScreen {
+                    onLogout()
+                }
+            }
             composable(
                 Screen.Add.route,
                 enterTransition = {
@@ -258,7 +268,9 @@ fun EmptyScreen(onAdd: () -> Unit) {
                 text = stringResource(id = R.string.txt_no_gift),
             )
 
-            Spacer(modifier = Modifier.fillMaxWidth().padding(bottom = 40.dp))
+            Spacer(modifier = Modifier
+                .fillMaxWidth()
+                .padding(bottom = 40.dp))
 
             Image(
                 modifier = Modifier
@@ -269,7 +281,9 @@ fun EmptyScreen(onAdd: () -> Unit) {
                 contentScale = ContentScale.Crop
             )
 
-            Spacer(modifier = Modifier.fillMaxWidth().padding(bottom = 40.dp))
+            Spacer(modifier = Modifier
+                .fillMaxWidth()
+                .padding(bottom = 40.dp))
 
             Button(
                 modifier = Modifier
@@ -292,5 +306,4 @@ sealed class Screen(val route: String, val icon: ImageVector, @StringRes val lab
 
     data object Add : Screen("add", Icons.Filled.Add, R.string.setting)
     data object Detail : Screen("detail", Icons.Filled.Search, R.string.detail)
-    data object Empty : Screen("empty", Icons.Filled.DateRange, R.string.empty)
 }

@@ -24,6 +24,10 @@
     <string name="btn_use_complete">사용 완료</string>
     <string name="btn_use_cancel">사용 취소</string>
     <string name="dlg_msg_use_cancel">기프티콘 사용을 취소하시겠습니까?</string>
+    <string name="dlg_msg_use_pin">소중한 기프티콘을 지킬 수 있는 보안을 설정하시겠습니까?</string>
+    <string name="title_msg_use_pin">보안 수단 미설정</string>
+    <string name="btn_pin_not_use">사용안함</string>
+    <string name="btn_pin_setting">설정</string>
     <string name="mgs_no_photo">사진을 추가해주세요.</string>
     <string name="mgs_no_name">이름을 입력해주세요.</string>
     <string name="mgs_no_brand">브랜드를 입력해주세요.</string>
@@ -34,5 +38,9 @@
     <string name="top_app_bar_end_date">디데이순</string>
     <string name="txt_no_gift">현재 사용 가능한 쿠폰이 존재하지 않습니다.</string>
     <string name="txt_used_stamp">사용완료\n%1$s</string>
+    <string name="txt_create_pin">PIN 번호를 생성하세요.</string>
+    <string name="txt_check_pin">입력한 PIN 번호를 확인합니다.</string>
     <string name="txt_input_pin">PIN 번호를 입력해주세요.</string>
+    <string name="txt_no_pin_auth">보안 설정 사용 안 함</string>
+    <string name="msg_pin_auth_fail">PIN 번호가 일치하지 않습니다.</string>
 </resources>

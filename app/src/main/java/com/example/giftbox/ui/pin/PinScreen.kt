@@ -1,8 +1,8 @@
 package com.example.giftbox.ui.pin
 
-import android.content.Context
-import androidx.compose.foundation.Image
+import android.util.Log
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -19,62 +19,48 @@ import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.CornerBasedShape
 import androidx.compose.foundation.shape.CornerSize
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.outlined.ArrowBack
 import androidx.compose.material.icons.filled.Check
-import androidx.compose.material.icons.filled.CheckCircle
-import androidx.compose.material.icons.filled.Favorite
-import androidx.compose.material.icons.filled.Star
-import androidx.compose.material.icons.outlined.CheckCircle
-import androidx.compose.material.icons.outlined.FavoriteBorder
-import androidx.compose.material.icons.outlined.Star
-import androidx.compose.material.icons.sharp.Star
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Button
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.MaterialTheme.typography
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.contentColorFor
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.mutableStateListOf
+import androidx.compose.runtime.State
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.giftbox.R
-import kotlinx.coroutines.delay
-
-const val pinSize = 6
-const val password = "000000"
 
 @Composable
-fun PinScreen() {
-    val inputPin = remember { mutableStateListOf<Int>() }
-    val error = remember { mutableStateOf<String>("") }
-    val showSuccess = remember { mutableStateOf(false) }
-    val context = LocalContext.current
+fun PinScreen(onSuccess: () -> Unit) {
+    val pinViewModel = hiltViewModel<PinViewModel>()
 
-    if (inputPin.size == pinSize) {
-        LaunchedEffect(true) {
-            delay(300)
+    Log.d("isShowPin", "pinViewModel.mode.value ${pinViewModel.mode.value}")
 
-            if (inputPin.joinToString("") == password) {
-                showSuccess.value = true
-                error.value = ""
-            } else {
-                inputPin.clear()
-                error.value = "PIN 번호가 일치하지 않습니다."
-            }
-        }
+
+    if (pinViewModel.mode.value == 4) {
+        onSuccess()
+        return
     }
 
     Column(
@@ -91,10 +77,27 @@ fun PinScreen() {
                     .fillMaxWidth(),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                Spacer(modifier = Modifier.height(100.dp))
+                Box(
+                    modifier = Modifier
+                        .height(100.dp)
+                        .fillMaxWidth(),
+                    contentAlignment = Alignment.TopStart
+                ) {
+                    if (pinViewModel.mode.value == 1) {
+                        Icon(
+                            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                            contentDescription = "Back",
+                            modifier = Modifier
+                                .padding(15.dp)
+                                .clickable {
+                                    pinViewModel.setMode(0)
+                                }
+                        )
+                    }
+                }
 
                 Text(
-                    text = stringResource(id = R.string.txt_input_pin),
+                    text = stringResource(id = pinViewModel.getTitle()),
                     style = typography.titleMedium,
                     modifier = Modifier.padding(16.dp),
                     color = Color.Black
@@ -102,24 +105,39 @@ fun PinScreen() {
 
                 Spacer(modifier = Modifier.height(30.dp))
 
-                if (showSuccess.value) {
-                    Text(text = "dfdf")
-                } else {
+                if (pinViewModel.showSuccess.value && pinViewModel.mode.value != 0) { // pin auth success
+                    if (pinViewModel.mode.value != 4) {
+                        Icon(
+                            imageVector = Icons.Default.Check,
+                            contentDescription = "Success",
+                            modifier = Modifier
+                                .size(30.dp)
+                        )
+                    }
+                    onSuccess()
+                } else { // pin circle shape
                     Row {
-                        (0 until pinSize).forEach {
-                            Icon(
-                                imageVector = if (inputPin.size > it) Icons.Filled.Favorite else Icons.Outlined.FavoriteBorder,
-                                contentDescription = it.toString(),
+                        (0 until pinViewModel.getPinSize()).forEach {
+                            val bgColor = if (pinViewModel.inputPin.size > it) MaterialTheme.colorScheme.onSurface else MaterialTheme.colorScheme.surfaceContainerLowest
+                            Box(
                                 modifier = Modifier
                                     .padding(8.dp)
-                                    .size(30.dp),
-                                tint = Color.Black
+                                    .size(15.dp)
+                                    .clip(shape = CircleShape)
+                                    .border(
+                                        width = 2.dp,
+                                        color = MaterialTheme.colorScheme.onSurface,
+                                        shape = CircleShape
+                                    )
+                                    .background(bgColor)
                             )
                         }
                     }
                 }
+
+                // error msg
                 Text(
-                    text = error.value,
+                    text = pinViewModel.error.value?.let { stringResource(id = it) } ?: "",
                     color = MaterialTheme.colorScheme.error,
                     modifier = Modifier.padding(16.dp)
                 )
@@ -127,19 +145,33 @@ fun PinScreen() {
                 Spacer(modifier = Modifier.height(50.dp))
             }
 
+            // pin keypad
             Column(
                 modifier = Modifier
                     .wrapContentSize()
                     .align(Alignment.BottomCenter)
                     .padding(bottom = 20.dp)
             ) {
+                if (pinViewModel.mode.value != 2) {
+                    Text(
+                        text = stringResource(id = R.string.txt_no_pin_auth),
+                        modifier = Modifier
+                            .padding(16.dp)
+                            .fillMaxWidth()
+                            .clickable {
+                                pinViewModel.setMode(4)
+                            },
+                        textAlign = TextAlign.Center
+                    )
+                }
+                // 1~3
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.SpaceEvenly
                 ) {
                     (1..3).forEach {
                         PinKeyItem(
-                            onClick = { inputPin.add(it) }
+                            onClick = { pinViewModel.addPinNum(it) }
                         ) {
                             Text(
                                 text = it.toString(),
@@ -148,14 +180,14 @@ fun PinScreen() {
                         }
                     }
                 }
-
+                // 4~6
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.SpaceEvenly
                 ) {
                     (4..6).forEach {
                         PinKeyItem(
-                            onClick = { inputPin.add(it) }
+                            onClick = { pinViewModel.addPinNum(it) }
                         ) {
                             Text(
                                 text = it.toString(),
@@ -164,14 +196,14 @@ fun PinScreen() {
                         }
                     }
                 }
-
+                // 7~9
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.SpaceEvenly
                 ) {
                     (7..9).forEach {
                         PinKeyItem(
-                            onClick = { inputPin.add(it) }
+                            onClick = { pinViewModel.addPinNum(it) }
                         ) {
                             Text(
                                 text = it.toString(),
@@ -181,25 +213,21 @@ fun PinScreen() {
                         }
                     }
                 }
-
+                // 0~<-
                 Row(
                     modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(start = 10.dp),
+                        .fillMaxWidth(),
                     horizontalArrangement = Arrangement.SpaceEvenly,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Spacer(
-//                        imageVector = Icons.Default.Check,
-//                        contentDescription = "Success",
-                        modifier = Modifier
-                            .size(25.dp)
-                            .clickable { }
-                    )
                     PinKeyItem(
-                        onClick = { inputPin.add(0) },
-                        modifier = Modifier.padding(horizontal = 16.dp,
-                            vertical = 8.dp)
+                        onClick = {  }
+                    ) {
+                        Spacer(modifier = Modifier.padding(4.dp))
+                    }
+
+                    PinKeyItem(
+                        onClick = { pinViewModel.addPinNum(0) }
                     ) {
                         Text(
                             text = "0",
@@ -207,17 +235,21 @@ fun PinScreen() {
                             modifier = Modifier.padding(4.dp)
                         )
                     }
-                    Icon(
-                        imageVector = Icons.AutoMirrored.Outlined.ArrowBack,
-                        contentDescription = "Clear",
-                        modifier = Modifier
-                            .size(25.dp)
-                            .clickable {
-                                if (inputPin.isNotEmpty()) {
-                                    inputPin.removeLast()
-                                }
+
+                    PinKeyItem(
+                        onClick = {
+                            if (pinViewModel.inputPin.isNotEmpty()) {
+                                pinViewModel.removeLastPin()
                             }
-                    )
+                        }
+                    ) {
+                        Icon(
+                            imageVector = Icons.AutoMirrored.Outlined.ArrowBack,
+                            contentDescription = "Clear",
+                            modifier = Modifier
+                                .size(20.dp)
+                        )
+                    }
                 }
             }
         }
@@ -227,7 +259,7 @@ fun PinScreen() {
 @Composable
 fun PinKeyItem(
     onClick: () -> Unit,
-    modifier: Modifier = Modifier.padding(8.dp),
+    modifier: Modifier = Modifier,
     shape: CornerBasedShape = MaterialTheme.shapes.small.copy(CornerSize(percent = 50)),
     backgroundColor: Color = MaterialTheme.colorScheme.onPrimary,
     contentColor: Color = contentColorFor(backgroundColor = backgroundColor),
@@ -235,7 +267,7 @@ fun PinKeyItem(
     content: @Composable () -> Unit
 ) {
     Surface(
-        modifier = modifier,
+        modifier = modifier.padding(8.dp),
         shape = shape,
         color = backgroundColor,
         contentColor = contentColor,
@@ -253,8 +285,39 @@ fun PinKeyItem(
     }
 }
 
-@Preview
 @Composable
-fun PinScreenPreview() {
-    PinScreen()
+fun PinSettingDialog(onConfirm: () -> Unit, onDismiss: () -> Unit) {
+    AlertDialog(
+        onDismissRequest = {},
+        title = {
+            Text(
+                textAlign = TextAlign.Start,
+                text = stringResource(id = R.string.title_msg_use_pin),
+                fontSize = 18.sp
+            )
+        },
+        text = {
+            Text(
+                textAlign = TextAlign.Start,
+                text = stringResource(id = R.string.dlg_msg_use_pin),
+                fontSize = 18.sp
+            )
+        },
+        confirmButton = {
+            TextButton(
+                onClick = { onConfirm() }
+            ) {
+                Text(text = stringResource(id = R.string.btn_pin_setting))
+            }
+        },
+        dismissButton = {
+            TextButton(
+                onClick = { onDismiss() }
+            ) {
+                Text(text = stringResource(id = R.string.btn_pin_not_use))
+            }
+        },
+//        shape = RectangleShape
+        shape = RoundedCornerShape(10.dp)
+    )
 }
