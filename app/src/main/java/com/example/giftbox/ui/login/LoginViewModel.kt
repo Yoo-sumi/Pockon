@@ -32,13 +32,11 @@ class LoginViewModel @Inject constructor(
     init {
         loginRepository.getCurrentUser()?.let {
             _isLoginState.value = true
-            saveMyUid(it.uid)
         }
     }
 
     fun getCurrentUser(): Boolean {
         loginRepository.getCurrentUser()?.let {
-//            _isLoginState.value = true
             saveMyUid(it.uid)
             return true
         } ?: return false
@@ -60,8 +58,14 @@ class LoginViewModel @Inject constructor(
                     val firebaseCredential = GoogleAuthProvider.getCredential(idToken, null)
 
                     loginRepository.login(firebaseCredential) {
-                        _isLoginState.value = it
-                        _isPinAuthUse.value = it
+                        if (it.isEmpty()) {
+                            _isLoginState.value = false
+                            _isPinAuthUse.value = false
+                        } else {
+                            _isLoginState.value = true
+                            _isPinAuthUse.value = true
+                            saveMyUid(it)
+                        }
                     }
                 }
             }

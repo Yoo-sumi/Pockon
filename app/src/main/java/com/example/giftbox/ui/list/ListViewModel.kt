@@ -15,6 +15,7 @@ import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
+import java.util.Date
 import java.util.Locale
 import javax.inject.Inject
 
@@ -24,8 +25,10 @@ class ListViewModel @Inject constructor(
     private val sharedPref: SharedPreferences
 ) : ViewModel() {
     private var uid = sharedPref.getString("uid", "") ?: ""
+    private var removeGift: Gift? = null
 
     private val _giftList = mutableStateOf<List<Gift>>(listOf())
+    val giftList: State<List<Gift>> = _giftList
 
     private val _copyGiftList = mutableStateOf<List<Gift>>(listOf())
     val copyGiftList: State<List<Gift>> = _copyGiftList
@@ -58,9 +61,54 @@ class ListViewModel @Inject constructor(
                     giftList.forEach {
                         if (!element.containsKey(it.brand)) element[it.brand] = false
                     }
-                    _chipElement.value = element.toList().sortedWith(compareBy({it.first})).toMap()
+                    _chipElement.value = element.toList().sortedWith(compareBy { it.first }).toMap()
 
                     orderBy()
+                } else {
+                    _giftList.value = listOf()
+                    _copyGiftList.value = listOf()
+                    _filterList.value = listOf()
+                }
+            }
+        }
+    }
+
+    fun removeGift(gift: Gift? = null) {
+        if (removeGift == null) {
+            removeGift = gift
+            return
+        }
+
+        if (_copyGiftList.value.size == 1) {
+
+//            _filterList.value = _filterList.value.filter {
+//                it != removeGift?.brand
+//            }
+//            _chipElement.value = _chipElement.value?.filter {
+//                it.key != removeGift?.brand
+//            }
+//            _chipElement.value.get("") = true
+        }
+        _giftList.value = _giftList.value.filter {
+            it.document != removeGift?.document
+        }
+        _copyGiftList.value = _giftList.value
+
+        val element = mutableMapOf("" to true)
+        _giftList.value.forEach {
+            if (!element.containsKey(it.brand)) element[it.brand] = false
+        }
+        _chipElement.value = element.toList().sortedWith(compareBy { it.first }).toMap()
+
+        filterList()
+        orderBy()
+        val giftDoc = removeGift?.document
+        removeGift = null
+
+        viewModelScope.launch {
+            giftDoc?.let {
+                giftRepository.removeGift(giftDoc).collect {
+
                 }
             }
         }
@@ -129,7 +177,6 @@ class ListViewModel @Inject constructor(
     }
 
     fun orderBy() {
-
         if (_topTitle.intValue == R.string.top_app_bar_recent) {
             _copyGiftList.value = _copyGiftList.value.sortedByDescending {
                 val dateFormat = SimpleDateFormat("yyyyMMddHHmmss", Locale.KOREA)
@@ -139,6 +186,25 @@ class ListViewModel @Inject constructor(
             val dateFormat = SimpleDateFormat("yyyyMMdd", Locale.KOREA)
             _copyGiftList.value = _copyGiftList.value.sortedBy {
                 dateFormat.parse(it.endDt)?.time
+            }
+        }
+    }
+
+    fun usedGift(gift: Gift) {
+        _giftList.value = _giftList.value.filter {
+            it.document != gift.document
+        }
+        _copyGiftList.value = _giftList.value
+        filterList()
+        orderBy()
+
+        viewModelScope.launch {
+            val nowDt = SimpleDateFormat(
+                "yyyy.MM.dd",
+                Locale.getDefault()
+            ).format(Date(System.currentTimeMillis()))
+            giftRepository.updateGift(gift.copy(usedDt = nowDt)).collect { result ->
+
             }
         }
     }

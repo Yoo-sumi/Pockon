@@ -22,4 +22,8 @@ class GiftRepository @Inject constructor(
     fun updateGift(gift: Gift): Flow<Boolean> {
         return giftDataSource.updateData(gift)
     }
+
+    fun removeGift(document: String): Flow<Boolean> {
+        return giftDataSource.deleteData(document)
+    }
 }

@@ -7,10 +7,10 @@ import javax.inject.Inject
 class LoginRepository @Inject constructor(
     private val auth: FirebaseAuth
 ) {
-    fun login(firebaseCredential: AuthCredential, onComplete: (Boolean) -> Unit) {
+    fun login(firebaseCredential: AuthCredential, onComplete: (String) -> Unit) {
         auth.signInWithCredential(firebaseCredential)
             .addOnCompleteListener { task ->
-                onComplete(task.isSuccessful)
+                onComplete(task.result.user?.uid ?: "")
             }
     }
 

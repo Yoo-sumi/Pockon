@@ -160,7 +160,7 @@ fun BottomNavigationBar(onLogout: () -> Unit) {
                 }
             }
             composable(Screen.List.route) {
-                if (listViewModel.copyGiftList.value.isEmpty()) {
+                if (listViewModel.giftList.value.isEmpty()) {
                     EmptyScreen { navController.navigate(route = Screen.Add.route) }
                     return@composable
                 }

@@ -1,5 +1,6 @@
 package com.example.giftbox.ui.list
 
+import androidx.compose.animation.animateContentSize
 import com.example.giftbox.R
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -21,7 +22,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.MoreVert
-import androidx.compose.material3.Card
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.DropdownMenu
@@ -35,18 +36,27 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SmallFloatingActionButton
+import androidx.compose.material3.SwipeToDismissBox
+import androidx.compose.material3.SwipeToDismissBoxValue
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.pulltorefresh.PullToRefreshContainer
 import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
+import androidx.compose.material3.rememberSwipeToDismissBoxState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -60,11 +70,21 @@ import com.example.giftbox.ui.utils.stringTobitmap
 @Composable
 fun ListScreen(listViewModel: ListViewModel = viewModel(), onDetail: (Gift) -> Unit, onAdd: () -> Unit) {
     val refreshState = rememberPullToRefreshState()
+    var showRemoveDlg by remember { mutableStateOf(false) }
 
     if (refreshState.isRefreshing) {
         listViewModel.getGiftList()
         listViewModel.setTopTitle(R.string.top_app_bar_recent)
         refreshState.endRefresh()
+    }
+
+    if (showRemoveDlg) {
+        RemoveDialog(onConfirm = {
+            listViewModel.removeGift()
+            showRemoveDlg = false
+        }) {
+            showRemoveDlg = false
+        }
     }
 
     Scaffold(
@@ -95,7 +115,7 @@ fun ListScreen(listViewModel: ListViewModel = viewModel(), onDetail: (Gift) -> U
                 LazyRow {
                     listViewModel.chipElement.value?.let { chips ->
                         val keys = chips.keys.toList()
-                        items(chips.size){ idx ->
+                        items(chips.size) { idx ->
                             val key = keys[idx]
                             FilterChip(
                                 onClick = {
@@ -137,7 +157,78 @@ fun ListScreen(listViewModel: ListViewModel = viewModel(), onDetail: (Gift) -> U
                     items(items = listViewModel.copyGiftList.value,
                         key = { gift -> gift.document }
                     ) { gift ->
-                        GiftItem(gift = gift, listViewModel.formatString(gift.endDt), listViewModel.getDday(gift.endDt)) { onDetail(it) }
+                        val swipeState = rememberSwipeToDismissBoxState()
+
+                        val text: String
+                        val alignment: Alignment
+                        val color: Color
+
+                        when (swipeState.dismissDirection) {
+                            SwipeToDismissBoxValue.EndToStart -> {
+                                text = stringResource(id = R.string.txt_used)
+                                alignment = Alignment.CenterEnd
+                                color = colorResource(id = R.color.dark_green)
+                            }
+
+                            SwipeToDismissBoxValue.StartToEnd -> {
+                                text = stringResource(id = R.string.txt_delete)
+                                alignment = Alignment.CenterStart
+                                color = Color.Red.copy(alpha = 0.8f)
+                            }
+
+                            SwipeToDismissBoxValue.Settled -> {
+                                text = stringResource(id = R.string.txt_used)
+                                alignment = Alignment.CenterEnd
+                                color = Color.Green.copy(alpha = 0.8f)
+                            }
+                        }
+
+                        SwipeToDismissBox(
+                            modifier = Modifier.animateContentSize(),
+                            state = swipeState,
+                            enableDismissFromEndToStart = true,
+                            enableDismissFromStartToEnd = true,
+                            backgroundContent = {
+                                Box(
+                                    contentAlignment = alignment,
+                                    modifier = Modifier
+                                        .fillMaxSize()
+                                        .padding(3.dp)
+                                        .clip(shape = RoundedCornerShape(10.dp))
+                                        .background(color)
+                                ) {
+                                    Text(
+                                        modifier = Modifier.padding(start = 15.dp, end = 15.dp),
+                                        text = text,
+                                        color = MaterialTheme.colorScheme.onPrimary,
+                                        fontSize = 20.sp
+                                    )
+                                }
+                            }
+                        ) {
+                            GiftItem(gift = gift, listViewModel.formatString(gift.endDt), listViewModel.getDday(gift.endDt)) { onDetail(it) }
+                        }
+
+                        when (swipeState.currentValue) {
+                            SwipeToDismissBoxValue.EndToStart -> {
+                                LaunchedEffect(swipeState) {
+                                    listViewModel.usedGift(gift)
+                                    swipeState.snapTo(SwipeToDismissBoxValue.Settled)
+                                }
+                            }
+
+                            SwipeToDismissBoxValue.StartToEnd -> {
+                                LaunchedEffect(swipeState) {
+                                    listViewModel.removeGift(gift)
+                                    swipeState.snapTo(SwipeToDismissBoxValue.Settled)
+                                    showRemoveDlg = true
+                                }
+                            }
+
+                            SwipeToDismissBoxValue.Settled -> {
+
+                            }
+                        }
                     }
                 }
             }
@@ -168,68 +259,67 @@ fun ListScreen(listViewModel: ListViewModel = viewModel(), onDetail: (Gift) -> U
 
 @Composable
 fun GiftItem(gift: Gift, formattedEndDate: String, dDay: String, onDetail: (Gift) -> Unit) {
-    Card(
+    Box(
         modifier = Modifier
             .padding(3.dp)
+            .clip(shape = RoundedCornerShape(10.dp))
             .clickable {
                 onDetail(gift)
             }
     ) {
-        Box {
-            Row(
-                modifier = Modifier
-                    .background(MaterialTheme.colorScheme.surfaceContainerLowest)
-                    .height(120.dp)
-            ) {
-                Box(modifier = Modifier
-                    .size(120.dp)
-                    .background(MaterialTheme.colorScheme.onSurfaceVariant)) {
-                    stringTobitmap(gift.photo)?.let {
-                        Image(
-                            bitmap = it.asImageBitmap(),
-                            contentDescription = "photo",
-                            contentScale = ContentScale.Crop
-                        )
-                    }
-                }
-
-                Column(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .padding(20.dp)
-                        .align(Alignment.Bottom)
-                ) {
-                    Text(
-                        modifier = Modifier.fillMaxWidth(),
-                        text = gift.brand
-                    )
-                    Text(
-                        modifier = Modifier.fillMaxWidth(),
-                        fontWeight = FontWeight.Bold,
-                        fontSize = 20.sp,
-                        text = gift.name
-                    )
-                    Text(
-                        modifier = Modifier.fillMaxWidth(),
-                        textAlign = TextAlign.Right,
-                        text = "~ $formattedEndDate"
+        Row(
+            modifier = Modifier
+                .background(MaterialTheme.colorScheme.surfaceContainerLowest)
+                .height(120.dp)
+        ) {
+            Box(modifier = Modifier
+                .size(120.dp)
+                .background(MaterialTheme.colorScheme.onSurfaceVariant)) {
+                stringTobitmap(gift.photo)?.let {
+                    Image(
+                        bitmap = it.asImageBitmap(),
+                        contentDescription = "photo",
+                        contentScale = ContentScale.Crop
                     )
                 }
             }
 
-            Text(
-                text = "D${dDay}",
+            Column(
                 modifier = Modifier
-                    .padding(2.dp)
-                    .align(Alignment.TopEnd)
-                    .background(
-                        color = MaterialTheme.colorScheme.primary,
-                        shape = CardDefaults.shape
-                    )
-                    .padding(start = 15.dp, end = 15.dp, top = 5.dp, bottom = 5.dp),
-                color = MaterialTheme.colorScheme.surfaceContainerLowest
-            )
+                    .fillMaxSize()
+                    .padding(20.dp)
+                    .align(Alignment.Bottom)
+            ) {
+                Text(
+                    modifier = Modifier.fillMaxWidth(),
+                    text = gift.brand
+                )
+                Text(
+                    modifier = Modifier.fillMaxWidth(),
+                    fontWeight = FontWeight.Bold,
+                    fontSize = 20.sp,
+                    text = gift.name
+                )
+                Text(
+                    modifier = Modifier.fillMaxWidth(),
+                    textAlign = TextAlign.Right,
+                    text = "~ $formattedEndDate"
+                )
+            }
         }
+
+        Text(
+            text = "D${dDay}",
+            modifier = Modifier
+                .padding(2.dp)
+                .align(Alignment.TopEnd)
+                .background(
+                    color = MaterialTheme.colorScheme.primary,
+                    shape = CardDefaults.shape
+                )
+                .padding(start = 15.dp, end = 15.dp, top = 5.dp, bottom = 5.dp),
+            color = MaterialTheme.colorScheme.surfaceContainerLowest
+        )
     }
 }
 
@@ -285,4 +375,34 @@ fun TopAppBarDropDownMenu(setTopTitle: (Int) -> Unit) {
             }
         )
     }
+}
+
+// 기프티콘 제거 묻는 다이얼로그
+@Composable
+fun RemoveDialog(onConfirm: () -> Unit, onDismiss: () -> Unit) {
+    AlertDialog(
+        onDismissRequest = {},
+        text = {
+            Text(
+                textAlign = TextAlign.Center,
+                text = stringResource(id = R.string.dlg_msg_use_cancel),
+                fontSize = 18.sp
+            )
+        },
+        confirmButton = {
+            TextButton(
+                onClick = { onConfirm() }
+            ) {
+                Text(text = stringResource(id = R.string.btn_confirm))
+            }
+        },
+        dismissButton = {
+            TextButton(
+                onClick = { onDismiss() }
+            ) {
+                Text(text = stringResource(id = R.string.btn_cancel))
+            }
+        },
+        shape = RoundedCornerShape(10.dp)
+    )
 }

@@ -1,6 +1,5 @@
 package com.example.giftbox.data
 
-import android.util.Log
 import com.example.giftbox.model.Gift
 import com.google.firebase.firestore.FirebaseFirestore
 import kotlinx.coroutines.channels.awaitClose
@@ -50,6 +49,7 @@ class GiftDataSource @Inject constructor(
             firestore
                 .collection("gift")
                 .whereEqualTo("uid", uid)
+                .whereEqualTo("usedDt", "")
                 .get()
                 .addOnCompleteListener { task ->
                     val giftList: MutableList<Gift>  = mutableListOf()
@@ -70,6 +70,19 @@ class GiftDataSource @Inject constructor(
                 .collection("gift")
                 .document(gift.document)
                 .set(gift)
+                .addOnCompleteListener { task ->
+                    trySend(task.isSuccessful)
+                }
+            awaitClose()
+        }
+    }
+
+    fun deleteData(document: String): Flow<Boolean> {
+        return callbackFlow {
+            firestore
+                .collection("gift")
+                .document(document)
+                .delete()
                 .addOnCompleteListener { task ->
                     trySend(task.isSuccessful)
                 }
