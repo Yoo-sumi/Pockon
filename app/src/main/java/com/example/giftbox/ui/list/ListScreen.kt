@@ -17,6 +17,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -119,7 +120,7 @@ fun ListScreen(listViewModel: ListViewModel = viewModel(), onDetail: (Gift) -> U
                             val key = keys[idx]
                             FilterChip(
                                 onClick = {
-                                    listViewModel.changeChipState(key)
+                                    listViewModel.changeChipState(listOf(key))
                                 },
                                 label = {
                                     if (idx == 0) {
@@ -154,9 +155,7 @@ fun ListScreen(listViewModel: ListViewModel = viewModel(), onDetail: (Gift) -> U
                     modifier = Modifier
                         .fillMaxSize()
                 ) {
-                    items(items = listViewModel.copyGiftList.value,
-                        key = { gift -> gift.document }
-                    ) { gift ->
+                    itemsIndexed(items = listViewModel.copyGiftList.value) { index, gift ->
                         val swipeState = rememberSwipeToDismissBoxState()
 
                         val text: String
@@ -219,7 +218,7 @@ fun ListScreen(listViewModel: ListViewModel = viewModel(), onDetail: (Gift) -> U
 
                             SwipeToDismissBoxValue.StartToEnd -> {
                                 LaunchedEffect(swipeState) {
-                                    listViewModel.removeGift(gift)
+                                    listViewModel.setRemoveGift(gift)
                                     swipeState.snapTo(SwipeToDismissBoxValue.Settled)
                                     showRemoveDlg = true
                                 }

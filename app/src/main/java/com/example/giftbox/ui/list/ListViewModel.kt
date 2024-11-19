@@ -2,7 +2,6 @@ package com.example.giftbox.ui.list
 
 import com.example.giftbox.R
 import android.content.SharedPreferences
-import android.util.Log
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
@@ -56,13 +55,7 @@ class ListViewModel @Inject constructor(
                 if (giftList.isNotEmpty()) {
                     _giftList.value = giftList
                     _copyGiftList.value = _giftList.value
-
-                    val element = mutableMapOf("" to true)
-                    giftList.forEach {
-                        if (!element.containsKey(it.brand)) element[it.brand] = false
-                    }
-                    _chipElement.value = element.toList().sortedWith(compareBy { it.first }).toMap()
-
+                    sortChips()
                     orderBy()
                 } else {
                     _giftList.value = listOf()
@@ -73,45 +66,16 @@ class ListViewModel @Inject constructor(
         }
     }
 
-    fun removeGift(gift: Gift? = null) {
-        if (removeGift == null) {
-            removeGift = gift
-            return
-        }
-
-        if (_copyGiftList.value.size == 1) {
-
-//            _filterList.value = _filterList.value.filter {
-//                it != removeGift?.brand
-//            }
-//            _chipElement.value = _chipElement.value?.filter {
-//                it.key != removeGift?.brand
-//            }
-//            _chipElement.value.get("") = true
-        }
-        _giftList.value = _giftList.value.filter {
-            it.document != removeGift?.document
-        }
-        _copyGiftList.value = _giftList.value
-
+    private fun sortChips() {
         val element = mutableMapOf("" to true)
         _giftList.value.forEach {
             if (!element.containsKey(it.brand)) element[it.brand] = false
         }
         _chipElement.value = element.toList().sortedWith(compareBy { it.first }).toMap()
+    }
 
-        filterList()
-        orderBy()
-        val giftDoc = removeGift?.document
-        removeGift = null
-
-        viewModelScope.launch {
-            giftDoc?.let {
-                giftRepository.removeGift(giftDoc).collect {
-
-                }
-            }
-        }
+    fun setRemoveGift(gift: Gift) {
+        removeGift = gift
     }
 
     fun formatString(endDate: String): String {
@@ -140,18 +104,18 @@ class ListViewModel @Inject constructor(
         return ""
     }
 
-    fun changeChipState(target: String) {
+    fun changeChipState(targetList: List<String>) {
         val beforeElements = mutableMapOf<String, Boolean>()
         val beforeFilters = mutableListOf<String>()
 
         _chipElement.value?.keys?.forEach { key ->
             val state = _chipElement.value!![key]
-            if (target == key) beforeElements[key] = !state!! else beforeElements[key] = state!!
+            if (targetList.contains(key)) beforeElements[key] = !state!! else beforeElements[key] = state!!
 
-            if (target.isEmpty() && key.isNotEmpty()) {
+            if (targetList.contains("") && key.isNotEmpty()) { // 전체 클릭
                 beforeElements[key] = false
             }
-            if (target.isNotEmpty() && key.isEmpty()) {
+            if (!targetList.contains("") && key.isEmpty()) { // 전체 이외 클릭
                 beforeElements[key] = false
             }
 
@@ -191,20 +155,46 @@ class ListViewModel @Inject constructor(
     }
 
     fun usedGift(gift: Gift) {
-        _giftList.value = _giftList.value.filter {
-            it.document != gift.document
-        }
-        _copyGiftList.value = _giftList.value
-        filterList()
-        orderBy()
-
         viewModelScope.launch {
             val nowDt = SimpleDateFormat(
                 "yyyy.MM.dd",
                 Locale.getDefault()
             ).format(Date(System.currentTimeMillis()))
             giftRepository.updateGift(gift.copy(usedDt = nowDt)).collect { result ->
+                _giftList.value = _giftList.value.filter {
+                    it.document != gift.document
+                }
+                _copyGiftList.value = _giftList.value
+                sortChips()
 
+                if (chipElement.value?.keys?.contains(gift.brand) == true) {
+                    changeChipState(_filterList.value)
+                } else if (_filterList.value.size == 1) {
+                    changeChipState(listOf(""))
+                } else {
+                    changeChipState(_filterList.value.filter { it != gift.brand })
+                }
+            }
+        }
+    }
+
+    fun removeGift() {
+        if (removeGift ==  null) return
+        viewModelScope.launch {
+            giftRepository.removeGift(removeGift!!.document).collect {
+                _giftList.value = _giftList.value.filter {
+                    it.document != removeGift?.document
+                }
+                _copyGiftList.value = _giftList.value
+                sortChips()
+                if (chipElement.value?.keys?.contains(removeGift!!.brand) == true) {
+                    changeChipState(_filterList.value)
+                } else if (_filterList.value.size == 1) {
+                    changeChipState(listOf(""))
+                } else {
+                    changeChipState(_filterList.value.filter { it != removeGift!!.brand })
+                }
+                removeGift = null
             }
         }
     }
