@@ -1,15 +1,13 @@
 package com.example.giftbox.ui.detail
 
-import android.graphics.Bitmap
+import android.net.Uri
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.giftbox.R
-import com.example.giftbox.data.GiftDataSource
 import com.example.giftbox.data.GiftRepository
 import com.example.giftbox.model.Gift
-import com.example.giftbox.ui.utils.stringTobitmap
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
@@ -24,8 +22,8 @@ class DetailViewModel @Inject constructor(
     private val _gift = mutableStateOf<Gift>(Gift())
     val gift: State<Gift> = _gift
 
-    private val _photo = mutableStateOf<Bitmap?>(null)
-    val photo: State<Bitmap?> = _photo
+    private val _photo = mutableStateOf<Uri?>(null)
+    val photo: State<Uri?> = _photo
     private val _name = mutableStateOf("")
     val name: State<String> = _name
     private val _brand = mutableStateOf("")
@@ -45,12 +43,12 @@ class DetailViewModel @Inject constructor(
 
     fun setGift(gift: Gift) {
         this._gift.value = gift
-        _photo.value = stringTobitmap(gift.photo)
         _name.value = gift.name
         _brand.value = gift.brand
         _endDate.value = gift.endDt
         _memo.value = gift.memo
         _usedDt.value = gift.usedDt
+        _photo.value = Uri.parse(gift.photo)
     }
 
     fun getLabelList(index: Int): Int {

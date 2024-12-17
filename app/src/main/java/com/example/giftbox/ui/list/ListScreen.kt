@@ -64,6 +64,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import coil.compose.AsyncImage
 import com.example.giftbox.model.Gift
 import com.example.giftbox.ui.utils.stringTobitmap
 
@@ -274,13 +275,11 @@ fun GiftItem(gift: Gift, formattedEndDate: String, dDay: String, onDetail: (Gift
             Box(modifier = Modifier
                 .size(120.dp)
                 .background(MaterialTheme.colorScheme.onSurfaceVariant)) {
-                stringTobitmap(gift.photo)?.let {
-                    Image(
-                        bitmap = it.asImageBitmap(),
-                        contentDescription = "photo",
-                        contentScale = ContentScale.Crop
-                    )
-                }
+                AsyncImage(
+                    model = gift.photo,
+                    contentDescription = "photo",
+                    contentScale = ContentScale.Crop
+                )
             }
 
             Column(

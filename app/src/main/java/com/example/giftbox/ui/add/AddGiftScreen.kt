@@ -63,6 +63,7 @@ import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat
 import androidx.hilt.navigation.compose.hiltViewModel
+import coil.compose.AsyncImage
 import com.example.giftbox.ui.utils.DateTransformation
 import com.example.giftbox.R
 import com.example.giftbox.ui.utils.getBitmapFromUri
@@ -87,8 +88,7 @@ fun AddGifticon(onBack: (Boolean) -> Unit) {
         contract = ActivityResultContracts.PickVisualMedia()
     ) { uri ->
         uri?.let {
-            val photo = getBitmapFromUri(context, it)
-            addViewModel.setPhoto(photo)
+            addViewModel.setPhoto(it)
         }
     }
 
@@ -253,7 +253,7 @@ fun InputDataTextField(value: String, label: Int, index: Int, onValueChange: (In
 
 @Composable
 fun GiftImage(context: Context,
-              selectedImage: Bitmap?,
+              selectedImage: Uri?,
               launcherMultiplePermissions:  ManagedActivityResultLauncher<Array<String>, Map<String, @JvmSuppressWildcards Boolean>>,
               galleryLauncher:  ManagedActivityResultLauncher<PickVisualMediaRequest, Uri?>) {
     Row(
@@ -290,8 +290,8 @@ fun GiftImage(context: Context,
                     contentScale = ContentScale.Crop
                 )
             } else {
-                Image(
-                    bitmap = selectedImage.asImageBitmap(),
+                AsyncImage(
+                    model = selectedImage,
                     contentDescription = "add photo",
                     contentScale = ContentScale.Crop
                 )

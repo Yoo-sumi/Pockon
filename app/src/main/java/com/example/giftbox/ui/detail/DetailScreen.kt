@@ -1,6 +1,7 @@
 package com.example.giftbox.ui.detail
 
-import android.graphics.Bitmap
+import android.net.Uri
+import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -54,6 +55,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
+import coil.compose.AsyncImage
 import com.example.giftbox.ui.utils.DateTransformation
 import com.example.giftbox.R
 import com.example.giftbox.model.Gift
@@ -81,6 +83,10 @@ fun DetailScreen(gift: Gift, onBack: (Gift) -> Unit) {
         skipPartiallyExpanded = true
     )
     val scope = rememberCoroutineScope()
+
+    BackHandler {
+        onBack(detailViewModel.gift.value)
+    }
 
     Scaffold(
         topBar = {
@@ -148,8 +154,9 @@ fun DetailScreen(gift: Gift, onBack: (Gift) -> Unit) {
         }
 
         if (detailViewModel.isShowBottomSheet.value) {
-            GiftBottomSheet(detailViewModel.photo.value, scope, sheetState) {
-                detailViewModel.setIsUsed(true)
+            GiftBottomSheet(detailViewModel.photo.value, scope, sheetState) { isUsed ->
+                if (isUsed) detailViewModel.setIsUsed(true)
+                else detailViewModel.setIsShowBottomSheet(false)
             }
         }
         if (detailViewModel.isShowCancelDialog.value) {
@@ -187,7 +194,7 @@ fun InputDataTextField(value: String, label: Int, index: Int) {
 }
 
 @Composable
-fun GiftImage(selectedImage: Bitmap?, usedDt: String) {
+fun GiftImage(selectedImage: Uri?, usedDt: String) {
     Row(
         horizontalArrangement = Arrangement.Center,
         modifier = Modifier
@@ -210,10 +217,9 @@ fun GiftImage(selectedImage: Bitmap?, usedDt: String) {
                     contentScale = ContentScale.Crop
                 )
             } else {
-                Image(
-                    modifier = Modifier.fillMaxSize(),
-                    bitmap = selectedImage.asImageBitmap(),
-                    contentDescription = "add photo",
+                AsyncImage(
+                    model = selectedImage,
+                    contentDescription = "detail photo",
                     contentScale = ContentScale.Crop
                 )
             }
@@ -227,7 +233,7 @@ fun GiftImage(selectedImage: Bitmap?, usedDt: String) {
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun GiftBottomSheet(image: Bitmap?, scope: CoroutineScope, sheetState: SheetState, onDismiss: () -> Unit) {
+fun GiftBottomSheet(image: Uri?, scope: CoroutineScope, sheetState: SheetState, onDismiss: (Boolean) -> Unit) {
     val screenHeight = LocalConfiguration.current.screenHeightDp.dp
 
     ModalBottomSheet(
@@ -235,7 +241,7 @@ fun GiftBottomSheet(image: Bitmap?, scope: CoroutineScope, sheetState: SheetStat
             .heightIn(max = screenHeight - 10.dp)
             .fillMaxSize(),
         onDismissRequest = {
-            onDismiss()
+            onDismiss(false)
         },
         sheetState = sheetState
     ) {
@@ -260,9 +266,9 @@ fun GiftBottomSheet(image: Bitmap?, scope: CoroutineScope, sheetState: SheetStat
                         contentScale = ContentScale.Crop
                     )
                 } else {
-                    Image(
+                    AsyncImage(
                         modifier = Modifier.fillMaxWidth(),
-                        bitmap = image.asImageBitmap(),
+                        model = image,
                         contentDescription = "use photo",
                         contentScale = ContentScale.Crop
                     )
@@ -276,7 +282,7 @@ fun GiftBottomSheet(image: Bitmap?, scope: CoroutineScope, sheetState: SheetStat
                 onClick = {
                     scope.launch { sheetState.hide() }.invokeOnCompletion {
                         if (!sheetState.isVisible) {
-                            onDismiss()
+                            onDismiss(true)
                         }
                     }
                 }

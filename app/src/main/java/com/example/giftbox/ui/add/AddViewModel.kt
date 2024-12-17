@@ -2,6 +2,7 @@ package com.example.giftbox.ui.add
 
 import android.content.SharedPreferences
 import android.graphics.Bitmap
+import android.net.Uri
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
@@ -28,8 +29,8 @@ class AddViewModel @Inject constructor(
     private val _isShowDatePicker = mutableStateOf(false)
     val isShowDatePicker: State<Boolean> = _isShowDatePicker
 
-    private val _photo = mutableStateOf<Bitmap?>(null)
-    val photo: State<Bitmap?> = _photo
+    private val _photo = mutableStateOf<Uri?>(null)
+    val photo: State<Uri?> = _photo
     private val _name = mutableStateOf("")
     val name: State<String> = _name
     private val _brand = mutableStateOf("")
@@ -45,15 +46,13 @@ class AddViewModel @Inject constructor(
 
     private fun getGift(document: String? = null) {
         if (document == null) return
-        viewModelScope.launch {
-            giftRepository.getGift(uid).collect { gift->
-                gift?.let {
-                    _photo.value = stringTobitmap(gift.photo)
-                    _name.value = gift.name
-                    _brand.value = gift.brand
-                    _endDate.value = gift.endDt
-                    _memo.value = gift.memo
-                }
+        giftRepository.getGift(uid, document) { gift ->
+            gift?.let {
+                _name.value = it.name
+                _brand.value = it.brand
+                _endDate.value = it.endDt
+                _memo.value = it.memo
+                _photo.value = Uri.parse(it.photo)
             }
         }
     }
@@ -73,15 +72,15 @@ class AddViewModel @Inject constructor(
             Locale.getDefault()
         ).format(Date(System.currentTimeMillis()))
 
-        val gift = Gift(uid = uid, photo = bitmapToString(_photo.value!!), name = _name.value, brand = _brand.value, endDt = _endDate.value, addDt = addDate, memo = _memo.value)
+        val gift = Gift(uid = uid, name = _name.value, brand = _brand.value, endDt = _endDate.value, addDt = addDate, memo = _memo.value)
         viewModelScope.launch {
-            giftRepository.addGift(gift).collect { docId ->
-                onAddComplete(docId != null)
+            giftRepository.addGift(gift, _photo.value!!) { isSuccess ->
+                onAddComplete(isSuccess)
             }
         }
     }
 
-    fun setPhoto(photo: Bitmap?) {
+    fun setPhoto(photo: Uri?) {
         _photo.value = photo
     }
 

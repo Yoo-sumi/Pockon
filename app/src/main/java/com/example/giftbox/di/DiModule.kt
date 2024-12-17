@@ -7,10 +7,13 @@ import com.example.giftbox.data.GiftRepository
 import com.example.giftbox.data.LoginRepository
 import com.example.giftbox.R
 import com.example.giftbox.data.GiftDataSource
+import com.example.giftbox.data.GiftPhotoDataSource
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.ktx.Firebase
+import com.google.firebase.storage.FirebaseStorage
+import com.google.firebase.storage.StorageReference
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -41,14 +44,26 @@ class DiModule {
 
     @Singleton
     @Provides
-    fun provideGiftRepository(giftDataSource: GiftDataSource) : GiftRepository {
-        return GiftRepository(giftDataSource)
+    fun provideGiftRepository(giftDataSource: GiftDataSource, giftPhotoDataSource: GiftPhotoDataSource) : GiftRepository {
+        return GiftRepository(giftDataSource, giftPhotoDataSource)
     }
 
     @Singleton
     @Provides
     fun provideGiftDataSource(firestore: FirebaseFirestore) : GiftDataSource {
         return GiftDataSource(firestore)
+    }
+
+    @Singleton
+    @Provides
+    fun provideFirebaseFirestorage() : StorageReference {
+        return FirebaseStorage.getInstance().reference
+    }
+
+    @Singleton
+    @Provides
+    fun provideGiftPhotoDataSource(storageRef: StorageReference) : GiftPhotoDataSource {
+        return GiftPhotoDataSource(storageRef)
     }
 
     @Singleton

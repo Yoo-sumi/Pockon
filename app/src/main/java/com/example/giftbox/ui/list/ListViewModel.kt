@@ -50,18 +50,16 @@ class ListViewModel @Inject constructor(
     }
 
     fun getGiftList() {
-        viewModelScope.launch {
-            giftRepository.getAllGift(uid).collect { giftList ->
-                if (giftList.isNotEmpty()) {
-                    _giftList.value = giftList
-                    _copyGiftList.value = _giftList.value
-                    sortChips()
-                    orderBy()
-                } else {
-                    _giftList.value = listOf()
-                    _copyGiftList.value = listOf()
-                    _filterList.value = listOf()
-                }
+        giftRepository.getAllGift(uid) { giftList ->
+            if (giftList.isNotEmpty()) {
+                _giftList.value = giftList
+                _copyGiftList.value = _giftList.value
+                sortChips()
+                orderBy()
+            } else {
+                _giftList.value = listOf()
+                _copyGiftList.value = listOf()
+                _filterList.value = listOf()
             }
         }
     }

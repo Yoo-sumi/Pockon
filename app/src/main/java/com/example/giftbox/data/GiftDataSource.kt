@@ -11,57 +11,47 @@ import javax.inject.Inject
 class GiftDataSource @Inject constructor(
     private val firestore: FirebaseFirestore
 ) {
-    fun uploadData(gift: Gift): Flow<String?> {
+    fun uploadData(gift: Gift, onComplete: (String?) -> Unit) {
         val document = firestore
             .collection("gift")
             .document()
         gift.document = document.id
-        return callbackFlow {
-            document
-                .set(gift)
-                .addOnCompleteListener { task ->
-                    if (task.isSuccessful) trySend(document.id) else trySend(null)
-                }
-            awaitClose()
-        }
+        document
+            .set(gift)
+            .addOnCompleteListener { task ->
+                if (task.isSuccessful) onComplete(document.id) else onComplete(null)
+            }
     }
 
-    fun loadData(document:String): Flow<Gift?> {
-        return callbackFlow {
-            firestore
-                .collection("gift")
-                .document(document)
-                .get()
-                .addOnCompleteListener { task ->
-                    var gift: Gift? = null
-                    if (task.isSuccessful) {
-                        gift = task.result.toObject(Gift::class.java)
-                        trySend(gift)
-                    }
-                    trySend(gift)
+    fun loadData(document:String, onComplete: (Gift?) -> Unit) {
+        firestore
+            .collection("gift")
+            .document(document)
+            .get()
+            .addOnCompleteListener { task ->
+                var gift: Gift? = null
+                if (task.isSuccessful) {
+                    gift = task.result.toObject(Gift::class.java)
                 }
-            awaitClose()
-        }
+                onComplete(gift)
+            }
     }
 
-    fun loadAllData(uid: String): Flow<List<Gift>> {
-        return callbackFlow {
-            firestore
-                .collection("gift")
-                .whereEqualTo("uid", uid)
-                .whereEqualTo("usedDt", "")
-                .get()
-                .addOnCompleteListener { task ->
-                    val giftList: MutableList<Gift>  = mutableListOf()
-                    if (task.isSuccessful) {
-                        for (document in task.result) {
-                            giftList.add(document.toObject(Gift::class.java))
-                        }
+    fun loadAllData(uid: String, onComplete: (List<Gift>) -> Unit) {
+        firestore
+            .collection("gift")
+            .whereEqualTo("uid", uid)
+            .whereEqualTo("usedDt", "")
+            .get()
+            .addOnCompleteListener { task ->
+                val giftList: MutableList<Gift>  = mutableListOf()
+                if (task.isSuccessful) {
+                    for (document in task.result) {
+                        giftList.add(document.toObject(Gift::class.java))
                     }
-                    trySend(giftList)
                 }
-            awaitClose()
-        }
+                onComplete(giftList)
+            }
     }
 
     fun updateData(gift: Gift): Flow<Boolean> {
