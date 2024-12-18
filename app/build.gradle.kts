@@ -1,3 +1,5 @@
+import com.android.build.gradle.internal.cxx.configure.gradleLocalProperties
+
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.jetbrains.kotlin.android)
@@ -21,6 +23,8 @@ android {
         vectorDrawables {
             useSupportLibrary = true
         }
+
+        addManifestPlaceholders(mapOf("NAVER_MAP_CLIENT_ID" to gradleLocalProperties(rootDir, providers).getProperty("NAVER_MAP_CLIENT_ID")))
     }
 
     buildTypes {
@@ -61,6 +65,9 @@ android {
 }
 
 dependencies {
+    // naver map SDK
+    implementation(libs.map.sdk)
+
     // fragment
     implementation(libs.androidx.fragment.ktx)
 

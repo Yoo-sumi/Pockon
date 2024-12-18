@@ -1,18 +1,18 @@
 package com.example.giftbox.ui.home
 
-import android.view.LayoutInflater
-import android.widget.FrameLayout
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.wrapContentHeight
+import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
@@ -25,34 +25,22 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SmallFloatingActionButton
 import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBarColors
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.viewinterop.AndroidView
-import androidx.compose.ui.viewinterop.AndroidViewBinding
-import androidx.fragment.app.FragmentActivity
-import androidx.fragment.app.FragmentContainerView
-import androidx.fragment.app.commit
-import androidx.hilt.navigation.compose.hiltViewModel
-import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.giftbox.R
-import com.example.giftbox.databinding.FragmentMapBinding
-import com.example.giftbox.ui.list.TopAppBarDropDownMenu
-import com.example.giftbox.ui.pin.PinSettingDialog
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun HomeScreen(onAdd: () -> Unit) {
+fun HomeScreen(onAdd: () -> Unit, showMap: () -> Unit) {
 //    val homeViewModel = hiltViewModel<HomeViewModel>()
 
     Scaffold(
@@ -78,23 +66,6 @@ fun HomeScreen(onAdd: () -> Unit) {
                     .fillMaxSize()
                     .padding(20.dp)
             ) {
-                AndroidView(
-                    modifier = Modifier.fillMaxWidth(),
-                    factory = { context ->
-                        FragmentContainerView(context).apply {
-                            id = R.id.fragment_container_view
-                        }
-                    },
-                    update = {
-                        val fragmentManager = (it.context as FragmentActivity).supportFragmentManager
-                        fragmentManager.commit {
-                            replace(
-                                R.id.fragment_container_view,
-                                MapFragment()
-                            )
-                        }
-                    }
-                )
                 Text(
                     text = stringResource(id = R.string.txt_use_near),
                     style = MaterialTheme.typography.titleLarge,
@@ -102,17 +73,26 @@ fun HomeScreen(onAdd: () -> Unit) {
                     modifier = Modifier
                         .fillMaxWidth()
                 )
-                Text(
-                    text = stringResource(id = R.string.btn_open_map),
-                    style = MaterialTheme.typography.bodyLarge,
-                    textAlign = TextAlign.End,
-                    color = MaterialTheme.colorScheme.secondary,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                )
+                Box(
+                    modifier = Modifier.fillMaxWidth(),
+                    contentAlignment = Alignment.BottomEnd
+                ) {
+                    TextButton(
+                        onClick = { showMap() },
+                        modifier = Modifier.wrapContentSize(),
+                    ) {
+                        Text(
+                            text = stringResource(id = R.string.btn_open_map),
+                            style = MaterialTheme.typography.labelLarge,
+                            textAlign = TextAlign.End,
+                            color = MaterialTheme.colorScheme.secondary
+                        )
+                    }
+                }
                 GiftItem()
             }
 
+            // + 추가 버튼
             SmallFloatingActionButton(
                 onClick = {
                     onAdd()
@@ -130,6 +110,7 @@ fun HomeScreen(onAdd: () -> Unit) {
     }
 }
 
+/** 기프티콘 각각의 카드*/
 @Composable
 fun GiftItem() {
     Card(

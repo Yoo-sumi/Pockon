@@ -28,6 +28,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.List
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Home
+import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.Button
@@ -66,6 +67,7 @@ import com.example.giftbox.ui.list.ListScreen
 import com.example.giftbox.ui.list.ListViewModel
 import com.example.giftbox.ui.login.LoginScreen
 import com.example.giftbox.ui.login.LoginViewModel
+import com.example.giftbox.ui.map.MapScreen
 import com.example.giftbox.ui.pin.PinScreen
 import com.google.gson.Gson
 import dagger.hilt.android.AndroidEntryPoint
@@ -155,9 +157,14 @@ fun BottomNavigationBar(onLogout: () -> Unit) {
             modifier = Modifier.padding(innerPadding)
         ) {
             composable(Screen.Home.route) {
-                HomeScreen {
-                    navController.navigate(route = Screen.Add.route)
-                }
+                HomeScreen(
+                    onAdd = {
+                        navController.navigate(route = Screen.Add.route)
+                    },
+                    showMap =  {
+                        navController.navigate(route = Screen.Map.route)
+                    }
+                )
             }
             composable(Screen.List.route) {
                 if (listViewModel.giftList.value.isEmpty()) {
@@ -220,6 +227,11 @@ fun BottomNavigationBar(onLogout: () -> Unit) {
                     if (detailGift != gift) {
                         listViewModel.getGiftList()
                     }
+                }
+            }
+            composable(Screen.Map.route) {
+                MapScreen {
+                    navController.popBackStack()
                 }
             }
         }
@@ -308,4 +320,5 @@ sealed class Screen(val route: String, val icon: ImageVector, @StringRes val lab
 
     data object Add : Screen("add", Icons.Filled.Add, R.string.setting)
     data object Detail : Screen("detail", Icons.Filled.Search, R.string.detail)
+    data object Map : Screen("map", Icons.Filled.LocationOn, R.string.map)
 }

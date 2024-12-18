@@ -1,4 +1,4 @@
-package com.example.giftbox.ui.home
+package com.example.giftbox.ui.map
 
 import android.os.Bundle
 import androidx.fragment.app.Fragment
@@ -11,7 +11,7 @@ import dagger.hilt.android.AndroidEntryPoint
 @AndroidEntryPoint
 class MapFragment : Fragment() {
 
-    lateinit var binding: FragmentMapBinding
+    private lateinit var binding: FragmentMapBinding
 //    private val shoppingViewModel : ShoppingViewModel by activityViewModels()
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {

@@ -11,6 +11,7 @@ espressoCore = "3.6.1"
 lifecycleRuntimeKtx = "2.8.6"
 activityCompose = "1.9.2"
 composeBom = "2024.04.01"
+mapSdk = "3.20.0"
 material = "1.7.2"
 navigationCompose = "2.8.1"
 composeMaterial = "1.4.0"
@@ -44,6 +45,7 @@ androidx-compose-material = { group = "androidx.wear.compose", name = "compose-m
 androidx-ui-viewbinding = { group = "androidx.compose.ui", name = "ui-viewbinding", version.ref = "uiViewbinding" }
 androidx-appcompat = { group = "androidx.appcompat", name = "appcompat", version.ref = "appcompat" }
 androidx-constraintlayout = { group = "androidx.constraintlayout", name = "constraintlayout", version.ref = "constraintlayout" }
+map-sdk = { module = "com.naver.maps:map-sdk", version.ref = "mapSdk" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }
