@@ -43,6 +43,8 @@ android {
     }
     buildFeatures {
         compose = true
+        // 뷰 바인딩 활성화
+        viewBinding = true
     }
     composeOptions {
         kotlinCompilerExtensionVersion = "1.5.1"
@@ -59,6 +61,18 @@ android {
 }
 
 dependencies {
+    // fragment
+    implementation(libs.androidx.fragment.ktx)
+
+    // viewbinding
+    implementation(libs.androidx.ui.viewbinding)
+
+    // appcompat
+    implementation(libs.androidx.appcompat)
+
+    // constraintlayout
+    implementation(libs.androidx.constraintlayout)
+
     // LocalDateTime Api 26 lower
     coreLibraryDesugaring("com.android.tools:desugar_jdk_libs:1.1.5")
 
