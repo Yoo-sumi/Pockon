@@ -91,25 +91,6 @@ fun AddGifticon(onBack: (Boolean) -> Unit) {
             addViewModel.setPhoto(it)
         }
     }
-
-    // check permission
-    val launcherMultiplePermissions = rememberLauncherForActivityResult(
-        ActivityResultContracts.RequestMultiplePermissions()
-    ) { permissionsMap ->
-        val areGranted = permissionsMap.values.reduce { acc, next -> acc && next }
-        if (areGranted) {
-            galleryLauncher.launch(
-                PickVisualMediaRequest(
-                    ActivityResultContracts.PickVisualMedia.ImageOnly
-                )
-            )
-        } else {
-            scope.launch {
-                snackbarHostState.showSnackbar(message = context.getString(R.string.msg_permission_photo))
-            }
-        }
-    }
-
     // scroll
     val scrollSate = rememberScrollState()
 
@@ -157,7 +138,7 @@ fun AddGifticon(onBack: (Boolean) -> Unit) {
                 .padding(25.dp)
         ) {
             // gift image
-            GiftImage(context, addViewModel.photo.value, launcherMultiplePermissions, galleryLauncher)
+            GiftImage(addViewModel.photo.value, galleryLauncher)
 
             // text field
             for (i in inputDataList.indices) {
@@ -252,10 +233,7 @@ fun InputDataTextField(value: String, label: Int, index: Int, onValueChange: (In
 }
 
 @Composable
-fun GiftImage(context: Context,
-              selectedImage: Uri?,
-              launcherMultiplePermissions:  ManagedActivityResultLauncher<Array<String>, Map<String, @JvmSuppressWildcards Boolean>>,
-              galleryLauncher:  ManagedActivityResultLauncher<PickVisualMediaRequest, Uri?>) {
+fun GiftImage(selectedImage: Uri?, galleryLauncher:  ManagedActivityResultLauncher<PickVisualMediaRequest, Uri?>) {
     Row(
         horizontalArrangement = Arrangement.Center,
         modifier = Modifier
@@ -269,15 +247,11 @@ fun GiftImage(context: Context,
                 .height(200.dp)
                 .background(Color.LightGray)
                 .clickable {
-                    checkPermission(context, launcherMultiplePermissions) {
-                        if (it) {
-                            galleryLauncher.launch(
-                                PickVisualMediaRequest(
-                                    ActivityResultContracts.PickVisualMedia.ImageOnly
-                                )
-                            )
-                        }
-                    }
+                    galleryLauncher.launch(
+                        PickVisualMediaRequest(
+                            ActivityResultContracts.PickVisualMedia.ImageOnly
+                        )
+                    )
                 }
         ) {
             if (selectedImage == null) {
@@ -291,6 +265,7 @@ fun GiftImage(context: Context,
                 )
             } else {
                 AsyncImage(
+                    modifier = Modifier.fillMaxSize(),
                     model = selectedImage,
                     contentDescription = "add photo",
                     contentScale = ContentScale.Crop
@@ -353,30 +328,3 @@ fun CustomDatePickerDialog(
         }
     }
 }
-
-private fun checkPermission(
-    context: Context,
-    launcher: ManagedActivityResultLauncher<Array<String>, Map<String, Boolean>>,
-    result: (Boolean) -> Unit
-) {
-    val permissions = if (Build.VERSION.SDK_INT >= 33) {
-        arrayOf(Manifest.permission.READ_MEDIA_IMAGES)
-    } else {
-        arrayOf(Manifest.permission.READ_EXTERNAL_STORAGE)
-    }
-
-    if (permissions.all {
-            ContextCompat.checkSelfPermission(
-                context,
-                it
-            ) == PackageManager.PERMISSION_GRANTED
-        }) {
-        result(true)
-    }
-
-    else {
-        result(false)
-        launcher.launch(permissions)
-    }
-}
-

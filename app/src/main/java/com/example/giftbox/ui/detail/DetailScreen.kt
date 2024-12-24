@@ -219,6 +219,7 @@ fun GiftImage(selectedImage: Uri?, usedDt: String) {
                 )
             } else {
                 AsyncImage(
+                    modifier = Modifier.fillMaxSize(),
                     model = selectedImage,
                     contentDescription = "detail photo",
                     contentScale = ContentScale.Crop
@@ -268,7 +269,7 @@ fun GiftBottomSheet(image: Uri?, scope: CoroutineScope, sheetState: SheetState, 
                     )
                 } else {
                     AsyncImage(
-                        modifier = Modifier.fillMaxWidth(),
+                        modifier = Modifier.fillMaxSize(),
                         model = image,
                         contentDescription = "use photo",
                         contentScale = ContentScale.Crop

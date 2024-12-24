@@ -1,10 +1,21 @@
 package com.example.giftbox
 
+import android.Manifest
+import android.app.Activity
+import android.content.Context
+import android.content.Intent
+import android.content.pm.PackageManager
 import android.net.Uri
+import android.os.Build
 import android.os.Bundle
+import android.provider.Settings
+import androidx.activity.compose.ManagedActivityResultLauncher
+import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.compose.setContent
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
 import androidx.annotation.StringRes
+import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.animation.AnimatedContentTransitionScope
 import androidx.compose.animation.core.EaseIn
@@ -39,16 +50,19 @@ import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.core.content.ContextCompat
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.giftbox.ui.theme.GiftBoxTheme
 import androidx.navigation.NavDestination.Companion.hierarchy
@@ -116,6 +130,31 @@ fun BottomNavigationBar(onLogout: () -> Unit) {
     )
     val showBottomBar = navController
         .currentBackStackEntryAsState().value?.destination?.route in bottomScreens.map { it.route }
+
+    val context = LocalContext.current
+
+    // check permission
+    val launcherPermissions = rememberLauncherForActivityResult(
+        ActivityResultContracts.RequestMultiplePermissions()
+    ) { permissionsMap ->
+        val areGranted = permissionsMap.values.reduce { acc, next -> acc && next }
+        if (!areGranted) {
+            AlertDialog.Builder(context)
+                .setTitle("알림")
+                .setMessage("권한이 거부되었습니다.\n설정에서 권한을 모두 허용해주세요.")
+                .setPositiveButton("확인") { dialog, which ->
+                    // 긍정 버튼 클릭 동작 처리
+                    val intent = Intent(
+                        Settings.ACTION_APPLICATION_DETAILS_SETTINGS,
+                        Uri.fromParts("package", context.packageName, null)
+                    )
+                    context.startActivity(intent)
+                    val activity = context as? Activity
+                    activity?.finish()
+                }
+                .show()
+        }
+    }
 
     Scaffold(
         modifier = Modifier.fillMaxSize(),
@@ -236,6 +275,7 @@ fun BottomNavigationBar(onLogout: () -> Unit) {
             }
         }
     }
+    CheckPermission(context, launcherPermissions)
 }
 
 @Composable
@@ -309,6 +349,30 @@ fun EmptyScreen(onAdd: () -> Unit) {
             ) {
                 Text(text = stringResource(id = R.string.btn_register))
             }
+        }
+    }
+}
+
+/** 앨범, 위치 권한 체크 */
+@Composable
+private fun CheckPermission(
+    context: Context,
+    launcher: ManagedActivityResultLauncher<Array<String>, Map<String, Boolean>>
+) {
+    val permissions = if (Build.VERSION.SDK_INT >= 33) {
+        arrayOf(Manifest.permission.READ_MEDIA_IMAGES, Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION)
+    } else {
+        arrayOf(Manifest.permission.READ_EXTERNAL_STORAGE,  Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION)
+    }
+
+    if (!permissions.all {
+            ContextCompat.checkSelfPermission(
+                context,
+                it
+            ) == PackageManager.PERMISSION_GRANTED
+        }) {
+        LaunchedEffect(Unit) {
+            launcher.launch(permissions)
         }
     }
 }

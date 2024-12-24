@@ -280,6 +280,7 @@ fun GiftItem(gift: Gift, formattedEndDate: String, dDay: String, onDetail: (Gift
                 .size(120.dp)
                 .background(MaterialTheme.colorScheme.onSurfaceVariant)) {
                 AsyncImage(
+                    modifier = Modifier.fillMaxSize(),
                     model = gift.photo,
                     contentDescription = "photo",
                     contentScale = ContentScale.Crop
