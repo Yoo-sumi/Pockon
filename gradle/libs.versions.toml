@@ -16,6 +16,7 @@ mapSdk = "3.20.0"
 material = "1.7.2"
 navigationCompose = "2.8.1"
 composeMaterial = "1.4.0"
+playServicesLocation = "21.3.0"
 uiViewbinding = "1.7.6"
 appcompat = "1.7.0"
 constraintlayout = "2.2.0"
@@ -48,6 +49,7 @@ androidx-ui-viewbinding = { group = "androidx.compose.ui", name = "ui-viewbindin
 androidx-appcompat = { group = "androidx.appcompat", name = "appcompat", version.ref = "appcompat" }
 androidx-constraintlayout = { group = "androidx.constraintlayout", name = "constraintlayout", version.ref = "constraintlayout" }
 map-sdk = { module = "com.naver.maps:map-sdk", version.ref = "mapSdk" }
+play-services-location = { module = "com.google.android.gms:play-services-location", version.ref = "playServicesLocation" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }

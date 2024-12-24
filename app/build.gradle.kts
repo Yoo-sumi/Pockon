@@ -1,4 +1,9 @@
 import com.android.build.gradle.internal.cxx.configure.gradleLocalProperties
+import java.io.FileInputStream
+import java.util.Properties;
+
+var properties = Properties()
+properties.load(FileInputStream("local.properties"))
 
 plugins {
     alias(libs.plugins.android.application)
@@ -25,6 +30,7 @@ android {
         }
 
         addManifestPlaceholders(mapOf("NAVER_MAP_CLIENT_ID" to gradleLocalProperties(rootDir, providers).getProperty("NAVER_MAP_CLIENT_ID")))
+        buildConfigField("String", "KAKAO_REST_API_KEY", properties.getProperty("KAKAO_REST_API_KEY"))
     }
 
     buildTypes {
@@ -49,6 +55,7 @@ android {
         compose = true
         // 뷰 바인딩 활성화
         viewBinding = true
+        buildConfig = true
     }
     composeOptions {
         kotlinCompilerExtensionVersion = "1.5.10"
@@ -65,6 +72,13 @@ android {
 }
 
 dependencies {
+    // retrofit2
+    implementation("com.squareup.retrofit2:converter-gson:2.6.2")
+    implementation("com.squareup.retrofit2:retrofit:2.6.0")
+
+    // location
+    implementation(libs.play.services.location)
+
     // naver map SDK
     implementation(libs.map.sdk)
 

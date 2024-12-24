@@ -140,8 +140,8 @@ fun BottomNavigationBar(onLogout: () -> Unit) {
         val areGranted = permissionsMap.values.reduce { acc, next -> acc && next }
         if (!areGranted) {
             AlertDialog.Builder(context)
-                .setTitle("알림")
-                .setMessage("권한이 거부되었습니다.\n설정에서 권한을 모두 허용해주세요.")
+                .setTitle(context.getString(R.string.txt_alert))
+                .setMessage(context.getString(R.string.msg_no_permission))
                 .setPositiveButton("확인") { dialog, which ->
                     // 긍정 버튼 클릭 동작 처리
                     val intent = Intent(

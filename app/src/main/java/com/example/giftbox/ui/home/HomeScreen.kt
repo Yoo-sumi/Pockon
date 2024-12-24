@@ -37,12 +37,13 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.example.giftbox.R
+import com.example.giftbox.data.SearchDataSource
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun HomeScreen(onAdd: () -> Unit, showMap: () -> Unit) {
 //    val homeViewModel = hiltViewModel<HomeViewModel>()
-
+    SearchDataSource().searchBrand()
     Scaffold(
         topBar = {
             CenterAlignedTopAppBar(

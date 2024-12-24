@@ -13,6 +13,7 @@
     <string name="title_add_gift">기프티콘 추가</string>
     <string name="title_detail_gift">상세정보</string>
     <string name="msg_permission_photo">사진 접근 권한이 거부되었습니다.</string>
+    <string name="txt_alert">알림</string>
     <string name="txt_delete">제거</string>
     <string name="txt_used">사용\n완료</string>
     <string name="txt_name">이름</string>
@@ -49,4 +50,5 @@
     <string name="txt_no_pin_auth">보안 설정 사용 안 함</string>
     <string name="txt_use_near">근처에서 사용할 수 있어요</string>
     <string name="msg_pin_auth_fail">PIN 번호가 일치하지 않습니다.</string>
+    <string name="msg_no_permission">권한이 거부되었습니다.\n설정에서 권한을 모두 허용해 주세요.</string>
 </resources>
