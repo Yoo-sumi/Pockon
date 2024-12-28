@@ -202,6 +202,10 @@ fun BottomNavigationBar(onLogout: () -> Unit) {
                     },
                     showMap =  {
                         navController.navigate(route = Screen.Map.route)
+                    },
+                    onDetail = { gift ->
+                        val gifJson = Uri.encode(Gson().toJson(gift))
+                        navController.navigate(route = "${Screen.Detail.route}/${gifJson}")
                     }
                 )
             }

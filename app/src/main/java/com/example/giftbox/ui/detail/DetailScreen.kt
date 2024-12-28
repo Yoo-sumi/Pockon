@@ -5,6 +5,7 @@ import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -122,8 +123,13 @@ fun DetailScreen(gift: Gift, onBack: (Gift) -> Unit) {
                 .padding(25.dp)
         ) {
             // gift image
-            GiftImage(detailViewModel.photo.value, detailViewModel.usedDt.value)
-//            detailViewModel.setIsShowBottomSheet(!detailViewModel.isShowBottomSheet.value)
+            GiftImage(detailViewModel.photo.value, detailViewModel.usedDt.value) {
+                if (detailViewModel.usedDt.value.isEmpty()) {
+                    detailViewModel.setIsShowBottomSheet(true)
+                } else {
+                    detailViewModel.setIsShowCancelDialog(true)
+                }
+            }
 
             // text field
             for (i in inputDataList.indices) {
@@ -195,7 +201,7 @@ fun InputDataTextField(value: String, label: Int, index: Int) {
 }
 
 @Composable
-fun GiftImage(selectedImage: Uri?, usedDt: String) {
+fun GiftImage(selectedImage: Uri?, usedDt: String, onClick: () -> Unit) {
     Row(
         horizontalArrangement = Arrangement.Center,
         modifier = Modifier
@@ -219,7 +225,11 @@ fun GiftImage(selectedImage: Uri?, usedDt: String) {
                 )
             } else {
                 AsyncImage(
-                    modifier = Modifier.fillMaxSize(),
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .clickable {
+                            onClick()
+                        },
                     model = selectedImage,
                     contentDescription = "detail photo",
                     contentScale = ContentScale.Crop
@@ -272,7 +282,7 @@ fun GiftBottomSheet(image: Uri?, scope: CoroutineScope, sheetState: SheetState, 
                         modifier = Modifier.fillMaxSize(),
                         model = image,
                         contentDescription = "use photo",
-                        contentScale = ContentScale.Crop
+                        contentScale = ContentScale.Fit
                     )
                 }
             }

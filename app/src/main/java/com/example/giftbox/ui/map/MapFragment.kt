@@ -23,8 +23,6 @@ class MapFragment : Fragment(), OnMapReadyCallback {
     private lateinit var naverMap : NaverMap
     private lateinit var locationSource: FusedLocationSource
 
-
-
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
         binding = FragmentMapBinding.inflate(inflater, container, false)
         mapView = binding.mapView

@@ -6,6 +6,8 @@ import androidx.core.content.ContextCompat.getString
 import com.example.giftbox.data.GiftRepository
 import com.example.giftbox.data.LoginRepository
 import com.example.giftbox.R
+import com.example.giftbox.data.BrandSearchDataSource
+import com.example.giftbox.data.BrandSearchRepository
 import com.example.giftbox.data.GiftDataSource
 import com.example.giftbox.data.GiftPhotoDataSource
 import com.google.firebase.auth.FirebaseAuth
@@ -52,6 +54,17 @@ class DiModule {
     @Provides
     fun provideGiftDataSource(firestore: FirebaseFirestore) : GiftDataSource {
         return GiftDataSource(firestore)
+    }
+
+    @Singleton
+    @Provides
+    fun provideBrandSearchRepository(brandSearchDataSource: BrandSearchDataSource) : BrandSearchRepository {
+        return BrandSearchRepository(brandSearchDataSource)
+    }
+
+    @Provides
+    fun provideBrandSearchDataSource() : BrandSearchDataSource {
+        return BrandSearchDataSource()
     }
 
     @Singleton
