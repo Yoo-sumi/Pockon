@@ -1,4 +1,4 @@
-package com.example.giftbox.data
+package com.example.giftbox.data.remote
 
 import com.example.giftbox.model.Gift
 import com.google.firebase.firestore.FirebaseFirestore

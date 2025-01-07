@@ -1,6 +1,8 @@
 package com.example.giftbox.data
 
 import android.net.Uri
+import com.example.giftbox.data.remote.GiftDataSource
+import com.example.giftbox.data.remote.GiftPhotoDataSource
 import com.example.giftbox.model.Gift
 import kotlinx.coroutines.flow.Flow
 import javax.inject.Inject

@@ -1,4 +1,4 @@
-package com.example.giftbox.data
+package com.example.giftbox.data.remote
 
 import android.net.Uri
 import com.google.firebase.storage.StorageReference

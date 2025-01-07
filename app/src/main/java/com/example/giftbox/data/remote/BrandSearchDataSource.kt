@@ -1,9 +1,9 @@
-package com.example.giftbox.data
+package com.example.giftbox.data.remote
 
 import android.location.Location
 import com.example.giftbox.BuildConfig
 import com.example.giftbox.KaKaoSearchAPI
-import com.example.giftbox.model.Brand
+import com.example.giftbox.model.Brands
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
@@ -20,18 +20,19 @@ class BrandSearchDataSource {
         .addConverterFactory(GsonConverterFactory.create())
         .build()
 
-    fun getBrandInfo(location: Location?, brandName: String, onComplete: (String, Brand?) -> Unit) {
+    fun getBrandInfo(location: Location?, brandName: String, onComplete: (String, Brands?) -> Unit) {
         val api = retrofit.create(KaKaoSearchAPI::class.java)
         val call = api.searchBrand(REST_API_KEY, brandName , x = location?.longitude.toString(), y = location?.latitude.toString())
 
-        call.enqueue(object : Callback<Brand> {
-            override fun onResponse(call: Call<Brand>, response: Response<Brand>) {
+        call.enqueue(object : Callback<Brands> {
+            override fun onResponse(call: Call<Brands>, response: Response<Brands>) {
                 if (response.isSuccessful && response.body() != null) onComplete(brandName, response.body())
                 else onComplete(brandName, null)
             }
 
-            override fun onFailure(call: Call<Brand>, t: Throwable) {
+            override fun onFailure(call: Call<Brands>, t: Throwable) {
                 t.printStackTrace()
+                onComplete(brandName, null)
             }
         })
     }

@@ -1,6 +1,6 @@
 package com.example.giftbox
 
-import com.example.giftbox.model.Brand
+import com.example.giftbox.model.Brands
 import retrofit2.Call
 import retrofit2.http.GET
 import retrofit2.http.Header
@@ -11,13 +11,13 @@ interface KaKaoSearchAPI {
     fun searchBrand(
         @Header("Authorization") authorization: String,
         @Query("query") query: String,
-        @Query("category_group_code") category: String = CATEGORY_GROUP_CODE,
+//        @Query("category_group_code") category: String = CATEGORY_GROUP_CODE,
         @Query("x") x: String? = null,
         @Query("y") y: String? = null,
         @Query("radius") radius: Int? = 10000
-    ): Call<Brand>
+    ): Call<Brands>
 
     companion object {
-        private const val CATEGORY_GROUP_CODE = "MT1,CS2,CT1,AD5,FD6,CE7"
+        private const val CATEGORY_GROUP_CODE = "MT1,CS2,CT1,AD5,FD6,CE7" // 여러개 안됨..
     }
 }

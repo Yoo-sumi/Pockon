@@ -2,7 +2,7 @@ package com.example.giftbox.model
 
 import com.google.gson.annotations.SerializedName
 
-data class Brand(
+data class Brands(
     var documents: List<Document>
 )
 

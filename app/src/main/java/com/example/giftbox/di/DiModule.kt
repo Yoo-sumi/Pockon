@@ -3,13 +3,17 @@ package com.example.giftbox.di
 import android.content.Context
 import android.content.SharedPreferences
 import androidx.core.content.ContextCompat.getString
+import androidx.room.Room
+import com.example.giftbox.AppDatabase
+import com.example.giftbox.BrandsDao
 import com.example.giftbox.data.GiftRepository
 import com.example.giftbox.data.LoginRepository
 import com.example.giftbox.R
-import com.example.giftbox.data.BrandSearchDataSource
+import com.example.giftbox.data.remote.BrandSearchDataSource
 import com.example.giftbox.data.BrandSearchRepository
-import com.example.giftbox.data.GiftDataSource
-import com.example.giftbox.data.GiftPhotoDataSource
+import com.example.giftbox.data.local.BrandDataSource
+import com.example.giftbox.data.remote.GiftDataSource
+import com.example.giftbox.data.remote.GiftPhotoDataSource
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.firestore.FirebaseFirestore
@@ -58,13 +62,18 @@ class DiModule {
 
     @Singleton
     @Provides
-    fun provideBrandSearchRepository(brandSearchDataSource: BrandSearchDataSource) : BrandSearchRepository {
-        return BrandSearchRepository(brandSearchDataSource)
+    fun provideBrandSearchRepository(brandSearchDataSource: BrandSearchDataSource, giftPlaceDataSource: BrandDataSource) : BrandSearchRepository {
+        return BrandSearchRepository(brandSearchDataSource, giftPlaceDataSource)
     }
 
     @Provides
     fun provideBrandSearchDataSource() : BrandSearchDataSource {
         return BrandSearchDataSource()
+    }
+
+    @Provides
+    fun provideBrandDataSource(brandsDao: BrandsDao) : BrandDataSource {
+        return BrandDataSource(brandsDao)
     }
 
     @Singleton
@@ -84,4 +93,16 @@ class DiModule {
     fun provideSharedPref(@ApplicationContext context: Context): SharedPreferences {
         return context.getSharedPreferences(getString(context, R.string.preference_file_key), Context.MODE_PRIVATE)
     }
+
+    @Singleton
+    @Provides
+    fun provideAppDatabase(
+        @ApplicationContext context: Context
+    ): AppDatabase = Room
+        .databaseBuilder(context, AppDatabase::class.java, "gift_box.db")
+        .build()
+
+    @Singleton
+    @Provides
+    fun provideGiftPlaceDao(appDatabase: AppDatabase): BrandsDao = appDatabase.brandsDao()
 }
