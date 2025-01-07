@@ -5,17 +5,20 @@ import android.location.Location
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
-import com.example.giftbox.data.BrandSearchRepository
+import androidx.lifecycle.viewModelScope
+import com.example.giftbox.data.BrandsRepository
 import com.example.giftbox.data.GiftRepository
 import com.example.giftbox.model.Document
 import com.example.giftbox.model.Gift
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
 class HomeViewModel @Inject constructor(
     private val giftRepository: GiftRepository,
-    private val brandSearchRepository: BrandSearchRepository,
+    private val brandsRepository: BrandsRepository,
     private val sharedPref: SharedPreferences
 ) : ViewModel() {
 
@@ -45,7 +48,7 @@ class HomeViewModel @Inject constructor(
         giftList.forEach {
             if (!brandNames.contains(it.brand)) brandNames.add(it.brand)
         }
-        if (brandNames.isNotEmpty()) brandSearchRepository.getBrandInfoList(location, brandNames) { keywords, brands ->
+        if (brandNames.isNotEmpty()) brandsRepository.searchBrandInfoList(location, brandNames) { keywords, brands ->
             brands.forEachIndexed { index, brand ->
                 val sortedList = brand?.documents?.sortedBy { Integer.parseInt(it.distance) }
                 sortedList?.forEach { document ->
@@ -62,6 +65,15 @@ class HomeViewModel @Inject constructor(
             }
             allList.sortBy { it.second.distance }
             _displayGiftList.value = allList
+
+            // 로컬 저장
+            viewModelScope.launch(Dispatchers.IO) {
+                for (k in 0..keywords.lastIndex) {
+                    brands[k]?.let { brand ->
+                        brandsRepository.insertBrands(keywords[k], brand.documents) // 브랜드별 위치정보 저장
+                    }
+                }
+            }
         }
     }
 

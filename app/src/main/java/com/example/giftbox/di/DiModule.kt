@@ -10,7 +10,7 @@ import com.example.giftbox.data.GiftRepository
 import com.example.giftbox.data.LoginRepository
 import com.example.giftbox.R
 import com.example.giftbox.data.remote.BrandSearchDataSource
-import com.example.giftbox.data.BrandSearchRepository
+import com.example.giftbox.data.BrandsRepository
 import com.example.giftbox.data.local.BrandDataSource
 import com.example.giftbox.data.remote.GiftDataSource
 import com.example.giftbox.data.remote.GiftPhotoDataSource
@@ -62,8 +62,8 @@ class DiModule {
 
     @Singleton
     @Provides
-    fun provideBrandSearchRepository(brandSearchDataSource: BrandSearchDataSource, giftPlaceDataSource: BrandDataSource) : BrandSearchRepository {
-        return BrandSearchRepository(brandSearchDataSource, giftPlaceDataSource)
+    fun provideBrandsRepository(brandSearchDataSource: BrandSearchDataSource, giftPlaceDataSource: BrandDataSource) : BrandsRepository {
+        return BrandsRepository(brandSearchDataSource, giftPlaceDataSource)
     }
 
     @Provides

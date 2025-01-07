@@ -1,16 +1,18 @@
 package com.example.giftbox.data
 
 import android.location.Location
+import com.example.giftbox.BrandsEntity
 import com.example.giftbox.data.local.BrandDataSource
 import com.example.giftbox.data.remote.BrandSearchDataSource
 import com.example.giftbox.model.Brands
+import com.example.giftbox.model.Document
 import javax.inject.Inject
 
-class BrandSearchRepository @Inject constructor(
+class BrandsRepository @Inject constructor(
     private val brandSearchDataSource: BrandSearchDataSource,
     private val brandDataSource: BrandDataSource
 ) {
-    fun getBrandInfoList(location: Location?, brandNames: ArrayList<String>, onComplete: (ArrayList<String>, ArrayList<Brands?>) -> Unit) {
+    fun searchBrandInfoList(location: Location?, brandNames: ArrayList<String>, onComplete: (ArrayList<String>, ArrayList<Brands?>) -> Unit) {
         val brandList = ArrayList<Brands?>()
         val keywordList = ArrayList<String>()
         brandNames.forEachIndexed { i, a ->
@@ -19,13 +21,22 @@ class BrandSearchRepository @Inject constructor(
                 keywordList.add(keyword)
                 if (brandList.size == brandNames.size) {
                     onComplete(keywordList, brandList)
-                    for (k in 0..keywordList.lastIndex) {
-                        brandList[k]?.let { brands ->
-                            brandDataSource.insertBrands(keywordList[k], brands.documents) // 브랜드별 위치정보 저장
-                        }
-                    }
                 }
             }
         }
+    }
+
+    fun insertBrands(keyword: String, documents: List<Document>) {
+        brandDataSource.insertBrands(keyword, documents)
+    }
+
+    fun getAllBrands(): Pair<ArrayList<String>, ArrayList<List<Document>>> {
+        val keywordList = ArrayList<String>()
+        val documentList = ArrayList<List<Document>>()
+        brandDataSource.getAllBrands().forEach {
+            keywordList.add(it.keyword)
+            documentList.add(it.documents)
+        }
+        return Pair(keywordList, documentList)
     }
 }
