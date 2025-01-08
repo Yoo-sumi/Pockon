@@ -4,14 +4,17 @@ import android.content.Context
 import android.content.SharedPreferences
 import androidx.core.content.ContextCompat.getString
 import androidx.room.Room
-import com.example.giftbox.AppDatabase
-import com.example.giftbox.BrandsDao
+import com.example.giftbox.BrandDao
+import com.example.giftbox.BrandDatabase
+import com.example.giftbox.GiftDao
+import com.example.giftbox.GiftDatabase
 import com.example.giftbox.data.GiftRepository
 import com.example.giftbox.data.LoginRepository
 import com.example.giftbox.R
+import com.example.giftbox.data.BrandSearchRepository
 import com.example.giftbox.data.remote.BrandSearchDataSource
-import com.example.giftbox.data.BrandsRepository
 import com.example.giftbox.data.local.BrandDataSource
+import com.example.giftbox.data.local.GiftLocalDataSource
 import com.example.giftbox.data.remote.GiftDataSource
 import com.example.giftbox.data.remote.GiftPhotoDataSource
 import com.google.firebase.auth.FirebaseAuth
@@ -50,8 +53,8 @@ class DiModule {
 
     @Singleton
     @Provides
-    fun provideGiftRepository(giftDataSource: GiftDataSource, giftPhotoDataSource: GiftPhotoDataSource) : GiftRepository {
-        return GiftRepository(giftDataSource, giftPhotoDataSource)
+    fun provideGiftRepository(giftDataSource: GiftDataSource, giftPhotoDataSource: GiftPhotoDataSource, giftLocalDataSource: GiftLocalDataSource) : GiftRepository {
+        return GiftRepository(giftDataSource, giftPhotoDataSource, giftLocalDataSource)
     }
 
     @Singleton
@@ -62,8 +65,8 @@ class DiModule {
 
     @Singleton
     @Provides
-    fun provideBrandsRepository(brandSearchDataSource: BrandSearchDataSource, giftPlaceDataSource: BrandDataSource) : BrandsRepository {
-        return BrandsRepository(brandSearchDataSource, giftPlaceDataSource)
+    fun provideBrandSearchRepository(brandSearchDataSource: BrandSearchDataSource, giftPlaceDataSource: BrandDataSource) : BrandSearchRepository {
+        return BrandSearchRepository(brandSearchDataSource, giftPlaceDataSource)
     }
 
     @Provides
@@ -72,8 +75,13 @@ class DiModule {
     }
 
     @Provides
-    fun provideBrandDataSource(brandsDao: BrandsDao) : BrandDataSource {
+    fun provideBrandDataSource(brandsDao: BrandDao) : BrandDataSource {
         return BrandDataSource(brandsDao)
+    }
+
+    @Provides
+    fun provideGiftLocalDataSource(giftDao: GiftDao) : GiftLocalDataSource {
+        return GiftLocalDataSource(giftDao)
     }
 
     @Singleton
@@ -96,13 +104,25 @@ class DiModule {
 
     @Singleton
     @Provides
-    fun provideAppDatabase(
+    fun provideBrandDatabase(
         @ApplicationContext context: Context
-    ): AppDatabase = Room
-        .databaseBuilder(context, AppDatabase::class.java, "gift_box.db")
+    ): BrandDatabase = Room
+        .databaseBuilder(context, BrandDatabase::class.java, "brand.db")
         .build()
 
     @Singleton
     @Provides
-    fun provideGiftPlaceDao(appDatabase: AppDatabase): BrandsDao = appDatabase.brandsDao()
+    fun provideBrandDao(brandDatabase: BrandDatabase): BrandDao = brandDatabase.brandDao()
+
+    @Singleton
+    @Provides
+    fun provideGiftDatabase(
+        @ApplicationContext context: Context
+    ): GiftDatabase = Room
+        .databaseBuilder(context, GiftDatabase::class.java, "gift.db")
+        .build()
+
+    @Singleton
+    @Provides
+    fun provideGiftDao(giftDatabase: GiftDatabase): GiftDao = giftDatabase.giftDao()
 }

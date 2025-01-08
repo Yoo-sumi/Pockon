@@ -1,14 +1,13 @@
 package com.example.giftbox.data
 
 import android.location.Location
-import com.example.giftbox.BrandsEntity
 import com.example.giftbox.data.local.BrandDataSource
 import com.example.giftbox.data.remote.BrandSearchDataSource
 import com.example.giftbox.model.Brands
 import com.example.giftbox.model.Document
 import javax.inject.Inject
 
-class BrandsRepository @Inject constructor(
+class BrandSearchRepository @Inject constructor(
     private val brandSearchDataSource: BrandSearchDataSource,
     private val brandDataSource: BrandDataSource
 ) {

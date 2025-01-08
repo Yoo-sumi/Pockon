@@ -2,7 +2,6 @@ package com.example.giftbox
 
 import androidx.room.Dao
 import androidx.room.Database
-import androidx.room.Delete
 import androidx.room.Entity
 import androidx.room.Insert
 import androidx.room.OnConflictStrategy
@@ -11,35 +10,34 @@ import androidx.room.Query
 import androidx.room.RoomDatabase
 import androidx.room.TypeConverter
 import androidx.room.TypeConverters
-import com.example.giftbox.model.Brands
 import com.example.giftbox.model.Document
 import com.google.gson.Gson
 
 @Database(
-    entities = [BrandsEntity::class],
+    entities = [BrandEntity::class],
     version = 1
 )
 @TypeConverters(DateListConverters::class)
-abstract class AppDatabase : RoomDatabase() {
-    abstract fun brandsDao(): BrandsDao
+abstract class BrandDatabase : RoomDatabase() {
+    abstract fun brandDao(): BrandDao
 }
 
 @Dao
-interface BrandsDao {
+interface BrandDao {
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    fun insertBrands(item: BrandsEntity)
+    fun insertBrands(item: BrandEntity)
 
-    @Query("SELECT * FROM BrandsEntity")
-    fun getAllBrands(): List<BrandsEntity>
+    @Query("SELECT * FROM BrandEntity")
+    fun getAllBrands(): List<BrandEntity>
 
-    @Query("DELETE FROM BrandsEntity")
+    @Query("DELETE FROM BrandEntity")
     fun deleteAllBrands()
 
 }
 
 @Entity
-data class BrandsEntity(
+data class BrandEntity(
     @PrimaryKey val keyword: String,
     val documents: List<Document>
 )

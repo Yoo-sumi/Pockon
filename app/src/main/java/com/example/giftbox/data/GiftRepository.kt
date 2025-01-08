@@ -1,15 +1,20 @@
 package com.example.giftbox.data
 
 import android.net.Uri
+import com.example.giftbox.GiftEntity
+import com.example.giftbox.data.local.BrandDataSource
+import com.example.giftbox.data.local.GiftLocalDataSource
 import com.example.giftbox.data.remote.GiftDataSource
 import com.example.giftbox.data.remote.GiftPhotoDataSource
+import com.example.giftbox.model.Document
 import com.example.giftbox.model.Gift
 import kotlinx.coroutines.flow.Flow
 import javax.inject.Inject
 
 class GiftRepository @Inject constructor(
     private val giftDataSource: GiftDataSource,
-    private val giftPhotoDataSource: GiftPhotoDataSource
+    private val giftPhotoDataSource: GiftPhotoDataSource,
+    private val giftLocalDataSource: GiftLocalDataSource
 ) {
     fun addGift(gift: Gift, photo: Uri, onComplete: (Boolean) -> Unit) {
         giftDataSource.uploadData(gift) { document ->
@@ -49,4 +54,13 @@ class GiftRepository @Inject constructor(
     fun removeGift(document: String): Flow<Boolean> {
         return giftDataSource.deleteData(document)
     }
+
+    fun insertGift(gift: Gift) {
+        val giftEntity = GiftEntity(document = gift.document, uid = gift.uid, photo = gift.photo, name = gift.name, brand = gift.brand, endDt = gift.endDt, addDt = gift.addDt, memo = gift.memo, usedDt = gift.usedDt)
+        giftLocalDataSource.insertGift(giftEntity)
+    }
+
+    fun getAllGift() = giftLocalDataSource.getAllGift().map { gift ->
+            Gift(document = gift.document, uid = gift.uid, photo = gift.photo, name = gift.name, brand = gift.brand, endDt = gift.endDt, addDt = gift.addDt, memo = gift.memo, usedDt = gift.usedDt)
+        }
 }

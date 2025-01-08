@@ -1,23 +1,21 @@
 package com.example.giftbox.data.local
 
-import com.example.giftbox.BrandsDao
-import com.example.giftbox.BrandsEntity
-import com.example.giftbox.model.Brands
+import com.example.giftbox.BrandDao
+import com.example.giftbox.BrandEntity
 import com.example.giftbox.model.Document
-import com.google.firebase.firestore.proto.NoDocument
 import javax.inject.Inject
 
 class BrandDataSource @Inject constructor(
-    private val brandsDao: BrandsDao
+    private val brandDao: BrandDao
 ) {
 
     fun insertBrands(keyword: String, documents: List<Document>) {
-        val item = BrandsEntity(keyword, documents)
-        brandsDao.insertBrands(item)
+        val item = BrandEntity(keyword, documents)
+        brandDao.insertBrands(item)
     }
 
-    fun getAllBrands() = brandsDao.getAllBrands()
+    fun getAllBrands() = brandDao.getAllBrands()
 
-    fun deleteAllBrands() = brandsDao.deleteAllBrands()
+    fun deleteAllBrands() = brandDao.deleteAllBrands()
 
 }

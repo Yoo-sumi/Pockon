@@ -69,9 +69,18 @@ android {
         sourceCompatibility = JavaVersion.VERSION_1_8
         targetCompatibility = JavaVersion.VERSION_1_8
     }
+    dataBinding {
+        enable = true
+    }
 }
 
 dependencies {
+    // cardview
+    implementation("androidx.cardview:cardview:1.0.0")
+
+    // viewpager2
+    implementation("androidx.viewpager2:viewpager2:1.1.0")
+
     // room
     implementation("androidx.room:room-runtime:2.6.1")
     kapt("androidx.room:room-compiler:2.6.1")

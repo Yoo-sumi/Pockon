@@ -6,7 +6,7 @@ import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.giftbox.data.BrandsRepository
+import com.example.giftbox.data.BrandSearchRepository
 import com.example.giftbox.data.GiftRepository
 import com.example.giftbox.model.Document
 import com.example.giftbox.model.Gift
@@ -18,7 +18,7 @@ import javax.inject.Inject
 @HiltViewModel
 class HomeViewModel @Inject constructor(
     private val giftRepository: GiftRepository,
-    private val brandsRepository: BrandsRepository,
+    private val brandSearchRepository: BrandSearchRepository,
     private val sharedPref: SharedPreferences
 ) : ViewModel() {
 
@@ -33,6 +33,12 @@ class HomeViewModel @Inject constructor(
         giftRepository.getAllGift(uid) { giftList ->
             if (giftList.isNotEmpty()) {
                 this.giftList = giftList
+                // 로컬 저장
+                viewModelScope.launch(Dispatchers.IO) {
+                    giftList.forEach { gift ->
+                        giftRepository.insertGift(gift)
+                    }
+                }
                 getBrandInfoList(location)
             } else {
                 this.giftList = listOf()
@@ -48,7 +54,7 @@ class HomeViewModel @Inject constructor(
         giftList.forEach {
             if (!brandNames.contains(it.brand)) brandNames.add(it.brand)
         }
-        if (brandNames.isNotEmpty()) brandsRepository.searchBrandInfoList(location, brandNames) { keywords, brands ->
+        if (brandNames.isNotEmpty()) brandSearchRepository.searchBrandInfoList(location, brandNames) { keywords, brands ->
             brands.forEachIndexed { index, brand ->
                 val sortedList = brand?.documents?.sortedBy { Integer.parseInt(it.distance) }
                 sortedList?.forEach { document ->
@@ -70,7 +76,7 @@ class HomeViewModel @Inject constructor(
             viewModelScope.launch(Dispatchers.IO) {
                 for (k in 0..keywords.lastIndex) {
                     brands[k]?.let { brand ->
-                        brandsRepository.insertBrands(keywords[k], brand.documents) // 브랜드별 위치정보 저장
+                        brandSearchRepository.insertBrands(keywords[k], brand.documents) // 브랜드별 위치정보 저장
                     }
                 }
             }
