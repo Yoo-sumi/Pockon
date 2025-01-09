@@ -1,5 +1,6 @@
 package com.example.giftbox.ui.map
 
+import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
@@ -28,6 +29,8 @@ class MapViewModel @Inject constructor(
 
     private var documentList: List<List<Document>> = listOf()
 
+    private var brandInfoList: Map<Document, ArrayList<String>> = mapOf()
+
     fun getAllBrands() {
         // 로컬 가져오기
         viewModelScope.launch(Dispatchers.IO) {
@@ -45,6 +48,27 @@ class MapViewModel @Inject constructor(
         }
     }
 
+    fun mappingInfo() {
+        val infoList = mutableMapOf<Document, ArrayList<String>>()
+        documentList.forEachIndexed { index, document ->
+            Log.d("정보정보", "키워드> ${_keywordList.value?.get(index)}")
+            document.forEach {
+                if (infoList.keys.contains(it)) infoList[it]?.add(_keywordList.value?.get(index) ?: "")
+                else infoList[it] = arrayListOf(_keywordList.value?.get(index) ?: "")
+
+                Log.d("정보정보", "${it.id} / ${it.placeName} / ${it.x}/ ${it.y}/ ${it.distance}")
+            }
+        }
+
+        infoList.keys.forEach { key ->
+            val aa = infoList[key]
+            Log.d("정보정보2", "${key.id} / ${key.placeName} / ${key.x}/ ${key.y}/ ${key.distance}")
+            aa?.forEach { k ->
+                Log.d("정보정보2", "키워드> ${k}")
+
+            }
+        }
+    }
 
     fun getDocumentList() = documentList
 }

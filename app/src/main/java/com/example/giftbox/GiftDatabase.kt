@@ -35,7 +35,7 @@ interface GiftDao {
 
 @Entity
 data class GiftEntity(
-    val document: String = "",
+    @PrimaryKey val document: String = "",
     val uid: String = "",
     val photo: String = "",
     val name: String = "",
@@ -44,7 +44,4 @@ data class GiftEntity(
     val addDt: String = "",
     val memo: String = "",
     val usedDt: String = ""
-) {
-    @PrimaryKey(autoGenerate = true)
-    var id: Long = 0
-}
+)

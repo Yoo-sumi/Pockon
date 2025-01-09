@@ -8,7 +8,6 @@ import android.widget.ImageView
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import coil.load
-import coil.transform.RoundedCornersTransformation
 import com.example.giftbox.R
 import com.example.giftbox.model.Gift
 import java.text.SimpleDateFormat
@@ -36,9 +35,7 @@ class GiftItemAdapter (
         holder.name.text = item.name
         holder.endDt.text = item.endDt
         holder.dDay.text = "D${getDday(item.endDt)}"
-        holder.photo.load(item.photo) {
-            transformations(RoundedCornersTransformation())
-        }
+        holder.photo.load(item.photo)
     }
 
     inner class GiftItemAdapterViewHolder(view: View) : RecyclerView.ViewHolder(view) {

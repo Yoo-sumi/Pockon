@@ -8,7 +8,6 @@ import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.recyclerview.widget.RecyclerView
-import androidx.viewpager2.widget.ViewPager2
 import com.example.giftbox.databinding.FragmentMapBinding
 import com.naver.maps.geometry.LatLng
 import com.naver.maps.map.LocationTrackingMode
@@ -36,6 +35,7 @@ class MapFragment : Fragment(), OnMapReadyCallback {
         locationSource = FusedLocationSource(this, LOCATION_PERMISSION_REQUEST_CODE)
 
         mapViewModel.keywordList.observe(viewLifecycleOwner) {
+            mapViewModel.mappingInfo()
             val documentList = mapViewModel.getDocumentList()
             documentList.forEach { documents ->
                 documents.forEach { document ->

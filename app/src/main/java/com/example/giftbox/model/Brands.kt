@@ -7,6 +7,7 @@ data class Brands(
 )
 
 data class Document(
+    var id: String = "",
     @SerializedName("place_name")
     var placeName: String = "",
     var distance: String = "",
