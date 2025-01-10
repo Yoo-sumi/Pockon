@@ -6,6 +6,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.TextView
+import androidx.core.content.ContextCompat.getString
 import androidx.recyclerview.widget.RecyclerView
 import coil.load
 import com.example.giftbox.R
@@ -33,8 +34,8 @@ class GiftItemAdapter (
         val item = gifts[position]
         holder.brand.text = item.brand
         holder.name.text = item.name
-        holder.endDt.text = item.endDt
-        holder.dDay.text = "D${getDday(item.endDt)}"
+        holder.endDt.text = context.getString(R.string.format_end_date, formatString(item.endDt))
+        holder.dDay.text = context.getString(R.string.format_d_day, getDday(item.endDt))
         holder.photo.load(item.photo)
     }
 
@@ -64,5 +65,11 @@ class GiftItemAdapter (
             }
         }
         return ""
+    }
+
+    private fun formatString(endDate: String): String {
+        return endDate.mapIndexed { index, c ->
+            if (index == 3 || index == 5) "${c}." else c
+        }.joinToString("")
     }
 }
