@@ -15,7 +15,7 @@ class GiftDataSource @Inject constructor(
         val document = firestore
             .collection("gift")
             .document()
-        gift.document = document.id
+        gift.id = document.id
         document
             .set(gift)
             .addOnCompleteListener { task ->
@@ -58,7 +58,7 @@ class GiftDataSource @Inject constructor(
         return callbackFlow {
             firestore
                 .collection("gift")
-                .document(gift.document)
+                .document(gift.id)
                 .set(gift)
                 .addOnCompleteListener { task ->
                     trySend(task.isSuccessful)

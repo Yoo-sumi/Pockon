@@ -24,7 +24,6 @@ class HomeViewModel @Inject constructor(
 
     private var uid = sharedPref.getString("uid", "") ?: ""
     private var giftList:List<Gift> = listOf()
-    private var brandMappingList: Map<String, List<Document>> = mapOf()
 
     private val _displayGiftList = mutableStateOf<List<Pair<Gift, Document>>>(listOf())
     val displayGiftList: State<List<Pair<Gift, Document>>> = _displayGiftList
@@ -35,6 +34,7 @@ class HomeViewModel @Inject constructor(
                 this.giftList = giftList
                 // 로컬 저장
                 viewModelScope.launch(Dispatchers.IO) {
+                    giftRepository.deleteAllGift()
                     giftList.forEach { gift ->
                         giftRepository.insertGift(gift)
                     }
@@ -47,37 +47,28 @@ class HomeViewModel @Inject constructor(
     }
 
     private fun getBrandInfoList(location: Location?) {
-        val mappingList: MutableMap<String, ArrayList<Document>> = mutableMapOf()
         val allList: ArrayList<Pair<Gift, Document>> = arrayListOf()
 
         val brandNames = ArrayList<String>()
         giftList.forEach {
             if (!brandNames.contains(it.brand)) brandNames.add(it.brand)
         }
-        if (brandNames.isNotEmpty()) brandSearchRepository.searchBrandInfoList(location, brandNames) { keywords, brands ->
-            brands.forEachIndexed { index, brand ->
-                val sortedList = brand?.documents?.sortedBy { Integer.parseInt(it.distance) }
-                sortedList?.forEach { document ->
-                    if (mappingList.keys.contains(keywords[index])) mappingList[keywords[index]]?.add(document)
-                    else mappingList[keywords[index]] = arrayListOf(document)
-                }
-            }
-            brandMappingList = mappingList
+        if (brandNames.isNotEmpty()) brandSearchRepository.searchBrandInfoList(location, brandNames) { brandInfoList ->
             giftList.forEach { gift ->
-                // 가장 가까운 첫번째 위치만 보여준다
-                brandMappingList[gift.brand]?.get(0)?.let { doc ->
-                    allList.add(Pair(gift, doc))
+                // 가장 가까운 첫번째 위치만 보여준다(여러개의 스타벅스 중 가장 가까이 있는 한 곳)
+                brandInfoList[gift.brand]?.sortedBy { Integer.parseInt(it.distance) }?.get(0).let { doc ->
+                    // gift, doc
+                    if (doc != null) allList.add(Pair(gift, doc))
                 }
             }
+            // 거리순으로 정렬(스타벅스, 투썸..)
             allList.sortBy { it.second.distance }
             _displayGiftList.value = allList
 
             // 로컬 저장
             viewModelScope.launch(Dispatchers.IO) {
-                for (k in 0..keywords.lastIndex) {
-                    brands[k]?.let { brand ->
-                        brandSearchRepository.insertBrands(keywords[k], brand.documents) // 브랜드별 위치정보 저장
-                    }
+                brandInfoList.forEach { keyword, documents ->
+                    if (documents != null) brandSearchRepository.insertBrands(keyword, documents) // 키워드별 브랜드 위치정보 저장
                 }
             }
         }

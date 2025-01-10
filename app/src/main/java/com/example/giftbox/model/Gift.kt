@@ -1,7 +1,7 @@
 package com.example.giftbox.model
 
 data class Gift(
-    var document: String = "",
+    var id: String = "",
     val uid: String = "",
     val photo: String = "",
     val name: String = "",

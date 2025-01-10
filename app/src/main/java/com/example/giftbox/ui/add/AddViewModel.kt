@@ -1,7 +1,6 @@
 package com.example.giftbox.ui.add
 
 import android.content.SharedPreferences
-import android.graphics.Bitmap
 import android.net.Uri
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
@@ -10,8 +9,6 @@ import androidx.lifecycle.viewModelScope
 import com.example.giftbox.model.Gift
 import com.example.giftbox.data.GiftRepository
 import com.example.giftbox.R
-import com.example.giftbox.ui.utils.bitmapToString
-import com.example.giftbox.ui.utils.stringTobitmap
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
@@ -44,9 +41,9 @@ class AddViewModel @Inject constructor(
         getGift()
     }
 
-    private fun getGift(document: String? = null) {
-        if (document == null) return
-        giftRepository.getGift(uid, document) { gift ->
+    private fun getGift(id: String? = null) {
+        if (id == null) return
+        giftRepository.getGift(uid, id) { gift ->
             gift?.let {
                 _name.value = it.name
                 _brand.value = it.brand

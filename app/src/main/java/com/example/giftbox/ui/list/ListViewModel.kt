@@ -160,7 +160,7 @@ class ListViewModel @Inject constructor(
             ).format(Date(System.currentTimeMillis()))
             giftRepository.updateGift(gift.copy(usedDt = nowDt)).collect { result ->
                 _giftList.value = _giftList.value.filter {
-                    it.document != gift.document
+                    it.id != gift.id
                 }
                 _copyGiftList.value = _giftList.value
                 sortChips()
@@ -179,9 +179,9 @@ class ListViewModel @Inject constructor(
     fun removeGift() {
         if (removeGift ==  null) return
         viewModelScope.launch {
-            giftRepository.removeGift(removeGift!!.document).collect {
+            giftRepository.removeGift(removeGift!!.id).collect {
                 _giftList.value = _giftList.value.filter {
-                    it.document != removeGift?.document
+                    it.id != removeGift?.id
                 }
                 _copyGiftList.value = _giftList.value
                 sortChips()

@@ -20,55 +20,58 @@ class MapViewModel @Inject constructor(
     private val giftRepository: GiftRepository
 ) : ViewModel() {
 
+    private val _displayInfoList = MutableLiveData<ArrayList<Pair<Document, List<Gift>>>>()
+    val displayInfoList: LiveData<ArrayList<Pair<Document, List<Gift>>>> = _displayInfoList
 
-    private val _giftList = MutableLiveData<List<Gift>>()
-    val giftList: LiveData<List<Gift>> = _giftList
-
-    private val _keywordList = MutableLiveData<List<String>>()
-    val keywordList: LiveData<List<String>> = _keywordList
-
-    private var documentList: List<List<Document>> = listOf()
-
-    private var brandInfoList: Map<Document, ArrayList<String>> = mapOf()
-
-    fun getAllBrands() {
-        // 로컬 가져오기
-        viewModelScope.launch(Dispatchers.IO) {
-            val brands = brandSearchRepository.getAllBrands()
-            _keywordList.postValue(brands.first)
-            documentList = brands.second
-        }
-    }
+    private var giftList = listOf<Gift>()
+    private var brandInfoList = mutableMapOf<String, List<Document>>()
+    private var nearestDoc: Document? = null
 
     fun getAllGift() {
+        // 기프티콘 정보 가져오기(로컬)
+        viewModelScope.launch(Dispatchers.IO) {
+            giftList = giftRepository.getAllGift()
+            getAllBrands() // 키워드별 브랜드 위치 정보 가져오기(로컬)
+        }
+    }
+
+    private fun getAllBrands() {
         // 로컬 가져오기
         viewModelScope.launch(Dispatchers.IO) {
-            val giftList = giftRepository.getAllGift()
-            _giftList.postValue(giftList)
+            // keyword, documents
+            brandInfoList = brandSearchRepository.getAllBrands()
+            mappingInfo()
         }
     }
 
-    fun mappingInfo() {
-        val infoList = mutableMapOf<Document, ArrayList<String>>()
-        documentList.forEachIndexed { index, document ->
-            Log.d("정보정보", "키워드> ${_keywordList.value?.get(index)}")
-            document.forEach {
-                if (infoList.keys.contains(it)) infoList[it]?.add(_keywordList.value?.get(index) ?: "")
-                else infoList[it] = arrayListOf(_keywordList.value?.get(index) ?: "")
+    // 브랜드별 사용 가능 기프티콘 매핑하기
+    private fun mappingInfo() {
+        val mappingList = mutableMapOf<Document, MutableSet<String>>()
+        nearestDoc = null
 
-                Log.d("정보정보", "${it.id} / ${it.placeName} / ${it.x}/ ${it.y}/ ${it.distance}")
+        // keyword, documents
+        brandInfoList = brandSearchRepository.getAllBrands()
+
+        brandInfoList.forEach { (keyword, documents) ->
+            documents.forEach { document ->
+                // 가장 가까운곳 뽑아내기
+                if (nearestDoc == null) nearestDoc = document
+                else if (nearestDoc!!.distance.toDouble() > document.distance.toDouble()) nearestDoc = document
+
+                if (mappingList.keys.contains(document)) mappingList[document]?.add(keyword)
+                else mappingList[document] = mutableSetOf(keyword)
             }
         }
 
-        infoList.keys.forEach { key ->
-            val aa = infoList[key]
-            Log.d("정보정보2", "${key.id} / ${key.placeName} / ${key.x}/ ${key.y}/ ${key.distance}")
-            aa?.forEach { k ->
-                Log.d("정보정보2", "키워드> ${k}")
-
-            }
+        val markerInGiftList = ArrayList<Pair<Document, List<Gift>>>()
+        mappingList.forEach { (document, keywordList) ->
+            val filterGiftList = giftList.filter { keywordList.contains(it.brand) }
+            markerInGiftList.add(Pair(document, filterGiftList))
         }
+
+        _displayInfoList.postValue(markerInGiftList)
     }
 
-    fun getDocumentList() = documentList
+    fun getNearestDoc() = this.nearestDoc
+
 }

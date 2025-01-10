@@ -11,15 +11,13 @@ class BrandSearchRepository @Inject constructor(
     private val brandSearchDataSource: BrandSearchDataSource,
     private val brandDataSource: BrandDataSource
 ) {
-    fun searchBrandInfoList(location: Location?, brandNames: ArrayList<String>, onComplete: (ArrayList<String>, ArrayList<Brands?>) -> Unit) {
-        val brandList = ArrayList<Brands?>()
-        val keywordList = ArrayList<String>()
+    fun searchBrandInfoList(location: Location?, brandNames: ArrayList<String>, onComplete: (MutableMap<String, List<Document>?>) -> Unit) {
+        val brandInfoList = mutableMapOf<String, List<Document>?>()
         brandNames.forEachIndexed { i, a ->
             brandSearchDataSource.getBrandInfo(location, a) { keyword, brand ->
-                brandList.add(brand)
-                keywordList.add(keyword)
-                if (brandList.size == brandNames.size) {
-                    onComplete(keywordList, brandList)
+                brandInfoList[keyword] = brand?.documents
+                if (brandInfoList.size == brandNames.size) {
+                    onComplete(brandInfoList)
                 }
             }
         }
@@ -29,13 +27,11 @@ class BrandSearchRepository @Inject constructor(
         brandDataSource.insertBrands(keyword, documents)
     }
 
-    fun getAllBrands(): Pair<ArrayList<String>, ArrayList<List<Document>>> {
-        val keywordList = ArrayList<String>()
-        val documentList = ArrayList<List<Document>>()
+    fun getAllBrands(): MutableMap<String, List<Document>> {
+        val brandInfoList = mutableMapOf<String, List<Document>>()
         brandDataSource.getAllBrands().forEach {
-            keywordList.add(it.keyword)
-            documentList.add(it.documents)
+            brandInfoList[it.keyword] = it.documents
         }
-        return Pair(keywordList, documentList)
+        return brandInfoList
     }
 }

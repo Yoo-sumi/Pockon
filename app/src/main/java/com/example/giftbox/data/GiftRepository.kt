@@ -2,11 +2,9 @@ package com.example.giftbox.data
 
 import android.net.Uri
 import com.example.giftbox.GiftEntity
-import com.example.giftbox.data.local.BrandDataSource
 import com.example.giftbox.data.local.GiftLocalDataSource
 import com.example.giftbox.data.remote.GiftDataSource
 import com.example.giftbox.data.remote.GiftPhotoDataSource
-import com.example.giftbox.model.Document
 import com.example.giftbox.model.Gift
 import kotlinx.coroutines.flow.Flow
 import javax.inject.Inject
@@ -17,16 +15,16 @@ class GiftRepository @Inject constructor(
     private val giftLocalDataSource: GiftLocalDataSource
 ) {
     fun addGift(gift: Gift, photo: Uri, onComplete: (Boolean) -> Unit) {
-        giftDataSource.uploadData(gift) { document ->
-            giftPhotoDataSource.uploadData(photo, gift.uid, document) {
+        giftDataSource.uploadData(gift) { id ->
+            giftPhotoDataSource.uploadData(photo, gift.uid, id) {
                 onComplete(it)
             }
         }
     }
 
-    fun getGift(uid: String, document:String, onComplete: (Gift?) -> Unit) {
-        giftDataSource.loadData(document) { gift ->
-            giftPhotoDataSource.downloadData(uid, document) { uri ->
+    fun getGift(uid: String, id:String, onComplete: (Gift?) -> Unit) {
+        giftDataSource.loadData(id) { gift ->
+            giftPhotoDataSource.downloadData(uid, id) { uri ->
                 onComplete(gift?.copy(photo = uri.toString()))
             }
         }
@@ -37,7 +35,7 @@ class GiftRepository @Inject constructor(
         giftDataSource.loadAllData(uid) { gifts ->
             if (gifts.isEmpty()) onComplete(giftList)
             gifts.forEachIndexed { idx, gift ->
-                giftPhotoDataSource.downloadData(gift.uid, gift.document) { uri ->
+                giftPhotoDataSource.downloadData(gift.uid, gift.id) { uri ->
                     giftList.add(gift.copy(photo = uri.toString()))
                     if (gifts.size == giftList.size) {
                         onComplete(giftList)
@@ -56,11 +54,13 @@ class GiftRepository @Inject constructor(
     }
 
     fun insertGift(gift: Gift) {
-        val giftEntity = GiftEntity(document = gift.document, uid = gift.uid, photo = gift.photo, name = gift.name, brand = gift.brand, endDt = gift.endDt, addDt = gift.addDt, memo = gift.memo, usedDt = gift.usedDt)
+        val giftEntity = GiftEntity(document = gift.id, uid = gift.uid, photo = gift.photo, name = gift.name, brand = gift.brand, endDt = gift.endDt, addDt = gift.addDt, memo = gift.memo, usedDt = gift.usedDt)
         giftLocalDataSource.insertGift(giftEntity)
     }
 
     fun getAllGift() = giftLocalDataSource.getAllGift().map { gift ->
-            Gift(document = gift.document, uid = gift.uid, photo = gift.photo, name = gift.name, brand = gift.brand, endDt = gift.endDt, addDt = gift.addDt, memo = gift.memo, usedDt = gift.usedDt)
+            Gift(id = gift.document, uid = gift.uid, photo = gift.photo, name = gift.name, brand = gift.brand, endDt = gift.endDt, addDt = gift.addDt, memo = gift.memo, usedDt = gift.usedDt)
         }
+
+    fun deleteAllGift() = giftLocalDataSource.deleteAllGift()
 }
