@@ -41,7 +41,7 @@ class HomeViewModel @Inject constructor(
                     }
                     getBrandInfoList() // 브랜드 검색
                 } else {
-                    giftList = listOf()
+                    _displayGiftList.value = listOf()
                 }
             }
         }
