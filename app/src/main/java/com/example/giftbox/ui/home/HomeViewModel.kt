@@ -12,6 +12,7 @@ import com.example.giftbox.model.Document
 import com.example.giftbox.model.Gift
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -27,26 +28,27 @@ class HomeViewModel @Inject constructor(
 
     private val _displayGiftList = mutableStateOf<List<Pair<Gift, Document>>>(listOf())
     val displayGiftList: State<List<Pair<Gift, Document>>> = _displayGiftList
-    
-    fun getGiftList(location: Location?) {
-        giftRepository.getAllGift(uid) { giftList ->
-            if (giftList.isNotEmpty()) {
-                this.giftList = giftList
-                // 로컬 저장
-                viewModelScope.launch(Dispatchers.IO) {
-                    giftRepository.deleteAllGift()
-                    giftList.forEach { gift ->
-                        giftRepository.insertGift(gift)
+
+    private var location: Location? = null
+
+    // 로컬 기프티콘 목록 변화 감지해서 가져오기
+    fun observeGiftList() {
+        viewModelScope.launch(Dispatchers.IO) {
+            giftRepository.getAllGift().collectLatest { allGift ->
+                if (allGift.isNotEmpty()) {
+                    giftList = allGift.map { gift ->
+                        Gift(id = gift.id, uid = gift.uid, photo = gift.photo, name = gift.name, brand = gift.brand, endDt = gift.endDt, addDt = gift.addDt, memo = gift.memo, usedDt = gift.usedDt)
                     }
+                    getBrandInfoList() // 브랜드 검색
+                } else {
+                    giftList = listOf()
                 }
-                getBrandInfoList(location)
-            } else {
-                this.giftList = listOf()
             }
         }
     }
 
-    private fun getBrandInfoList(location: Location?) {
+    // 브랜드 검색 후 로컬에 저장
+    fun getBrandInfoList() {
         val allList: ArrayList<Pair<Gift, Document>> = arrayListOf()
 
         val brandNames = ArrayList<String>()
@@ -56,6 +58,7 @@ class HomeViewModel @Inject constructor(
         if (brandNames.isNotEmpty()) brandSearchRepository.searchBrandInfoList(location, brandNames) { brandInfoList ->
             giftList.forEach { gift ->
                 // 가장 가까운 첫번째 위치만 보여준다(여러개의 스타벅스 중 가장 가까이 있는 한 곳)
+                if (brandInfoList[gift.brand]?.isEmpty() == true) return@forEach // 검색 결과가 없는 경우 스킵
                 brandInfoList[gift.brand]?.sortedBy { Integer.parseInt(it.distance) }?.get(0).let { doc ->
                     // gift, doc
                     if (doc != null) allList.add(Pair(gift, doc))
@@ -67,7 +70,8 @@ class HomeViewModel @Inject constructor(
 
             // 로컬 저장
             viewModelScope.launch(Dispatchers.IO) {
-                brandInfoList.forEach { keyword, documents ->
+                brandSearchRepository.deleteAllBrands()
+                brandInfoList.forEach { (keyword, documents) ->
                     if (documents != null) brandSearchRepository.insertBrands(keyword, documents) // 키워드별 브랜드 위치정보 저장
                 }
             }
@@ -78,5 +82,9 @@ class HomeViewModel @Inject constructor(
         return endDate.mapIndexed { index, c ->
             if (index == 3 || index == 5) "${c}." else c
         }.joinToString("")
+    }
+
+    fun setLocation(location: Location?) {
+        this.location = location
     }
 }

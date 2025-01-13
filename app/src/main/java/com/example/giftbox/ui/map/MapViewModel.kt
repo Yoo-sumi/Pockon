@@ -1,8 +1,7 @@
 package com.example.giftbox.ui.map
 
-import android.util.Log
-import androidx.lifecycle.LiveData
-import androidx.lifecycle.MutableLiveData
+import androidx.compose.runtime.State
+import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.giftbox.data.BrandSearchRepository
@@ -11,6 +10,8 @@ import com.example.giftbox.model.Document
 import com.example.giftbox.model.Gift
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.take
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -20,18 +21,34 @@ class MapViewModel @Inject constructor(
     private val giftRepository: GiftRepository
 ) : ViewModel() {
 
-    private val _displayInfoList = MutableLiveData<ArrayList<Pair<Document, List<Gift>>>>()
-    val displayInfoList: LiveData<ArrayList<Pair<Document, List<Gift>>>> = _displayInfoList
+    private val _displayInfoList = mutableStateOf<List<Pair<Document, List<Gift>>>>(listOf())
+    val displayInfoList: State<List<Pair<Document, List<Gift>>>> = _displayInfoList
+
+    private val _selectedGift = mutableStateOf<Gift?>(null)
+    val selectedGift: State<Gift?> = _selectedGift
 
     private var giftList = listOf<Gift>()
     private var brandInfoList = mutableMapOf<String, List<Document>>()
     private var nearestDoc: Document? = null
 
-    fun getAllGift() {
-        // 기프티콘 정보 가져오기(로컬)
+    init {
+        observeGiftList()
+    }
+
+    // 로컬 기프티콘 목록 변화 감지해서 가져오기
+    private fun observeGiftList() {
         viewModelScope.launch(Dispatchers.IO) {
-            giftList = giftRepository.getAllGift()
-            getAllBrands() // 키워드별 브랜드 위치 정보 가져오기(로컬)
+            giftRepository.getAllGift().take(1).collectLatest { allGift -> // 지도에서는 실시간 갱신 안함 > 1로제한
+                if (allGift.isNotEmpty()) {
+                    giftList =  allGift.map { gift ->
+                        Gift(id = gift.id, uid = gift.uid, photo = gift.photo, name = gift.name, brand = gift.brand, endDt = gift.endDt, addDt = gift.addDt, memo = gift.memo, usedDt = gift.usedDt)
+                    }
+                    getAllBrands() // 키워드별 브랜드 위치 정보 가져오기(로컬)
+                } else {
+                    // 기프티콘 없음
+                    TODO()
+                }
+            }
         }
     }
 
@@ -69,9 +86,13 @@ class MapViewModel @Inject constructor(
             markerInGiftList.add(Pair(document, filterGiftList))
         }
 
-        _displayInfoList.postValue(markerInGiftList)
+        _displayInfoList.value = markerInGiftList
     }
 
     fun getNearestDoc() = this.nearestDoc
+
+    fun setSelectedGift(gift: Gift?) {
+        _selectedGift.value = gift
+    }
 
 }

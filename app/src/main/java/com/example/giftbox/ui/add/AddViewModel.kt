@@ -57,7 +57,7 @@ class AddViewModel @Inject constructor(
     fun setGift(index: Int, value: String) {
         when (index) {
             0 -> _name.value = value
-            1 -> _brand.value = value
+            1 -> _brand.value = value.trim()
             2 -> _endDate.value = value
             3 -> _memo.value = value
         }

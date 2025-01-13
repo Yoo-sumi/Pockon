@@ -53,14 +53,15 @@ class GiftRepository @Inject constructor(
         return giftDataSource.deleteData(document)
     }
 
+    /* 로컬 */
     fun insertGift(gift: Gift) {
-        val giftEntity = GiftEntity(document = gift.id, uid = gift.uid, photo = gift.photo, name = gift.name, brand = gift.brand, endDt = gift.endDt, addDt = gift.addDt, memo = gift.memo, usedDt = gift.usedDt)
+        val giftEntity = GiftEntity(id = gift.id, uid = gift.uid, photo = gift.photo, name = gift.name, brand = gift.brand, endDt = gift.endDt, addDt = gift.addDt, memo = gift.memo, usedDt = gift.usedDt)
         giftLocalDataSource.insertGift(giftEntity)
     }
 
-    fun getAllGift() = giftLocalDataSource.getAllGift().map { gift ->
-            Gift(id = gift.document, uid = gift.uid, photo = gift.photo, name = gift.name, brand = gift.brand, endDt = gift.endDt, addDt = gift.addDt, memo = gift.memo, usedDt = gift.usedDt)
-        }
+    fun getAllGift() = giftLocalDataSource.getAllGift()
+
+    fun deleteGift(id: String) = giftLocalDataSource.deleteGift(id)
 
     fun deleteAllGift() = giftLocalDataSource.deleteAllGift()
 }

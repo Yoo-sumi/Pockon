@@ -61,7 +61,8 @@ fun HomeScreen(onAdd: () -> Unit, showMap: () -> Unit, onDetail: (Gift) -> Unit)
         LocationServices.getFusedLocationProviderClient(context)
     }
     getLocation(fusedLocationClient) {
-        homeViewModel.getGiftList(it)
+        homeViewModel.setLocation(it) // 위치 가져온 다음
+        homeViewModel.observeGiftList() // 기프티콘 불러오기
     }
 
     Scaffold(
@@ -103,7 +104,8 @@ fun HomeScreen(onAdd: () -> Unit, showMap: () -> Unit, onDetail: (Gift) -> Unit)
                     ) {
                         IconButton(onClick = {
                             getLocation(fusedLocationClient) {
-                                homeViewModel.getGiftList(it)
+                                homeViewModel.setLocation(it)
+                                homeViewModel.getBrandInfoList() // 위치 동기화 후 브랜드만 재검색
                             }
                         }) {
                             Icon(

@@ -265,11 +265,8 @@ fun BottomNavigationBar(onLogout: () -> Unit) {
             ) { navBackStackEntry ->
                 val giftJson = navBackStackEntry.arguments?.getString("gift")
                 val gift = Gson().fromJson(giftJson, Gift::class.java)
-                DetailScreen(gift) { detailGift ->
+                DetailScreen(gift) {
                     navController.popBackStack()
-                    if (detailGift != gift) {
-                        listViewModel.getGiftList()
-                    }
                 }
             }
             composable(Screen.Map.route) {

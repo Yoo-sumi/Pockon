@@ -66,7 +66,7 @@ import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun DetailScreen(gift: Gift, onBack: (Gift) -> Unit) {
+fun DetailScreen(gift: Gift, onBack: () -> Unit) {
     val detailViewModel = hiltViewModel<DetailViewModel>()
     detailViewModel.setGift(gift)
 
@@ -87,7 +87,7 @@ fun DetailScreen(gift: Gift, onBack: (Gift) -> Unit) {
     val scope = rememberCoroutineScope()
 
     BackHandler {
-        onBack(detailViewModel.gift.value)
+        onBack()
     }
 
     Scaffold(
@@ -101,7 +101,7 @@ fun DetailScreen(gift: Gift, onBack: (Gift) -> Unit) {
                 },
                 navigationIcon = {
                     IconButton(onClick = {
-                        onBack(detailViewModel.gift.value)
+                        onBack()
                     }) {
                         Icon(
                             imageVector = Icons.AutoMirrored.Filled.ArrowBack

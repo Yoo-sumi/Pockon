@@ -10,6 +10,8 @@ import androidx.lifecycle.viewModelScope
 import com.example.giftbox.model.Gift
 import com.example.giftbox.data.GiftRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
 import java.time.LocalDateTime
@@ -32,8 +34,7 @@ class ListViewModel @Inject constructor(
     private val _copyGiftList = mutableStateOf<List<Gift>>(listOf())
     val copyGiftList: State<List<Gift>> = _copyGiftList
 
-    private val _filterList = mutableStateOf(listOf<String>())
-    val filterList: State<List<String>> = _filterList
+    private var filterList = listOf<String>()
 
     private var _chipElement = mutableStateOf<Map<String, Boolean>?>(null)
     val chipElement: State<Map<String, Boolean>?> = _chipElement
@@ -42,6 +43,7 @@ class ListViewModel @Inject constructor(
     val topTitle: State<Int> = _topTitle
 
     init {
+        observeGiftList() // 관찰자 등록
         getGiftList()
     }
 
@@ -49,17 +51,41 @@ class ListViewModel @Inject constructor(
         _topTitle.intValue = title
     }
 
+    // 로컬 기프티콘 목록 변화 감지해서 가져오기
+    private fun observeGiftList() {
+        viewModelScope.launch(Dispatchers.IO) {
+            giftRepository.getAllGift().collectLatest { allGift ->
+                if (allGift.isNotEmpty()) {
+                    _giftList.value = allGift.map { gift ->
+                        Gift(id = gift.id, uid = gift.uid, photo = gift.photo, name = gift.name, brand = gift.brand, endDt = gift.endDt, addDt = gift.addDt, memo = gift.memo, usedDt = gift.usedDt)
+                    }
+                    _copyGiftList.value = _giftList.value
+                    sortChips()
+                    orderBy()
+                } else {
+                    _giftList.value = listOf()
+                    _copyGiftList.value = listOf()
+                    filterList = listOf()
+                }
+            }
+        }
+    }
+
+    // 서버에서 기프티콘 리스트 가져오기
     fun getGiftList() {
         giftRepository.getAllGift(uid) { giftList ->
             if (giftList.isNotEmpty()) {
-                _giftList.value = giftList
-                _copyGiftList.value = _giftList.value
-                sortChips()
-                orderBy()
+                // 로컬 저장(기프티콘)
+                viewModelScope.launch(Dispatchers.IO) {
+                    giftRepository.deleteAllGift()
+                    giftList.forEach { gift ->
+                        giftRepository.insertGift(gift)
+                    }
+                }
             } else {
                 _giftList.value = listOf()
                 _copyGiftList.value = listOf()
-                _filterList.value = listOf()
+                filterList = listOf()
             }
         }
     }
@@ -125,7 +151,7 @@ class ListViewModel @Inject constructor(
         }
 
         _chipElement.value = beforeElements
-        _filterList.value = beforeFilters
+        filterList = beforeFilters
         filterList()
         orderBy()
     }
@@ -133,7 +159,7 @@ class ListViewModel @Inject constructor(
     private fun filterList() {
         val filtered = mutableListOf<Gift>()
         _giftList.value.forEach {
-            if (_filterList.value.contains(it.brand) || _filterList.value.isEmpty()) filtered.add(it)
+            if (filterList.contains(it.brand) || filterList.isEmpty()) filtered.add(it)
         }
         _copyGiftList.value = filtered
     }
@@ -152,47 +178,46 @@ class ListViewModel @Inject constructor(
         }
     }
 
+    // 기프티콘 수정
     fun usedGift(gift: Gift) {
         viewModelScope.launch {
             val nowDt = SimpleDateFormat(
                 "yyyy.MM.dd",
                 Locale.getDefault()
             ).format(Date(System.currentTimeMillis()))
-            giftRepository.updateGift(gift.copy(usedDt = nowDt)).collect { result ->
-                _giftList.value = _giftList.value.filter {
-                    it.id != gift.id
-                }
-                _copyGiftList.value = _giftList.value
-                sortChips()
-
-                if (chipElement.value?.keys?.contains(gift.brand) == true) {
-                    changeChipState(_filterList.value)
-                } else if (_filterList.value.size == 1) {
-                    changeChipState(listOf(""))
-                } else {
-                    changeChipState(_filterList.value.filter { it != gift.brand })
+            val updateGift = gift.copy(usedDt = nowDt)
+            giftRepository.updateGift(updateGift).collect { result ->
+                // 수정 성공
+                if (result) {
+                    // 로컬 수정
+                    viewModelScope.launch(Dispatchers.IO) {
+                        giftRepository.insertGift(updateGift)
+                    }
+                } else { // 수정 실패
+                    // 네트워크가 불안정합니다. 인터넷 연결을 확인해주세요.
+                    TODO()
                 }
             }
         }
     }
 
+    // 기프티콘 삭제
     fun removeGift() {
         if (removeGift ==  null) return
+        if (removeGift?.id?.isEmpty() == true) return
+        val id = removeGift!!.id
+        removeGift = null
         viewModelScope.launch {
-            giftRepository.removeGift(removeGift!!.id).collect {
-                _giftList.value = _giftList.value.filter {
-                    it.id != removeGift?.id
+            giftRepository.removeGift(id).collect { result ->
+                if (result) {
+                    // 로컬 삭제
+                    viewModelScope.launch(Dispatchers.IO) {
+                        giftRepository.deleteGift(id)
+                    }
+                } else { // 삭제 실패
+                    // 네트워크가 불안정합니다. 인터넷 연결을 확인해주세요.
+                    TODO()
                 }
-                _copyGiftList.value = _giftList.value
-                sortChips()
-                if (chipElement.value?.keys?.contains(removeGift!!.brand) == true) {
-                    changeChipState(_filterList.value)
-                } else if (_filterList.value.size == 1) {
-                    changeChipState(listOf(""))
-                } else {
-                    changeChipState(_filterList.value.filter { it != removeGift!!.brand })
-                }
-                removeGift = null
             }
         }
     }

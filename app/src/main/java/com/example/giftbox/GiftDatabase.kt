@@ -9,7 +9,7 @@ import androidx.room.PrimaryKey
 import androidx.room.Query
 import androidx.room.RoomDatabase
 import androidx.room.TypeConverters
-import com.example.giftbox.model.Gift
+import kotlinx.coroutines.flow.Flow
 
 @Database(
     entities = [GiftEntity::class],
@@ -25,17 +25,20 @@ interface GiftDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     fun insertGift(item: GiftEntity)
 
-    @Query("SELECT * FROM GiftEntity")
-    fun getAllGift(): List<GiftEntity>
+    @Query("SELECT * FROM GiftEntity WHERE NULLIF(usedDt, '') IS NULL")
+    fun getAllGift(): Flow<List<GiftEntity>>
 
     @Query("DELETE FROM GiftEntity")
     fun deleteAllGift()
+
+    @Query("DELETE FROM GiftEntity WHERE id = :id")
+    fun deleteGift(id: String)
 
 }
 
 @Entity
 data class GiftEntity(
-    @PrimaryKey val document: String = "",
+    @PrimaryKey val id: String = "",
     val uid: String = "",
     val photo: String = "",
     val name: String = "",

@@ -3,13 +3,14 @@
     xmlns:app="http://schemas.android.com/apk/res-auto" >
 
     <androidx.cardview.widget.CardView
+        android:id="@+id/card_view"
         app:cardCornerRadius="10dp"
         android:layout_width="match_parent"
         android:layout_height="match_parent">
 
         <androidx.constraintlayout.widget.ConstraintLayout
             android:layout_width="match_parent"
-            android:layout_height="match_parent">
+            android:layout_height="120dp">
 
             <TextView
                 android:id="@+id/tv_d_day"

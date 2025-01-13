@@ -14,6 +14,8 @@ class GiftLocalDataSource @Inject constructor(
 
     fun getAllGift() = giftDao.getAllGift()
 
+    fun deleteGift(id: String) = giftDao.deleteGift(id)
+
     fun deleteAllGift() = giftDao.deleteAllGift()
 
 }

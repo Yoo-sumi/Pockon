@@ -6,7 +6,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.TextView
-import androidx.core.content.ContextCompat.getString
+import androidx.cardview.widget.CardView
 import androidx.recyclerview.widget.RecyclerView
 import coil.load
 import com.example.giftbox.R
@@ -18,7 +18,8 @@ import java.util.Locale
 
 class GiftItemAdapter (
     var gifts: List<Gift>,
-    var context: Context
+    var context: Context,
+    val onClick: (Gift) -> Unit
 ) : RecyclerView.Adapter<GiftItemAdapter.GiftItemAdapterViewHolder>() {
 
     override fun getItemCount(): Int {
@@ -37,6 +38,9 @@ class GiftItemAdapter (
         holder.endDt.text = context.getString(R.string.format_end_date, formatString(item.endDt))
         holder.dDay.text = context.getString(R.string.format_d_day, getDday(item.endDt))
         holder.photo.load(item.photo)
+        holder.cardView.setOnClickListener {
+            onClick(item) // 상세보기
+        }
     }
 
     inner class GiftItemAdapterViewHolder(view: View) : RecyclerView.ViewHolder(view) {
@@ -45,6 +49,7 @@ class GiftItemAdapter (
         val endDt: TextView = view.findViewById(R.id.tv_end_dt)
         val dDay: TextView = view.findViewById(R.id.tv_d_day)
         val photo: ImageView = view.findViewById(R.id.iv_photo)
+        val cardView: CardView = view.findViewById(R.id.card_view)
     }
 
     private fun getDday(endDate: String): String {

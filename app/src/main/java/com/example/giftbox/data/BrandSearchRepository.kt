@@ -3,7 +3,6 @@ package com.example.giftbox.data
 import android.location.Location
 import com.example.giftbox.data.local.BrandDataSource
 import com.example.giftbox.data.remote.BrandSearchDataSource
-import com.example.giftbox.model.Brands
 import com.example.giftbox.model.Document
 import javax.inject.Inject
 
@@ -33,5 +32,9 @@ class BrandSearchRepository @Inject constructor(
             brandInfoList[it.keyword] = it.documents
         }
         return brandInfoList
+    }
+
+    fun deleteAllBrands() {
+        brandDataSource.deleteAllBrands()
     }
 }

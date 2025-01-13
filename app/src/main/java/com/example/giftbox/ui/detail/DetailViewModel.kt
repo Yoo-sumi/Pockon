@@ -9,6 +9,7 @@ import com.example.giftbox.R
 import com.example.giftbox.data.GiftRepository
 import com.example.giftbox.model.Gift
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
 import java.util.Date
@@ -77,11 +78,19 @@ class DetailViewModel @Inject constructor(
                     Locale.getDefault()
                 ).format(Date(System.currentTimeMillis()))
             }
-            _gift.value = _gift.value.copy(usedDt = nowDt)
-            giftRepository.updateGift(_gift.value).collect { result ->
+            val gift = _gift.value.copy(usedDt = nowDt)
+            giftRepository.updateGift(gift).collect { result ->
                 if (result) {
+                    // 로컬 수정
+                    viewModelScope.launch(Dispatchers.IO) {
+                        giftRepository.insertGift(gift)
+                    }
+                    _gift.value = gift
                     _usedDt.value = _gift.value.usedDt
                     _isShowBottomSheet.value = false
+                } else { // 수정 실패
+                    // 네트워크가 불안정합니다. 인터넷 연결을 확인해주세요.
+                    TODO()
                 }
             }
         }
