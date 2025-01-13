@@ -11,13 +11,17 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Refresh
@@ -38,6 +42,7 @@ import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
@@ -60,6 +65,8 @@ fun HomeScreen(onAdd: () -> Unit, showMap: () -> Unit, onDetail: (Gift) -> Unit)
     val fusedLocationClient = remember {
         LocationServices.getFusedLocationProviderClient(context)
     }
+    val scrollState = rememberScrollState()
+
     getLocation(fusedLocationClient) {
         homeViewModel.setLocation(it) // 위치 가져온 다음
         homeViewModel.observeGiftList() // 기프티콘 불러오기
@@ -87,6 +94,7 @@ fun HomeScreen(onAdd: () -> Unit, showMap: () -> Unit, onDetail: (Gift) -> Unit)
                 modifier = Modifier
                     .fillMaxSize()
                     .padding(20.dp)
+                    .verticalScroll(scrollState)
             ) {
                 Row(
                     modifier = Modifier.fillMaxWidth(),
@@ -114,14 +122,7 @@ fun HomeScreen(onAdd: () -> Unit, showMap: () -> Unit, onDetail: (Gift) -> Unit)
                             )
                         }
                     }
-                }
 
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(bottom = 8.dp),
-                    contentAlignment = Alignment.BottomEnd
-                ) {
                     Text(
                         text = stringResource(id = R.string.btn_open_map),
                         style = MaterialTheme.typography.titleSmall,
@@ -130,13 +131,43 @@ fun HomeScreen(onAdd: () -> Unit, showMap: () -> Unit, onDetail: (Gift) -> Unit)
                         modifier = Modifier.clickable {
                             showMap()
                         }
+                            .fillMaxWidth()
                     )
                 }
 
                 // gift item
                 LazyRow(
                     modifier = Modifier
-                        .fillMaxSize()
+                        .padding(top = 10.dp)
+                        .wrapContentHeight(Alignment.CenterVertically)
+                ) {
+
+                    itemsIndexed(items = homeViewModel.displayGiftList.value) { index, gift ->
+                        HomeGiftItem(gift.first, homeViewModel.formatString(gift.first.endDt), gift.second) {
+                            onDetail(gift.first)
+                        }
+                    }
+                }
+
+
+                // 기한 만료
+                Row(
+                    modifier = Modifier.fillMaxWidth().padding(top = 30.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text(
+                        modifier = Modifier.wrapContentSize(),
+                        text = stringResource(id = R.string.txt_use_end),
+                        style = MaterialTheme.typography.titleLarge,
+                        textAlign = TextAlign.Start
+                    )
+                }
+
+                // gift item
+                LazyRow(
+                    modifier = Modifier
+                        .padding(top = 10.dp)
+                        .wrapContentHeight(Alignment.CenterVertically)
                 ) {
 
                     itemsIndexed(items = homeViewModel.displayGiftList.value) { index, gift ->
@@ -170,7 +201,8 @@ fun HomeScreen(onAdd: () -> Unit, showMap: () -> Unit, onDetail: (Gift) -> Unit)
 @Composable
 fun HomeGiftItem(gift: Gift, formattedEndDate: String, document: Document, onClick: () -> Unit) {
     Card(
-        modifier = Modifier.padding(end = 5.dp)
+        modifier = Modifier
+            .padding(end = 5.dp)
             .clickable {
                 onClick()
             },

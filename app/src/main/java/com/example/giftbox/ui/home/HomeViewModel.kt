@@ -14,20 +14,25 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
+import java.text.SimpleDateFormat
+import java.time.LocalDateTime
+import java.time.format.DateTimeFormatter
+import java.util.Locale
 import javax.inject.Inject
 
 @HiltViewModel
 class HomeViewModel @Inject constructor(
     private val giftRepository: GiftRepository,
     private val brandSearchRepository: BrandSearchRepository,
-    private val sharedPref: SharedPreferences
 ) : ViewModel() {
 
-    private var uid = sharedPref.getString("uid", "") ?: ""
     private var giftList:List<Gift> = listOf()
 
     private val _displayGiftList = mutableStateOf<List<Pair<Gift, Document>>>(listOf())
     val displayGiftList: State<List<Pair<Gift, Document>>> = _displayGiftList
+
+    private val _closeToGiftList = mutableStateOf<List<Gift>>(listOf())
+    val closeToGiftList: State<List<Gift>> = _closeToGiftList
 
     private var location: Location? = null
 

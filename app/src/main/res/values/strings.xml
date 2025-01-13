@@ -49,6 +49,7 @@
     <string name="txt_input_pin">PIN 번호를 입력해주세요.</string>
     <string name="txt_no_pin_auth">보안 설정 사용 안 함</string>
     <string name="txt_use_near">근처에서 사용할 수 있어요</string>
+    <string name="txt_use_end">사용 기한이 임박했어요!</string>
     <string name="msg_pin_auth_fail">PIN 번호가 일치하지 않습니다.</string>
     <string name="msg_no_permission">권한이 거부되었습니다.\n설정에서 권한을 모두 허용해 주세요.</string>
     <string name="format_d_day">D%s</string>
