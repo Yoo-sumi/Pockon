@@ -41,12 +41,12 @@ class HomeViewModel @Inject constructor(
         viewModelScope.launch(Dispatchers.IO) {
             giftRepository.getAllGift().collectLatest { allGift ->
                 if (allGift.isNotEmpty()) {
-                    val dateFormat = SimpleDateFormat("yyyyMMdd", Locale.KOREA)
                     giftList = allGift.map { gift ->
                         Gift(id = gift.id, uid = gift.uid, photo = gift.photo, name = gift.name, brand = gift.brand, endDt = gift.endDt, addDt = gift.addDt, memo = gift.memo, usedDt = gift.usedDt)
                     }
 
                     // 기한 임박 기프티콘 목록(TOP 30)
+                    val dateFormat = SimpleDateFormat("yyyyMMdd", Locale.KOREA)
                     _closeToGiftList.value = giftList.sortedBy { gift -> dateFormat.parse(gift.endDt)?.time }.filterIndexed { index, gift -> index < 30 }
 
                     getBrandInfoList() // 브랜드 검색

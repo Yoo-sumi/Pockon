@@ -28,6 +28,9 @@ interface GiftDao {
     @Query("SELECT * FROM GiftEntity WHERE NULLIF(usedDt, '') IS NULL")
     fun getAllGift(): Flow<List<GiftEntity>>
 
+    @Query("SELECT * FROM GiftEntity WHERE NULLIF(usedDt, '') IS NOT NULL")
+    fun getAllUsedGift(): Flow<List<GiftEntity>>
+
     @Query("DELETE FROM GiftEntity")
     fun deleteAllGift()
 

@@ -61,6 +61,8 @@ class GiftRepository @Inject constructor(
 
     fun getAllGift() = giftLocalDataSource.getAllGift()
 
+    fun getAllUsedGift() = giftLocalDataSource.getAllUsedGift()
+
     fun deleteGift(id: String) = giftLocalDataSource.deleteGift(id)
 
     fun deleteAllGift() = giftLocalDataSource.deleteAllGift()

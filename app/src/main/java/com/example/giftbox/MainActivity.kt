@@ -84,6 +84,8 @@ import com.example.giftbox.ui.login.LoginScreen
 import com.example.giftbox.ui.login.LoginViewModel
 import com.example.giftbox.ui.map.MapScreen
 import com.example.giftbox.ui.pin.PinScreen
+import com.example.giftbox.ui.settings.SettingScreen
+import com.example.giftbox.ui.used.UsedScreen
 import com.google.gson.Gson
 import dagger.hilt.android.AndroidEntryPoint
 
@@ -230,7 +232,8 @@ fun BottomNavigationBar(onLogout: () -> Unit) {
             }
             composable(Screen.Setting.route) {
                 SettingScreen {
-                    onLogout()
+                    navController.navigate(route = Screen.Used.route)
+//                    onLogout()
                 }
             }
             composable(
@@ -276,35 +279,17 @@ fun BottomNavigationBar(onLogout: () -> Unit) {
                     navController.popBackStack()
                 }
             }
+            composable(Screen.Used.route) {
+                UsedScreen(
+                    onDetail = { gift ->
+                        val gifJson = Uri.encode(Gson().toJson(gift))
+                        navController.navigate(route = "${Screen.Detail.route}/${gifJson}")
+                    }
+                )
+            }
         }
     }
     CheckPermission(context, launcherPermissions)
-}
-
-@Composable
-fun SettingScreen(onLogout: () -> Unit) {
-    Box(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(MaterialTheme.colorScheme.background)
-    ) {
-        Column(
-            verticalArrangement = Arrangement.Center,
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
-            Text(
-                text = stringResource(id = R.string.setting),
-            )
-            Button(
-                onClick = {
-                    onLogout()
-                }
-            ) {
-                Text(text = "로그아웃")
-            }
-        }
-
-    }
 }
 
 @Composable
@@ -388,4 +373,5 @@ sealed class Screen(val route: String, val icon: ImageVector, @StringRes val lab
     data object Add : Screen("add", Icons.Filled.Add, R.string.setting)
     data object Detail : Screen("detail", Icons.Filled.Search, R.string.detail)
     data object Map : Screen("map", Icons.Filled.LocationOn, R.string.map)
+    data object Used : Screen("used", Icons.Filled.LocationOn, R.string.map)
 }
