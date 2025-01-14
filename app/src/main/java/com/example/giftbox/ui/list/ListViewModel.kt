@@ -102,32 +102,6 @@ class ListViewModel @Inject constructor(
         removeGift = gift
     }
 
-    fun formatString(endDate: String): String {
-        return endDate.mapIndexed { index, c ->
-            if (index == 3 || index == 5) "${c}." else c
-        }.joinToString("")
-    }
-
-    fun getDday(endDate: String): String {
-        val formatter = DateTimeFormatter.BASIC_ISO_DATE
-        val current = LocalDateTime.now().format(formatter)
-
-        val dateFormat = SimpleDateFormat("yyyyMMdd", Locale.KOREA)
-        val startDate = dateFormat.parse(current)?.time
-        val parseEndDate = dateFormat.parse(endDate)?.time
-        if (parseEndDate != null && startDate != null) {
-            val diff = (startDate - parseEndDate) / (24 * 60 * 60 * 1000)
-            return if (diff.toInt() > 0) {
-                "+$diff"
-            } else if (diff.toInt() == 0) {
-                "-$diff"
-            } else {
-                "$diff"
-            }
-        }
-        return ""
-    }
-
     fun changeChipState(targetList: List<String>) {
         val beforeElements = mutableMapOf<String, Boolean>()
         val beforeFilters = mutableListOf<String>()

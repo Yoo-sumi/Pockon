@@ -4,6 +4,10 @@ import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.input.OffsetMapping
 import androidx.compose.ui.text.input.TransformedText
 import androidx.compose.ui.text.input.VisualTransformation
+import java.text.SimpleDateFormat
+import java.time.LocalDateTime
+import java.time.format.DateTimeFormatter
+import java.util.Locale
 
 class DateTransformation : VisualTransformation {
     override fun filter(text: AnnotatedString): TransformedText {
@@ -36,4 +40,30 @@ private fun dateFilter(text: AnnotatedString): TransformedText {
     }
 
     return TransformedText(AnnotatedString(out), numberOffsetTranslator)
+}
+
+fun getDday(endDate: String): Pair<String, Boolean> {
+    val formatter = DateTimeFormatter.BASIC_ISO_DATE
+    val current = LocalDateTime.now().format(formatter)
+
+    val dateFormat = SimpleDateFormat("yyyyMMdd", Locale.KOREA)
+    val startDate = dateFormat.parse(current)?.time
+    val parseEndDate = dateFormat.parse(endDate)?.time
+    if (parseEndDate != null && startDate != null) {
+        val diff = (parseEndDate - startDate) / (24 * 60 * 60 * 1000)
+        return if (diff.toInt() > 0) {
+            Pair("D-$diff", false)
+        } else if (diff.toInt() == 0) {
+            Pair("D-Day", false)
+        } else {
+            Pair("만료", true)
+        }
+    }
+    return Pair("", false)
+}
+
+fun formatString(endDate: String): String {
+    return endDate.mapIndexed { index, c ->
+        if (index == 3 || index == 5) "${c}." else c
+    }.joinToString("")
 }

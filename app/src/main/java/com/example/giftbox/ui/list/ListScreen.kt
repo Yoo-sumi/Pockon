@@ -67,7 +67,8 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import coil.compose.AsyncImage
 import com.example.giftbox.model.Gift
-import com.example.giftbox.ui.utils.stringTobitmap
+import com.example.giftbox.ui.utils.formatString
+import com.example.giftbox.ui.utils.getDday
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -210,7 +211,7 @@ fun ListScreen(listViewModel: ListViewModel = viewModel(), onDetail: (Gift) -> U
                                 }
                             }
                         ) {
-                            GiftItem(gift = gift, listViewModel.formatString(gift.endDt), listViewModel.getDday(gift.endDt)) { onDetail(it) }
+                            GiftItem(gift = gift, formatString(gift.endDt), getDday(gift.endDt)) { onDetail(it) }
                         }
 
                         when (swipeState.currentValue) {
@@ -262,7 +263,7 @@ fun ListScreen(listViewModel: ListViewModel = viewModel(), onDetail: (Gift) -> U
 }
 
 @Composable
-fun GiftItem(gift: Gift, formattedEndDate: String, dDay: String, onDetail: (Gift) -> Unit) {
+fun GiftItem(gift: Gift, formattedEndDate: String, dDay: Pair<String, Boolean>, onDetail: (Gift) -> Unit) {
     Box(
         modifier = Modifier
             .padding(3.dp)
@@ -311,13 +312,19 @@ fun GiftItem(gift: Gift, formattedEndDate: String, dDay: String, onDetail: (Gift
             }
         }
 
+        val color = if (dDay.second) {
+            MaterialTheme.colorScheme.outline
+        } else {
+            MaterialTheme.colorScheme.primary
+        }
         Text(
-            text = "D${dDay}",
+            text = dDay.first,
+            fontSize = 14.sp,
             modifier = Modifier
                 .padding(2.dp)
                 .align(Alignment.TopEnd)
                 .background(
-                    color = MaterialTheme.colorScheme.primary,
+                    color = color,
                     shape = CardDefaults.shape
                 )
                 .padding(start = 15.dp, end = 15.dp, top = 5.dp, bottom = 5.dp),

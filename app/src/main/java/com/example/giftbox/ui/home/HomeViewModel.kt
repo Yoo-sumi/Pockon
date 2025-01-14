@@ -41,9 +41,14 @@ class HomeViewModel @Inject constructor(
         viewModelScope.launch(Dispatchers.IO) {
             giftRepository.getAllGift().collectLatest { allGift ->
                 if (allGift.isNotEmpty()) {
+                    val dateFormat = SimpleDateFormat("yyyyMMdd", Locale.KOREA)
                     giftList = allGift.map { gift ->
                         Gift(id = gift.id, uid = gift.uid, photo = gift.photo, name = gift.name, brand = gift.brand, endDt = gift.endDt, addDt = gift.addDt, memo = gift.memo, usedDt = gift.usedDt)
                     }
+
+                    // 기한 임박 기프티콘 목록(TOP 30)
+                    _closeToGiftList.value = giftList.sortedBy { gift -> dateFormat.parse(gift.endDt)?.time }.filterIndexed { index, gift -> index < 30 }
+
                     getBrandInfoList() // 브랜드 검색
                 } else {
                     _displayGiftList.value = listOf()
@@ -70,7 +75,7 @@ class HomeViewModel @Inject constructor(
                 }
             }
             // 거리순으로 정렬(스타벅스, 투썸..)
-            allList.sortBy { it.second.distance }
+            allList.sortBy { it.second.distance.toDouble() }
             _displayGiftList.value = allList
 
             // 로컬 저장
@@ -81,12 +86,6 @@ class HomeViewModel @Inject constructor(
                 }
             }
         }
-    }
-
-    fun formatString(endDate: String): String {
-        return endDate.mapIndexed { index, c ->
-            if (index == 3 || index == 5) "${c}." else c
-        }.joinToString("")
     }
 
     fun setLocation(location: Location?) {

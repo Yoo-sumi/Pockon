@@ -11,10 +11,8 @@ import androidx.recyclerview.widget.RecyclerView
 import coil.load
 import com.example.giftbox.R
 import com.example.giftbox.model.Gift
-import java.text.SimpleDateFormat
-import java.time.LocalDateTime
-import java.time.format.DateTimeFormatter
-import java.util.Locale
+import com.example.giftbox.ui.utils.formatString
+import com.example.giftbox.ui.utils.getDday
 
 class GiftItemAdapter (
     var gifts: List<Gift>,
@@ -36,7 +34,17 @@ class GiftItemAdapter (
         holder.brand.text = item.brand
         holder.name.text = item.name
         holder.endDt.text = context.getString(R.string.format_end_date, formatString(item.endDt))
-        holder.dDay.text = context.getString(R.string.format_d_day, getDday(item.endDt))
+        val formattedDay = getDday(item.endDt)
+        if (formattedDay.second) {
+            holder.dDayEnd.visibility = View.VISIBLE
+            holder.dDay.visibility = View.GONE
+            holder.dDayEnd.text = getDday(item.endDt).first
+        } else {
+            holder.dDayEnd.visibility = View.GONE
+            holder.dDay.visibility = View.VISIBLE
+            holder.dDay.text = getDday(item.endDt).first
+        }
+        holder.dDay.text = getDday(item.endDt).first
         holder.photo.load(item.photo)
         holder.cardView.setOnClickListener {
             onClick(item) // 상세보기
@@ -48,33 +56,8 @@ class GiftItemAdapter (
         val name: TextView = view.findViewById(R.id.tv_name)
         val endDt: TextView = view.findViewById(R.id.tv_end_dt)
         val dDay: TextView = view.findViewById(R.id.tv_d_day)
+        val dDayEnd: TextView = view.findViewById(R.id.tv_d_day_end)
         val photo: ImageView = view.findViewById(R.id.iv_photo)
         val cardView: CardView = view.findViewById(R.id.card_view)
-    }
-
-    private fun getDday(endDate: String): String {
-        val formatter = DateTimeFormatter.BASIC_ISO_DATE
-        val current = LocalDateTime.now().format(formatter)
-
-        val dateFormat = SimpleDateFormat("yyyyMMdd", Locale.KOREA)
-        val startDate = dateFormat.parse(current)?.time
-        val parseEndDate = dateFormat.parse(endDate)?.time
-        if (parseEndDate != null && startDate != null) {
-            val diff = (startDate - parseEndDate) / (24 * 60 * 60 * 1000)
-            return if (diff.toInt() > 0) {
-                "+$diff"
-            } else if (diff.toInt() == 0) {
-                "-$diff"
-            } else {
-                "$diff"
-            }
-        }
-        return ""
-    }
-
-    private fun formatString(endDate: String): String {
-        return endDate.mapIndexed { index, c ->
-            if (index == 3 || index == 5) "${c}." else c
-        }.joinToString("")
     }
 }
