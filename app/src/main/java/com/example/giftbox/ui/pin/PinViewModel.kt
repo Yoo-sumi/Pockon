@@ -36,8 +36,6 @@ class PinViewModel @Inject constructor(
 
     init {
         _mode.intValue = if (pinNumber.isEmpty()) 0 else 2
-        Log.d("isShowPin", "init")
-
     }
 
     fun setMode(mode: Int) {
@@ -58,15 +56,11 @@ class PinViewModel @Inject constructor(
     }
 
     fun getTitle(): Int {
-        return when (this._mode.value) {
+        return when (this._mode.intValue) {
             0 -> R.string.txt_create_pin
             1 -> R.string.txt_check_pin
             else -> R.string.txt_input_pin
         }
-    }
-
-    fun setShowSuccess(flag: Boolean) {
-        _showSuccess.value = flag
     }
 
     private fun comparePinNum() {

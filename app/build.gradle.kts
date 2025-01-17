@@ -75,6 +75,10 @@ android {
 }
 
 dependencies {
+    // Jetpack Navigation Kotlin
+    implementation ("androidx.navigation:navigation-fragment-ktx:2.8.5")
+    implementation ("androidx.navigation:navigation-ui-ktx:2.8.5")
+
     // cardview
     implementation("androidx.cardview:cardview:1.0.0")
 
@@ -83,6 +87,8 @@ dependencies {
 
     // room
     implementation("androidx.room:room-ktx:2.6.1")
+    implementation(libs.material)
+    implementation(libs.androidx.activity)
     kapt("androidx.room:room-compiler:2.6.1")
 
     // retrofit2

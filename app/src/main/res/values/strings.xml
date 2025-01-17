@@ -28,6 +28,7 @@
     <string name="btn_use_complete">사용 완료</string>
     <string name="btn_use_cancel">사용 취소</string>
     <string name="btn_open_map">지도보기</string>
+    <string name="btn_goggle_login">Sign In With Google</string>
     <string name="dlg_msg_delete">기프티콘을 삭제하시겠습니까?</string>
     <string name="dlg_msg_use_cancel">기프티콘 사용을 취소하시겠습니까?</string>
     <string name="dlg_msg_use_pin">소중한 기프티콘을 지킬 수 있는 보안을 설정하시겠습니까?</string>

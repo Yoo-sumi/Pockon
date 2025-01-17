@@ -56,7 +56,7 @@ fun getDday(endDate: String): Pair<String, Boolean> {
         } else if (diff.toInt() == 0) {
             Pair("D-Day", false)
         } else {
-            Pair("기한만료", true)
+            Pair("만료", true)
         }
     }
     return Pair("", false)

@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/nav_graph"
+    app:startDestination="@id/LoginFragment">
+
+    <fragment
+        android:id="@+id/LoginFragment"
+        android:name="com.example.giftbox.ui.login.LoginFragment"
+        android:label="LoginFragment" >
+        <action
+            android:id="@+id/action_LoginFragment_to_mainFragment"
+            app:destination="@id/mainFragment" />
+        <action
+            android:id="@+id/action_LoginFragment_to_pinFragment"
+            app:destination="@id/pinFragment" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/pinFragment"
+        android:name="com.example.giftbox.ui.pin.PinFragment"
+        android:label="PinFragment" >
+    </fragment>
+
+    <fragment
+        android:id="@+id/mainFragment"
+        android:name="com.example.giftbox.ui.main.MainFragment"
+        android:label="MainFragment" >
+        <action
+            android:id="@+id/action_mainFragment_to_pinFragment"
+            app:destination="@id/mainFragment" />
+    </fragment>
+</navigation>
