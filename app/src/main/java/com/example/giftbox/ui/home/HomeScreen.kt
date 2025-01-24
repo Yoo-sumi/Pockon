@@ -40,6 +40,7 @@ import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -66,7 +67,7 @@ import com.google.android.gms.location.LocationServices
 fun HomeScreen(onAdd: () -> Unit, showMap: () -> Unit, onDetail: (Gift) -> Unit) {
     val homeViewModel = hiltViewModel<HomeViewModel>()
     val context = LocalContext.current
-    val fusedLocationClient = remember {
+    val fusedLocationClient = rememberSaveable {
         LocationServices.getFusedLocationProviderClient(context)
     }
     val scrollState = rememberScrollState()

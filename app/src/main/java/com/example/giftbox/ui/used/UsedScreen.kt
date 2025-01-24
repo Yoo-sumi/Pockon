@@ -79,7 +79,6 @@ fun UsedGiftItem(gift: Gift, formattedEndDate: String, dDay: Pair<String, Boolea
     Box(
         modifier = Modifier
             .clip(shape = RoundedCornerShape(10.dp))
-            .size(200.dp)
             .clickable {
                 onClick()
             }
@@ -90,7 +89,9 @@ fun UsedGiftItem(gift: Gift, formattedEndDate: String, dDay: Pair<String, Boolea
         ) {
             Box {
                 AsyncImage(
-                    modifier = Modifier.fillMaxSize(),
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .size(200.dp),
                     model = Uri.parse(gift.photo),
                     contentDescription = "add photo",
                     contentScale = ContentScale.Crop

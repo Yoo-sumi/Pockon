@@ -50,6 +50,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -74,7 +75,7 @@ import com.example.giftbox.ui.utils.getDday
 @Composable
 fun ListScreen(listViewModel: ListViewModel = viewModel(), onDetail: (Gift) -> Unit, onAdd: () -> Unit) {
     val refreshState = rememberPullToRefreshState()
-    var showRemoveDlg by remember { mutableStateOf(false) }
+    var showRemoveDlg by rememberSaveable { mutableStateOf(false) }
 
     if (refreshState.isRefreshing) {
         listViewModel.getGiftList()
@@ -335,7 +336,7 @@ fun GiftItem(gift: Gift, formattedEndDate: String, dDay: Pair<String, Boolean>, 
 
 @Composable
 fun TopAppBarDropDownMenu(setTopTitle: (Int) -> Unit) {
-    val expanded = remember {
+    val expanded = rememberSaveable {
         mutableStateOf(false)
     }
 

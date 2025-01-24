@@ -19,6 +19,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -28,13 +29,16 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.giftbox.R
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun SettingScreen(onUsedGift: () -> Unit) {
-    var checkedAlarm by remember { mutableStateOf(false) }
-    var checkedPwd by remember { mutableStateOf(false) }
+fun SettingScreen(onUsedGift: () -> Unit, movePinScreen: () -> Unit) {
+    val settingViewModel = hiltViewModel<SettingViewModel>()
+
+    var checkedAlarm by rememberSaveable { mutableStateOf(false) }
+    var checkedPwd by rememberSaveable { mutableStateOf(settingViewModel.getIsAuthPin()) }
 
     Scaffold(
         topBar = {
@@ -91,10 +95,10 @@ fun SettingScreen(onUsedGift: () -> Unit) {
                     checked = checkedPwd,
                     onCheck = {
                         checkedPwd = !checkedPwd
+                        if (checkedPwd) {
+                            movePinScreen()
+                        }
                     },
-                    onClick = {
-
-                    }
                 )
 
                 // 사용자

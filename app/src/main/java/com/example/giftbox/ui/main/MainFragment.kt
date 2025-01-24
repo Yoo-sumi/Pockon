@@ -67,6 +67,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavDestination.Companion.hierarchy
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.NavType
+import androidx.navigation.Navigation
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
@@ -90,18 +91,19 @@ class MainFragment : Fragment() {
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View = ComposeView(requireContext()).apply {
         setContent {
-            BottomNavigationBar(
-//                onLogout = {
-//                    loginViewModel.logout()
-//                }
-            )
+            BottomNavigationBar {
+                // 로그인 성공 > 메인 화면으로 이동
+                val navController = Navigation.findNavController(requireView())
+                navController.popBackStack()
+                navController.navigate(R.id.pinFragment)
+            }
         }
     }
 
 }
 
 @Composable
-fun BottomNavigationBar() {
+fun BottomNavigationBar(movePinScreen: () -> Unit) {
     val navController = rememberNavController()
 
     val listViewModel = hiltViewModel<ListViewModel>()
@@ -215,6 +217,9 @@ fun BottomNavigationBar() {
                 SettingScreen(
                     onUsedGift = {
                         navController.navigate(route = Screen.Used.route)
+                    },
+                    movePinScreen = {
+                        movePinScreen()
                     }
                 )
             }

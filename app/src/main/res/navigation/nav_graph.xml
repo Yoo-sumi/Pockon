@@ -28,6 +28,6 @@
         android:label="MainFragment" >
         <action
             android:id="@+id/action_mainFragment_to_pinFragment"
-            app:destination="@id/mainFragment" />
+            app:destination="@id/pinFragment" />
     </fragment>
 </navigation>

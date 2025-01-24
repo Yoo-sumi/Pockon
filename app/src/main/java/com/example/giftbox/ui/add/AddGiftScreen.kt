@@ -49,6 +49,7 @@ import androidx.compose.material3.rememberDatePickerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -80,7 +81,7 @@ fun AddGifticon(onBack: (Boolean) -> Unit) {
     val context = LocalContext.current
 
     // snackbar
-    val snackbarHostState = remember { SnackbarHostState() }
+    val snackbarHostState = rememberSaveable { SnackbarHostState() }
     val scope = rememberCoroutineScope()
 
     // select photo
