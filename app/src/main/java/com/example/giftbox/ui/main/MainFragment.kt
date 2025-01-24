@@ -91,19 +91,25 @@ class MainFragment : Fragment() {
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View = ComposeView(requireContext()).apply {
         setContent {
-            BottomNavigationBar {
-                // 로그인 성공 > 메인 화면으로 이동
-                val navController = Navigation.findNavController(requireView())
-                navController.popBackStack()
-                navController.navigate(R.id.pinFragment)
-            }
+            BottomNavigationBar(
+                movePinScreen = {
+                    val navController = Navigation.findNavController(requireView())
+                    navController.popBackStack()
+                    navController.navigate(R.id.pinFragment)
+                },
+                moveLogInScreen = {
+                    val navController = Navigation.findNavController(requireView())
+                    navController.popBackStack()
+                    navController.navigate(R.id.loginFragment)
+                }
+            )
         }
     }
 
 }
 
 @Composable
-fun BottomNavigationBar(movePinScreen: () -> Unit) {
+fun BottomNavigationBar(movePinScreen: () -> Unit, moveLogInScreen: () -> Unit) {
     val navController = rememberNavController()
 
     val listViewModel = hiltViewModel<ListViewModel>()
@@ -220,6 +226,9 @@ fun BottomNavigationBar(movePinScreen: () -> Unit) {
                     },
                     movePinScreen = {
                         movePinScreen()
+                    },
+                    moveLogInScreen = {
+                        moveLogInScreen()
                     }
                 )
             }

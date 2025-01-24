@@ -75,7 +75,7 @@ import com.example.giftbox.ui.utils.getDday
 @Composable
 fun ListScreen(listViewModel: ListViewModel = viewModel(), onDetail: (Gift) -> Unit, onAdd: () -> Unit) {
     val refreshState = rememberPullToRefreshState()
-    var showRemoveDlg by rememberSaveable { mutableStateOf(false) }
+    var showRemoveDlg by remember { mutableStateOf(false) }
 
     if (refreshState.isRefreshing) {
         listViewModel.getGiftList()
@@ -336,7 +336,7 @@ fun GiftItem(gift: Gift, formattedEndDate: String, dDay: Pair<String, Boolean>, 
 
 @Composable
 fun TopAppBarDropDownMenu(setTopTitle: (Int) -> Unit) {
-    val expanded = rememberSaveable {
+    val expanded = remember {
         mutableStateOf(false)
     }
 
@@ -396,7 +396,7 @@ fun RemoveDialog(onConfirm: () -> Unit, onDismiss: () -> Unit) {
         text = {
             Text(
                 textAlign = TextAlign.Center,
-                text = stringResource(id = R.string.dlg_msg_use_cancel),
+                text = stringResource(id = R.string.dlg_msg_delete),
                 fontSize = 18.sp
             )
         },

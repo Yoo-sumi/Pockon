@@ -67,7 +67,7 @@ import com.google.android.gms.location.LocationServices
 fun HomeScreen(onAdd: () -> Unit, showMap: () -> Unit, onDetail: (Gift) -> Unit) {
     val homeViewModel = hiltViewModel<HomeViewModel>()
     val context = LocalContext.current
-    val fusedLocationClient = rememberSaveable {
+    val fusedLocationClient = remember {
         LocationServices.getFusedLocationProviderClient(context)
     }
     val scrollState = rememberScrollState()

@@ -65,22 +65,6 @@ class LoginViewModel @Inject constructor(
         }
     }
 
-
-    fun logout() {
-//        loginRepository.logout()
-//        _isLoginState.value = false
-//        sharedPref.edit().clear().apply()
-//        _isPinAuthUse.value = sharedPref.getBoolean("auth_pin", false)
-//        _pinNumber.value = sharedPref.getString("pin_num", "") ?: ""
-//        _isPinAuth.value = false
-    }
-
-    fun removeAccount() {
-//        loginRepository.removeAccount { result ->
-//            _isLoginState.value = !result
-//        }
-    }
-
     private fun saveMyUid(uid: String) {
         sharedPref.edit().putString("uid", uid).apply()
     }

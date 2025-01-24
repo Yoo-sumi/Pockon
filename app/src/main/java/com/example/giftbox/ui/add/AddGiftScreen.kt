@@ -81,7 +81,7 @@ fun AddGifticon(onBack: (Boolean) -> Unit) {
     val context = LocalContext.current
 
     // snackbar
-    val snackbarHostState = rememberSaveable { SnackbarHostState() }
+    val snackbarHostState = remember { SnackbarHostState() }
     val scope = rememberCoroutineScope()
 
     // select photo

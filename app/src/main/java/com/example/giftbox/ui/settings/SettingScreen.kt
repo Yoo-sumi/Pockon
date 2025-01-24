@@ -8,12 +8,15 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.wrapContentSize
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -28,15 +31,19 @@ import androidx.compose.ui.draw.scale
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.giftbox.R
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun SettingScreen(onUsedGift: () -> Unit, movePinScreen: () -> Unit) {
+fun SettingScreen(onUsedGift: () -> Unit, movePinScreen: () -> Unit, moveLogInScreen: () -> Unit) {
     val settingViewModel = hiltViewModel<SettingViewModel>()
 
+    var showLogoutDlg by remember { mutableStateOf(false) }
+    var showRemoveDlg by remember { mutableStateOf(false) }
     var checkedAlarm by rememberSaveable { mutableStateOf(false) }
     var checkedPwd by rememberSaveable { mutableStateOf(settingViewModel.getIsAuthPin()) }
 
@@ -97,6 +104,8 @@ fun SettingScreen(onUsedGift: () -> Unit, movePinScreen: () -> Unit) {
                         checkedPwd = !checkedPwd
                         if (checkedPwd) {
                             movePinScreen()
+                        } else {
+                            settingViewModel.offAuthPin()
                         }
                     },
                 )
@@ -110,15 +119,45 @@ fun SettingScreen(onUsedGift: () -> Unit, movePinScreen: () -> Unit) {
                 SettingItem(
                     text = "로그아웃",
                     onClick = {
+                        showLogoutDlg = true
                     }
                 )
 
                 SettingItem(
                     text = "회원 탈퇴",
                     onClick = {
+                        showRemoveDlg = true
                     }
                 )
             }
+        }
+
+        if (showLogoutDlg) {
+            LogoutDialog(
+                onConfirm = {
+                    showLogoutDlg = false
+                    settingViewModel.logout()
+                    moveLogInScreen()
+                },
+                onDismiss = {
+                    showLogoutDlg = false
+                }
+            )
+        }
+
+        if (showRemoveDlg) {
+            RemoveAccountDialog(
+                onConfirm = {
+                    showRemoveDlg = false
+                    settingViewModel.removeAccount { result ->
+                        if (result) moveLogInScreen()
+                        else TODO()
+                    }
+                },
+                onDismiss = {
+                    showRemoveDlg = false
+                }
+            )
         }
     }
 }
@@ -176,4 +215,63 @@ fun SettingItem(text: String, isTitle: Boolean = false, isSwitch: Boolean = fals
             }
         }
     }
+}
+
+// 기프티콘 제거 묻는 다이얼로그
+@Composable
+fun LogoutDialog(onConfirm: () -> Unit, onDismiss: () -> Unit) {
+    AlertDialog(
+        onDismissRequest = {},
+        text = {
+            Text(
+                textAlign = TextAlign.Center,
+                text = stringResource(id = R.string.dlg_msg_logout),
+                fontSize = 18.sp
+            )
+        },
+        confirmButton = {
+            TextButton(
+                onClick = { onConfirm() }
+            ) {
+                Text(text = stringResource(id = R.string.btn_confirm))
+            }
+        },
+        dismissButton = {
+            TextButton(
+                onClick = { onDismiss() }
+            ) {
+                Text(text = stringResource(id = R.string.btn_cancel))
+            }
+        },
+        shape = RoundedCornerShape(10.dp)
+    )
+}
+
+@Composable
+fun RemoveAccountDialog(onConfirm: () -> Unit, onDismiss: () -> Unit) {
+    AlertDialog(
+        onDismissRequest = {},
+        text = {
+            Text(
+                textAlign = TextAlign.Center,
+                text = stringResource(id = R.string.dlg_msg_remove_account),
+                fontSize = 18.sp
+            )
+        },
+        confirmButton = {
+            TextButton(
+                onClick = { onConfirm() }
+            ) {
+                Text(text = stringResource(id = R.string.btn_confirm))
+            }
+        },
+        dismissButton = {
+            TextButton(
+                onClick = { onDismiss() }
+            ) {
+                Text(text = stringResource(id = R.string.btn_cancel))
+            }
+        },
+        shape = RoundedCornerShape(10.dp)
+    )
 }
