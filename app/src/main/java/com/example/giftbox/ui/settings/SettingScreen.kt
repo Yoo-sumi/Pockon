@@ -150,8 +150,11 @@ fun SettingScreen(onUsedGift: () -> Unit, movePinScreen: () -> Unit, moveLogInSc
                 onConfirm = {
                     showRemoveDlg = false
                     settingViewModel.removeAccount { result ->
-                        if (result) moveLogInScreen()
-                        else TODO()
+                        if (result) {
+                            moveLogInScreen()
+                        }
+                        else { // 네트워크가 불안정합니다. 인터넷 연결을 확인해주세요.
+                        }
                     }
                 },
                 onDismiss = {

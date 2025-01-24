@@ -1,6 +1,5 @@
 package com.example.giftbox.ui.home
 
-import android.content.SharedPreferences
 import android.location.Location
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
@@ -15,8 +14,6 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
-import java.time.LocalDateTime
-import java.time.format.DateTimeFormatter
 import java.util.Locale
 import javax.inject.Inject
 
@@ -51,6 +48,7 @@ class HomeViewModel @Inject constructor(
 
                     getBrandInfoList() // 브랜드 검색
                 } else {
+                    _closeToGiftList.value = listOf()
                     _displayGiftList.value = listOf()
                 }
             }

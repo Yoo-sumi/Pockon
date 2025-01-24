@@ -67,16 +67,13 @@ class GiftDataSource @Inject constructor(
         }
     }
 
-    fun deleteData(document: String): Flow<Boolean> {
-        return callbackFlow {
-            firestore
-                .collection("gift")
-                .document(document)
-                .delete()
-                .addOnCompleteListener { task ->
-                    trySend(task.isSuccessful)
-                }
-            awaitClose()
-        }
+    fun deleteData(document: String, onComplete: (Boolean) -> Unit) {
+        firestore
+            .collection("gift")
+            .document(document)
+            .delete()
+            .addOnCompleteListener { task ->
+                onComplete(task.isSuccessful)
+            }
     }
 }

@@ -49,8 +49,12 @@ class GiftRepository @Inject constructor(
         return giftDataSource.updateData(gift)
     }
 
-    fun removeGift(document: String): Flow<Boolean> {
-        return giftDataSource.deleteData(document)
+    fun removeGift(uid: String, document: String, onComplete: (Boolean) -> Unit) {
+        giftDataSource.deleteData(document) {
+            giftPhotoDataSource.removeData(uid, document) {
+                onComplete(it)
+            }
+        }
     }
 
     /* 로컬 */

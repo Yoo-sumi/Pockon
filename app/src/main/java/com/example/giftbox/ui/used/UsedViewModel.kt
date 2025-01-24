@@ -32,7 +32,7 @@ class UsedViewModel @Inject constructor(
     // 로컬 기프티콘 목록 변화 감지해서 가져오기
     private fun observeGiftList() {
         viewModelScope.launch(Dispatchers.IO) {
-            giftRepository.getAllUsedGift().collectLatest { allGift -> // 지도에서는 실시간 갱신 안함 > 1로제한
+            giftRepository.getAllUsedGift().collectLatest { allGift ->
                 if (allGift.isNotEmpty()) {
                     val dateFormat = SimpleDateFormat("yyyyMMdd", Locale.KOREA)
                     _giftList.value =  allGift.map { gift ->
@@ -40,7 +40,7 @@ class UsedViewModel @Inject constructor(
                     }.sortedByDescending {  gift -> dateFormat.parse(gift.endDt)?.time }
                 } else {
                     // 기프티콘 없음
-                    TODO()
+                    _giftList.value = listOf()
                 }
             }
         }

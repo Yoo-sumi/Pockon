@@ -179,10 +179,11 @@ class ListViewModel @Inject constructor(
     fun removeGift() {
         if (removeGift ==  null) return
         if (removeGift?.id?.isEmpty() == true) return
+        val uid = removeGift!!.uid
         val id = removeGift!!.id
         removeGift = null
         viewModelScope.launch {
-            giftRepository.removeGift(id).collect { result ->
+            giftRepository.removeGift(uid, id) { result ->
                 if (result) {
                     // 로컬 삭제
                     viewModelScope.launch(Dispatchers.IO) {

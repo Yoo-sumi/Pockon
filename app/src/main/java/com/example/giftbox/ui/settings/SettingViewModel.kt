@@ -8,6 +8,7 @@ import com.example.giftbox.data.GiftRepository
 import com.example.giftbox.data.LoginRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -19,6 +20,7 @@ class SettingViewModel @Inject constructor(
     private val sharedPref: SharedPreferences
 ) : ViewModel() {
 
+    private var uid = sharedPref.getString("uid", "") ?: ""
     private var isAuthPin = sharedPref.getBoolean("auth_pin", false)
 
     fun getIsAuthPin() = isAuthPin
@@ -40,13 +42,28 @@ class SettingViewModel @Inject constructor(
     fun removeAccount(onSuccess: (Boolean) -> Unit) {
         loginRepository.removeAccount { result ->
             if (result) {
-                sharedPref.edit().clear().apply()
-                viewModelScope.launch(Dispatchers.IO) {
-                    giftRepository.deleteAllGift()
-                    brandSearchRepository.deleteAllBrands()
+                viewModelScope.launch {
+                    giftRepository.getAllGift().collectLatest { gifts ->
+                        gifts.forEach { gift ->
+                            // remote 데이터 삭제
+                            giftRepository.removeGift(uid, gift.id) {
+                                if (!it) {
+                                    onSuccess(it) // 삭제 실패
+                                }
+                            }
+                        }
+                        // 로컬 데이터 삭제
+                        viewModelScope.launch(Dispatchers.IO) {
+                            giftRepository.deleteAllGift()
+                            brandSearchRepository.deleteAllBrands()
+                        }
+                        sharedPref.edit().clear().apply()
+                        onSuccess(result)
+                    }
                 }
+            } else {
+                onSuccess(result)
             }
-            onSuccess(result)
         }
     }
 
