@@ -101,6 +101,12 @@ class MainFragment : Fragment() {
                     val navController = Navigation.findNavController(requireView())
                     navController.popBackStack()
                     navController.navigate(R.id.loginFragment)
+                },
+                onFinish = {
+                    activity?.supportFragmentManager
+                        ?.beginTransaction()
+                        ?.remove(this@MainFragment)
+                        ?.commit()
                 }
             )
         }
@@ -109,7 +115,7 @@ class MainFragment : Fragment() {
 }
 
 @Composable
-fun BottomNavigationBar(movePinScreen: () -> Unit, moveLogInScreen: () -> Unit) {
+fun BottomNavigationBar(movePinScreen: () -> Unit, moveLogInScreen: () -> Unit, onFinish: () -> Unit) {
     val navController = rememberNavController()
 
     val listViewModel = hiltViewModel<ListViewModel>()
@@ -142,8 +148,7 @@ fun BottomNavigationBar(movePinScreen: () -> Unit, moveLogInScreen: () -> Unit) 
                         Uri.fromParts("package", context.packageName, null)
                     )
                     context.startActivity(intent)
-                    val activity = context as? Activity
-                    activity?.finish()
+                    onFinish()
                 }
                 .show()
         }
@@ -344,7 +349,7 @@ private fun CheckPermission(
     launcher: ManagedActivityResultLauncher<Array<String>, Map<String, Boolean>>
 ) {
     val permissions = if (Build.VERSION.SDK_INT >= 33) {
-        arrayOf(Manifest.permission.READ_MEDIA_IMAGES, Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION)
+        arrayOf(Manifest.permission.POST_NOTIFICATIONS, Manifest.permission.READ_MEDIA_IMAGES, Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION)
     } else {
         arrayOf(Manifest.permission.READ_EXTERNAL_STORAGE,  Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION)
     }

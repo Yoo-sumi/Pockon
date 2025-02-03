@@ -11,6 +11,7 @@ import com.example.giftbox.GiftDatabase
 import com.example.giftbox.data.GiftRepository
 import com.example.giftbox.data.LoginRepository
 import com.example.giftbox.R
+import com.example.giftbox.alarm.MyAlarmManager
 import com.example.giftbox.data.BrandSearchRepository
 import com.example.giftbox.data.remote.BrandSearchDataSource
 import com.example.giftbox.data.local.BrandDataSource
@@ -125,4 +126,9 @@ class DiModule {
     @Singleton
     @Provides
     fun provideGiftDao(giftDatabase: GiftDatabase): GiftDao = giftDatabase.giftDao()
+
+    @Singleton
+    @Provides
+    fun provideMyAlarmManager(@ApplicationContext context: Context): MyAlarmManager =
+        MyAlarmManager(context)
 }

@@ -7,15 +7,16 @@ import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.giftbox.alarm.MyAlarmManager
 import com.example.giftbox.model.Gift
 import com.example.giftbox.data.GiftRepository
+import com.example.giftbox.ui.utils.getDdayInt
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
-import java.time.LocalDateTime
-import java.time.format.DateTimeFormatter
+import java.util.ArrayList
 import java.util.Date
 import java.util.Locale
 import javax.inject.Inject
@@ -23,9 +24,12 @@ import javax.inject.Inject
 @HiltViewModel
 class ListViewModel @Inject constructor(
     private val giftRepository: GiftRepository,
-    private val sharedPref: SharedPreferences
+    private val sharedPref: SharedPreferences,
+    private val myAlarmManager: MyAlarmManager
 ) : ViewModel() {
     private var uid = sharedPref.getString("uid", "") ?: ""
+    private var isNotiEndDt = sharedPref.getBoolean("noti_end_dt", true)
+    private var registerNoti = sharedPref.getBoolean("noti_register", false)
     private var removeGift: Gift? = null
 
     private val _giftList = mutableStateOf<List<Gift>>(listOf())
@@ -56,9 +60,20 @@ class ListViewModel @Inject constructor(
         viewModelScope.launch(Dispatchers.IO) {
             giftRepository.getAllGift().collectLatest { allGift ->
                 if (allGift.isNotEmpty()) {
-                    _giftList.value = allGift.map { gift ->
-                        Gift(id = gift.id, uid = gift.uid, photo = gift.photo, name = gift.name, brand = gift.brand, endDt = gift.endDt, addDt = gift.addDt, memo = gift.memo, usedDt = gift.usedDt)
+                    val tempList = ArrayList<Gift>()
+                    allGift.forEach { gift ->
+                        val tempGift = Gift(id = gift.id, uid = gift.uid, photo = gift.photo, name = gift.name, brand = gift.brand, endDt = gift.endDt, addDt = gift.addDt, memo = gift.memo, usedDt = gift.usedDt)
+                        tempList.add(tempGift)
+                        if (!registerNoti) {
+                            myAlarmManager.cancel(tempGift.id)
+                            // 알림 등록
+                            if (isNotiEndDt && getDdayInt(tempGift.endDt) in 0..1) {
+                                myAlarmManager.schedule(tempGift, getDdayInt(tempGift.endDt))
+                            }
+                        }
                     }
+                    sharedPref.edit().putBoolean("noti_register", true).apply()
+                    _giftList.value = tempList
                     _copyGiftList.value = _giftList.value
                     sortChips()
                     orderBy()
@@ -167,6 +182,7 @@ class ListViewModel @Inject constructor(
                     viewModelScope.launch(Dispatchers.IO) {
                         giftRepository.insertGift(updateGift)
                     }
+                    myAlarmManager.cancel(gift.id)
                 } else { // 수정 실패
                     // 네트워크가 불안정합니다. 인터넷 연결을 확인해주세요.
                     TODO()
@@ -189,6 +205,7 @@ class ListViewModel @Inject constructor(
                     viewModelScope.launch(Dispatchers.IO) {
                         giftRepository.deleteGift(id)
                     }
+                    myAlarmManager.cancel(id)
                 } else { // 삭제 실패
                     // 네트워크가 불안정합니다. 인터넷 연결을 확인해주세요.
                     TODO()

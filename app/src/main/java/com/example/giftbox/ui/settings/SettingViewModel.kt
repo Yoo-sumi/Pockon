@@ -3,12 +3,16 @@ package com.example.giftbox.ui.settings
 import android.content.SharedPreferences
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.giftbox.alarm.MyAlarmManager
 import com.example.giftbox.data.BrandSearchRepository
 import com.example.giftbox.data.GiftRepository
 import com.example.giftbox.data.LoginRepository
+import com.example.giftbox.model.Gift
+import com.example.giftbox.ui.utils.getDdayInt
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.take
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -17,13 +21,35 @@ class SettingViewModel @Inject constructor(
     private val loginRepository: LoginRepository,
     private val giftRepository: GiftRepository,
     private val brandSearchRepository: BrandSearchRepository,
-    private val sharedPref: SharedPreferences
+    private val sharedPref: SharedPreferences,
+    private val myAlarmManager: MyAlarmManager
 ) : ViewModel() {
 
     private var uid = sharedPref.getString("uid", "") ?: ""
     private var isAuthPin = sharedPref.getBoolean("auth_pin", false)
+    private var isNotiEndDt = sharedPref.getBoolean("noti_end_dt", true)
+
+    fun getIsNotiEndDt() = isNotiEndDt
 
     fun getIsAuthPin() = isAuthPin
+
+    fun onOffNotiEndDt(flag: Boolean) {
+        sharedPref.edit().putBoolean("noti_end_dt", flag).apply()
+        isNotiEndDt = flag
+
+        viewModelScope.launch(Dispatchers.IO) {
+            giftRepository.getAllGift().take(1).collectLatest { allGift ->
+                allGift.forEach { gift ->
+                    val tempGift = Gift(id = gift.id, uid = gift.uid, photo = gift.photo, name = gift.name, brand = gift.brand, endDt = gift.endDt, addDt = gift.addDt, memo = gift.memo, usedDt = gift.usedDt)
+                    myAlarmManager.cancel(tempGift.id)
+                    // 알림 등록
+                    if (isNotiEndDt && getDdayInt(tempGift.endDt) in 0..1) {
+                        myAlarmManager.schedule(tempGift, getDdayInt(tempGift.endDt))
+                    }
+                }
+            }
+        }
+    }
 
     fun offAuthPin() {
         sharedPref.edit().remove("pin_num").apply()

@@ -1,5 +1,7 @@
 package com.example.giftbox.model
 
+import java.io.Serializable
+
 data class Gift(
     var id: String = "",
     val uid: String = "",
@@ -10,4 +12,4 @@ data class Gift(
     val addDt: String = "",
     val memo: String = "",
     val usedDt: String = ""
-)
+) : Serializable

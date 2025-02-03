@@ -44,7 +44,7 @@ fun SettingScreen(onUsedGift: () -> Unit, movePinScreen: () -> Unit, moveLogInSc
 
     var showLogoutDlg by remember { mutableStateOf(false) }
     var showRemoveDlg by remember { mutableStateOf(false) }
-    var checkedAlarm by rememberSaveable { mutableStateOf(false) }
+    var checkedAlarm by rememberSaveable { mutableStateOf(settingViewModel.getIsNotiEndDt()) }
     var checkedPwd by rememberSaveable { mutableStateOf(settingViewModel.getIsAuthPin()) }
 
     Scaffold(
@@ -93,6 +93,7 @@ fun SettingScreen(onUsedGift: () -> Unit, movePinScreen: () -> Unit, moveLogInSc
                     checked = checkedAlarm,
                     onCheck = {
                         checkedAlarm = !checkedAlarm
+                        settingViewModel.onOffNotiEndDt(checkedAlarm)
                     }
                 )
 

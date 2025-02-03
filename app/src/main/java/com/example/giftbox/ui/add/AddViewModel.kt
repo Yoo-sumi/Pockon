@@ -9,6 +9,8 @@ import androidx.lifecycle.viewModelScope
 import com.example.giftbox.model.Gift
 import com.example.giftbox.data.GiftRepository
 import com.example.giftbox.R
+import com.example.giftbox.alarm.MyAlarmManager
+import com.example.giftbox.ui.utils.getDdayInt
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
@@ -19,9 +21,12 @@ import javax.inject.Inject
 @HiltViewModel
 class AddViewModel @Inject constructor(
     private val giftRepository: GiftRepository,
-    private val sharedPref: SharedPreferences
+    private val sharedPref: SharedPreferences,
+    private val myAlarmManager: MyAlarmManager
 ) : ViewModel() {
+
     private var uid = sharedPref.getString("uid", "") ?: ""
+    private var isNotiEndDt = sharedPref.getBoolean("noti_end_dt", true)
 
     private val _isShowDatePicker = mutableStateOf(false)
     val isShowDatePicker: State<Boolean> = _isShowDatePicker
@@ -73,6 +78,11 @@ class AddViewModel @Inject constructor(
         viewModelScope.launch {
             giftRepository.addGift(gift, _photo.value!!) { isSuccess ->
                 onAddComplete(isSuccess)
+                myAlarmManager.cancel(gift.id)
+                // 알림 등록
+                if (isNotiEndDt && getDdayInt(gift.endDt) in 0..1) {
+                    myAlarmManager.schedule(gift, getDdayInt(gift.endDt))
+                }
             }
         }
     }
@@ -88,13 +98,13 @@ class AddViewModel @Inject constructor(
     fun isValid(): Int? {
         var msg: Int? = null
         if (_photo.value == null) {
-            msg = R.string.mgs_no_photo
+            msg = R.string.msg_no_photo
         } else if (_name.value.isEmpty()) {
-            msg = R.string.mgs_no_name
+            msg = R.string.msg_no_name
         } else if (_brand.value.isEmpty()) {
-            msg = R.string.mgs_no_brand
+            msg = R.string.msg_no_brand
         } else if (_endDate.value.isEmpty() || _endDate.value.length < 8) {
-            msg = R.string.mgs_no_end_date
+            msg = R.string.msg_no_end_date
         }
 
         return msg

@@ -62,6 +62,20 @@ fun getDday(endDate: String): Pair<String, Boolean> {
     return Pair("", false)
 }
 
+fun getDdayInt(endDate: String): Int {
+    val formatter = DateTimeFormatter.BASIC_ISO_DATE
+    val current = LocalDateTime.now().format(formatter)
+
+    val dateFormat = SimpleDateFormat("yyyyMMdd", Locale.KOREA)
+    val startDate = dateFormat.parse(current)?.time
+    val parseEndDate = dateFormat.parse(endDate)?.time
+    if (parseEndDate != null && startDate != null) {
+        val diff = (parseEndDate - startDate) / (24 * 60 * 60 * 1000)
+        return diff.toInt()
+    }
+    return 0
+}
+
 fun formatString(endDate: String): String {
     return endDate.mapIndexed { index, c ->
         if (index == 3 || index == 5) "${c}." else c
