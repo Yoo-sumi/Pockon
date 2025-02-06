@@ -1,5 +1,6 @@
 package com.example.giftbox.ui.map
 
+import android.content.ContextWrapper
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
@@ -17,7 +18,7 @@ fun MapScreen(onBack: () -> Unit) {
 
     if (mapViewmodel.selectedGift.value != null) {
         // 클릭한 기프티콘 상세보기
-        DetailScreen(mapViewmodel.selectedGift.value!!) {
+        DetailScreen(mapViewmodel.selectedGift.value!!.id) {
             mapViewmodel.setSelectedGift(null)
         }
     } else if (mapViewmodel.displayInfoList.value.isNotEmpty()) {
@@ -30,7 +31,8 @@ fun MapScreen(onBack: () -> Unit) {
                 }
             },
             update = {
-                val fragmentManager = (it.context as FragmentActivity).supportFragmentManager
+                val baseContext = (it.context as ContextWrapper).baseContext
+                val fragmentManager = (baseContext as FragmentActivity).supportFragmentManager
                 fragmentManager.commit {
                     replace(
                         R.id.fragment_container_view,

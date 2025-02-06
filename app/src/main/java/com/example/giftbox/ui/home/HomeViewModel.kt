@@ -39,7 +39,7 @@ class HomeViewModel @Inject constructor(
             giftRepository.getAllGift().collectLatest { allGift ->
                 if (allGift.isNotEmpty()) {
                     giftList = allGift.map { gift ->
-                        Gift(id = gift.id, uid = gift.uid, photo = gift.photo, name = gift.name, brand = gift.brand, endDt = gift.endDt, addDt = gift.addDt, memo = gift.memo, usedDt = gift.usedDt)
+                        Gift(id = gift.id, uid = gift.uid, photo = gift.photo, name = gift.name, brand = gift.brand, endDt = gift.endDt, addDt = gift.addDt, memo = gift.memo, usedDt = gift.usedDt, cash = gift.cash)
                     }
 
                     // 기한 임박 기프티콘 목록(TOP 30)

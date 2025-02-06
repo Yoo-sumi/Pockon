@@ -8,7 +8,6 @@ import androidx.room.OnConflictStrategy
 import androidx.room.PrimaryKey
 import androidx.room.Query
 import androidx.room.RoomDatabase
-import androidx.room.TypeConverters
 import kotlinx.coroutines.flow.Flow
 
 @Database(
@@ -27,6 +26,9 @@ interface GiftDao {
 
     @Query("SELECT * FROM GiftEntity WHERE NULLIF(usedDt, '') IS NULL")
     fun getAllGift(): Flow<List<GiftEntity>>
+
+    @Query("SELECT * FROM GiftEntity WHERE id = :id")
+    fun getGift(id: String): Flow<GiftEntity>
 
     @Query("SELECT * FROM GiftEntity WHERE NULLIF(usedDt, '') IS NOT NULL")
     fun getAllUsedGift(): Flow<List<GiftEntity>>
@@ -49,5 +51,6 @@ data class GiftEntity(
     val endDt: String = "",
     val addDt: String = "",
     val memo: String = "",
-    val usedDt: String = ""
+    val usedDt: String = "",
+    val cash: String = ""
 )

@@ -46,7 +46,7 @@ import com.example.giftbox.ui.utils.formatString
 import com.example.giftbox.ui.utils.getDday
 
 @Composable
-fun UsedScreen(onDetail: (Gift) -> Unit) {
+fun UsedScreen(onDetail: (String) -> Unit) {
     val usedViewModel = hiltViewModel<UsedViewModel>()
 
     Column {
@@ -65,7 +65,7 @@ fun UsedScreen(onDetail: (Gift) -> Unit) {
         ) {
             itemsIndexed(items = usedViewModel.giftList.value) { index, gift ->
                 UsedGiftItem(gift, formatString(gift.endDt), getDday(gift.endDt)) {
-                    onDetail(gift)
+                    onDetail(gift.id)
                 }
             }
         }

@@ -36,7 +36,7 @@ class UsedViewModel @Inject constructor(
                 if (allGift.isNotEmpty()) {
                     val dateFormat = SimpleDateFormat("yyyyMMdd", Locale.KOREA)
                     _giftList.value =  allGift.map { gift ->
-                        Gift(id = gift.id, uid = gift.uid, photo = gift.photo, name = gift.name, brand = gift.brand, endDt = gift.endDt, addDt = gift.addDt, memo = gift.memo, usedDt = gift.usedDt)
+                        Gift(id = gift.id, uid = gift.uid, photo = gift.photo, name = gift.name, brand = gift.brand, endDt = gift.endDt, addDt = gift.addDt, memo = gift.memo, usedDt = gift.usedDt, cash = gift.cash)
                     }.sortedByDescending {  gift -> dateFormat.parse(gift.endDt)?.time }
                 } else {
                     // 기프티콘 없음

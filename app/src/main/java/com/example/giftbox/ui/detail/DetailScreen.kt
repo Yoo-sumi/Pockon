@@ -9,7 +9,10 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -18,8 +21,13 @@ import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.wrapContentHeight
+import androidx.compose.foundation.layout.wrapContentWidth
+import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.BasicTextField
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
@@ -28,6 +36,8 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.FilterChip
+import androidx.compose.material3.FilterChipDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -35,40 +45,49 @@ import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SheetState
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
-import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.RectangleShape
-import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.window.Dialog
 import androidx.hilt.navigation.compose.hiltViewModel
 import coil.compose.AsyncImage
 import com.example.giftbox.ui.utils.DateTransformation
 import com.example.giftbox.R
 import com.example.giftbox.model.Gift
+import com.example.giftbox.ui.utils.decimalFormat
+import com.example.giftbox.ui.utils.thousandSeparatorTransformation
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun DetailScreen(gift: Gift, onBack: () -> Unit) {
+fun DetailScreen(id: String, onBack: () -> Unit) {
     val detailViewModel = hiltViewModel<DetailViewModel>()
-    detailViewModel.setGift(gift)
+    detailViewModel.getGift(id)
 
     // scroll
     val scrollSate = rememberScrollState()
@@ -77,6 +96,7 @@ fun DetailScreen(gift: Gift, onBack: () -> Unit) {
     val inputDataList = listOf(
         detailViewModel.name.value,
         detailViewModel.brand.value,
+        detailViewModel.cash.value,
         detailViewModel.endDate.value,
         detailViewModel.memo.value
     )
@@ -133,6 +153,7 @@ fun DetailScreen(gift: Gift, onBack: () -> Unit) {
 
             // text field
             for (i in inputDataList.indices) {
+                if (i == 2 && detailViewModel.cash.value.isEmpty()) continue
                 InputDataTextField(
                     value = inputDataList[i],
                     label = detailViewModel.getLabelList(i),
@@ -162,8 +183,16 @@ fun DetailScreen(gift: Gift, onBack: () -> Unit) {
 
         if (detailViewModel.isShowBottomSheet.value) {
             GiftBottomSheet(detailViewModel.photo.value, scope, sheetState) { isUsed ->
-                if (isUsed) detailViewModel.setIsUsed(true)
-                else detailViewModel.setIsShowBottomSheet(false)
+                if (isUsed) {
+                    if (detailViewModel.cash.value.isNotEmpty()) {
+                        detailViewModel.setIsShowUseCashDialog(true)
+                        detailViewModel.setIsShowBottomSheet(false)
+                    } else {
+                        detailViewModel.setIsUsed(true)
+                    }
+                } else {
+                    detailViewModel.setIsShowBottomSheet(false)
+                }
             }
         }
         if (detailViewModel.isShowCancelDialog.value) {
@@ -177,6 +206,29 @@ fun DetailScreen(gift: Gift, onBack: () -> Unit) {
                 }
             )
         }
+
+        // 금액권 사용금액 입력 다이얼로그
+        if (detailViewModel.isShowUseCashDialog.value) {
+            Dialog(onDismissRequest = {}) {
+                Surface(
+                    modifier = Modifier
+                        .wrapContentWidth()
+                        .wrapContentHeight(),
+                    shape = RoundedCornerShape(12.dp),
+                    color = Color.White
+                ) {
+                    UseCashDialog(
+                        remainCash = detailViewModel.cash.value,
+                        onCancel = {
+                            detailViewModel.setIsShowUseCashDialog(false)
+                        },
+                        onConfirm = { useCash ->
+                            detailViewModel.setIsUsed(true, useCash)
+                        }
+                    )
+                }
+            }
+        }
     }
 }
 
@@ -185,8 +237,8 @@ fun InputDataTextField(value: String, label: Int, index: Int) {
     var modifier = Modifier
         .fillMaxWidth()
         .padding(top = 5.dp)
-    if (index == 3) {
-        modifier = modifier.height(200.dp)
+    if (index == 4) {
+        modifier = modifier.height(150.dp)
     }
 
     OutlinedTextField(
@@ -194,9 +246,13 @@ fun InputDataTextField(value: String, label: Int, index: Int) {
         modifier = modifier,
         value = value,
         onValueChange = {},
-        maxLines = if (index == 3) 50 else 1,
+        maxLines = if (index == 4) 50 else 1,
         label = { Text(stringResource(id = label)) },
-        visualTransformation = if (index == 2) DateTransformation() else VisualTransformation.None
+        visualTransformation = when(index) {
+            2 -> thousandSeparatorTransformation(true)
+            3 -> DateTransformation()
+            else -> VisualTransformation.None
+        }
     )
 }
 
@@ -379,7 +435,179 @@ fun UsedCancelDialog(onConfirm: () -> Unit, onDismiss: () -> Unit) {
                 Text(text = stringResource(id = R.string.btn_cancel))
             }
         },
-//        shape = RectangleShape
         shape = RoundedCornerShape(10.dp)
     )
+}
+
+// 사용 금액 입력 다이얼로그
+@Composable
+fun UseCashDialog(remainCash: String, onCancel: () -> Unit, onConfirm: (Int) -> Unit){
+    var inputCash by rememberSaveable { mutableStateOf("") }
+
+    Column(
+        modifier = Modifier.fillMaxWidth()
+    ) {
+        // title
+        Text(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(10.dp),
+            text = stringResource(id = R.string.txt_use_cash_inpur),
+            textAlign = TextAlign.Center,
+            fontSize = 16.sp
+        )
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(1.dp)
+                .background(color = Color.LightGray)
+        )
+
+        // cash button
+        LazyRow(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(top = 10.dp),
+            horizontalArrangement = Arrangement.Center
+        ) {
+            val useCashList = listOf(1000, 5000, 10000, remainCash.toInt())
+            items(useCashList.size) { idx ->
+                Spacer(modifier = Modifier.width(4.dp))
+                FilterChip(
+                    onClick = {
+                        val total = ((if (inputCash.isEmpty()) 0 else inputCash.toInt()) + useCashList[idx]).toString()
+                        inputCash = if (total.toInt() >= remainCash.toInt()) remainCash else total
+                    },
+                    label = {
+                        Text(
+                            text = if (idx == useCashList.lastIndex) {
+                                stringResource(id = R.string.btn_all_cash)
+                            } else {
+                                stringResource(id = R.string.format_cash, decimalFormat(useCashList[idx]))
+                            },
+                            fontWeight = FontWeight.Bold,
+                            fontSize = 10.sp,
+                        )
+                    },
+                    selected = false,
+                    shape = RoundedCornerShape(50.dp),
+                    colors = FilterChipDefaults.filterChipColors().copy(
+                        containerColor = MaterialTheme.colorScheme.surfaceContainerHighest,
+                        selectedContainerColor = MaterialTheme.colorScheme.primary
+                    ),
+                    border = null
+                )
+                Spacer(modifier = Modifier.width(4.dp))
+            }
+        }
+
+        // input cash
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(end = 20.dp),
+            horizontalArrangement = Arrangement.End,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            BasicTextField(
+                modifier = Modifier
+                    .wrapContentWidth()
+                    .alignByBaseline(),
+                value = inputCash,
+                onValueChange = {
+                    val input = if (it.isEmpty()) 0 else it.toInt()
+                    inputCash = if (input >= remainCash.toInt()) remainCash else it
+                },
+                visualTransformation = thousandSeparatorTransformation(false),
+                textStyle = TextStyle(
+                    fontSize = 24.sp,
+                    textAlign = TextAlign.End
+                ),
+                keyboardOptions = KeyboardOptions.Default.copy(keyboardType = KeyboardType.Number)
+            )
+            Text(
+                modifier = Modifier
+                    .wrapContentWidth()
+                    .alignByBaseline(),
+                text = stringResource(id = R.string.format_cash, ""),
+                fontSize = 24.sp,
+                textAlign = TextAlign.End
+            )
+        }
+
+        // remain cash
+        Text(
+            text = stringResource(id = R.string.format_remain_cash, decimalFormat(remainCash.toInt() - (if (inputCash.isEmpty()) 0 else inputCash.toInt()))),
+            textAlign = TextAlign.End,
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(end = 20.dp, bottom = 10.dp),
+            fontSize = 10.sp
+        )
+
+        // bottom button
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(1.dp)
+                .background(color = Color.LightGray)
+        )
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(IntrinsicSize.Min)
+        ) {
+            Button(
+                onClick = { onCancel() },
+                shape = RectangleShape,
+                modifier = Modifier
+                    .weight(1f)
+                    .fillMaxHeight(),
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = Color.White,
+                    contentColor = Color.Red,
+                    disabledContainerColor = Color.Gray,
+                    disabledContentColor = Color.White
+                )
+            ) {
+                Text(
+                    text = stringResource(id = R.string.btn_cancel),
+                    textAlign = TextAlign.Center,
+                    style = TextStyle(
+                        fontSize = 14.sp,
+                        fontWeight = FontWeight.Normal
+                    )
+                )
+            }
+
+            Box(
+                modifier = Modifier
+                    .fillMaxHeight()
+                    .width(1.dp)
+                    .background(color = Color.LightGray)
+            )
+            Button(
+                onClick = { onConfirm(remainCash.toInt() - (if (inputCash.isEmpty()) 0 else inputCash.toInt())) },
+                shape = RectangleShape,
+                modifier = Modifier
+                    .weight(1f)
+                    .fillMaxHeight(),
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = Color.White,
+                    contentColor = Color.Black,
+                    disabledContainerColor = Color.Gray,
+                    disabledContentColor = Color.White
+                ),
+            ) {
+                Text(
+                    text = stringResource(id = R.string.btn_confirm),
+                    textAlign = TextAlign.Center,
+                    style = TextStyle(
+                        fontSize = 14.sp,
+                        fontWeight = FontWeight.Normal
+                    )
+                )
+            }
+        }
+    }
 }

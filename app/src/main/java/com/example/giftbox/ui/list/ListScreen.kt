@@ -73,7 +73,7 @@ import com.example.giftbox.ui.utils.getDday
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun ListScreen(listViewModel: ListViewModel = viewModel(), onDetail: (Gift) -> Unit, onAdd: () -> Unit) {
+fun ListScreen(listViewModel: ListViewModel = viewModel(), onDetail: (String) -> Unit, onAdd: () -> Unit) {
     val refreshState = rememberPullToRefreshState()
     var showRemoveDlg by remember { mutableStateOf(false) }
 
@@ -264,13 +264,13 @@ fun ListScreen(listViewModel: ListViewModel = viewModel(), onDetail: (Gift) -> U
 }
 
 @Composable
-fun GiftItem(gift: Gift, formattedEndDate: String, dDay: Pair<String, Boolean>, onDetail: (Gift) -> Unit) {
+fun GiftItem(gift: Gift, formattedEndDate: String, dDay: Pair<String, Boolean>, onDetail: (String) -> Unit) {
     Box(
         modifier = Modifier
             .padding(3.dp)
             .clip(shape = RoundedCornerShape(10.dp))
             .clickable {
-                onDetail(gift)
+                onDetail(gift.id)
             }
     ) {
         Row(

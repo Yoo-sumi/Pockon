@@ -37,6 +37,8 @@ class AddViewModel @Inject constructor(
     val name: State<String> = _name
     private val _brand = mutableStateOf("")
     val brand: State<String> = _brand
+    private val _cash = mutableStateOf("")
+    val cash: State<String> = _cash
     private val _endDate = mutableStateOf("")
     val endDate: State<String> = _endDate
     private val _memo = mutableStateOf("")
@@ -63,8 +65,9 @@ class AddViewModel @Inject constructor(
         when (index) {
             0 -> _name.value = value
             1 -> _brand.value = value.trim()
-            2 -> _endDate.value = value
-            3 -> _memo.value = value
+            2 -> _cash.value = value
+            3 -> _endDate.value = value
+            4 -> _memo.value = value
         }
     }
 
@@ -74,7 +77,7 @@ class AddViewModel @Inject constructor(
             Locale.getDefault()
         ).format(Date(System.currentTimeMillis()))
 
-        val gift = Gift(uid = uid, name = _name.value, brand = _brand.value, endDt = _endDate.value, addDt = addDate, memo = _memo.value)
+        val gift = Gift(uid = uid, name = _name.value, brand = _brand.value, endDt = _endDate.value, addDt = addDate, memo = _memo.value, cash = _cash.value)
         viewModelScope.launch {
             giftRepository.addGift(gift, _photo.value!!) { isSuccess ->
                 onAddComplete(isSuccess)
@@ -95,7 +98,7 @@ class AddViewModel @Inject constructor(
         _isShowDatePicker.value = !_isShowDatePicker.value
     }
 
-    fun isValid(): Int? {
+    fun isValid(checkedCash: Boolean): Int? {
         var msg: Int? = null
         if (_photo.value == null) {
             msg = R.string.msg_no_photo
@@ -105,6 +108,8 @@ class AddViewModel @Inject constructor(
             msg = R.string.msg_no_brand
         } else if (_endDate.value.isEmpty() || _endDate.value.length < 8) {
             msg = R.string.msg_no_end_date
+        } else if (checkedCash && _cash.value.isEmpty()) {
+            msg = R.string.msg_no_cash
         }
 
         return msg
@@ -114,7 +119,8 @@ class AddViewModel @Inject constructor(
         return when (index) {
             0 -> R.string.txt_name
             1 -> R.string.txt_brand
-            2 -> R.string.txt_end_date
+            2 -> R.string.txt_cash
+            3 -> R.string.txt_end_date
             else -> R.string.txt_memo
         }
     }

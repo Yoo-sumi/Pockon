@@ -40,7 +40,7 @@ class SettingViewModel @Inject constructor(
         viewModelScope.launch(Dispatchers.IO) {
             giftRepository.getAllGift().take(1).collectLatest { allGift ->
                 allGift.forEach { gift ->
-                    val tempGift = Gift(id = gift.id, uid = gift.uid, photo = gift.photo, name = gift.name, brand = gift.brand, endDt = gift.endDt, addDt = gift.addDt, memo = gift.memo, usedDt = gift.usedDt)
+                    val tempGift = Gift(id = gift.id, uid = gift.uid, photo = gift.photo, name = gift.name, brand = gift.brand, endDt = gift.endDt, addDt = gift.addDt, memo = gift.memo, usedDt = gift.usedDt, cash = gift.cash)
                     myAlarmManager.cancel(tempGift.id)
                     // 알림 등록
                     if (isNotiEndDt && getDdayInt(tempGift.endDt) in 0..1) {

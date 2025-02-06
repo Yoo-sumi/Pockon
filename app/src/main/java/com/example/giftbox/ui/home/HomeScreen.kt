@@ -64,7 +64,7 @@ import com.google.android.gms.location.LocationServices
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun HomeScreen(onAdd: () -> Unit, showMap: () -> Unit, onDetail: (Gift) -> Unit) {
+fun HomeScreen(onAdd: () -> Unit, showMap: () -> Unit, onDetail: (String) -> Unit) {
     val homeViewModel = hiltViewModel<HomeViewModel>()
     val context = LocalContext.current
     val fusedLocationClient = remember {
@@ -150,7 +150,7 @@ fun HomeScreen(onAdd: () -> Unit, showMap: () -> Unit, onDetail: (Gift) -> Unit)
 
                     itemsIndexed(items = homeViewModel.displayGiftList.value) { index, gift ->
                         HomeGiftItem(gift.first, formatString(gift.first.endDt), getDday(gift.first.endDt), gift.second) {
-                            onDetail(gift.first)
+                            onDetail(gift.first.id)
                         }
                     }
                 }
@@ -180,7 +180,7 @@ fun HomeScreen(onAdd: () -> Unit, showMap: () -> Unit, onDetail: (Gift) -> Unit)
 
                     items(items = homeViewModel.closeToGiftList.value) { gift ->
                         HomeGiftItem(gift, formatString(gift.endDt), getDday(gift.endDt)) {
-                            onDetail(gift)
+                            onDetail(gift.id)
                         }
                     }
                 }

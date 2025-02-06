@@ -62,7 +62,7 @@ class ListViewModel @Inject constructor(
                 if (allGift.isNotEmpty()) {
                     val tempList = ArrayList<Gift>()
                     allGift.forEach { gift ->
-                        val tempGift = Gift(id = gift.id, uid = gift.uid, photo = gift.photo, name = gift.name, brand = gift.brand, endDt = gift.endDt, addDt = gift.addDt, memo = gift.memo, usedDt = gift.usedDt)
+                        val tempGift = Gift(id = gift.id, uid = gift.uid, photo = gift.photo, name = gift.name, brand = gift.brand, endDt = gift.endDt, addDt = gift.addDt, memo = gift.memo, usedDt = gift.usedDt, cash = gift.cash)
                         tempList.add(tempGift)
                         if (!registerNoti) {
                             myAlarmManager.cancel(tempGift.id)

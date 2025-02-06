@@ -11,5 +11,6 @@ data class Gift(
     val endDt: String = "",
     val addDt: String = "",
     val memo: String = "",
-    val usedDt: String = ""
+    val usedDt: String = "",
+    val cash: String = ""
 ) : Serializable

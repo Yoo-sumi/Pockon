@@ -201,9 +201,8 @@ fun BottomNavigationBar(movePinScreen: () -> Unit, moveLogInScreen: () -> Unit, 
                     showMap =  {
                         navController.navigate(route = Screen.Map.route)
                     },
-                    onDetail = { gift ->
-                        val gifJson = Uri.encode(Gson().toJson(gift))
-                        navController.navigate(route = "${Screen.Detail.route}/${gifJson}")
+                    onDetail = { id ->
+                        navController.navigate(route = "${Screen.Detail.route}/${id}")
                     }
                 )
             }
@@ -215,9 +214,8 @@ fun BottomNavigationBar(movePinScreen: () -> Unit, moveLogInScreen: () -> Unit, 
 
                 ListScreen(
                     listViewModel = listViewModel,
-                    onDetail = { gift ->
-                        val gifJson = Uri.encode(Gson().toJson(gift))
-                        navController.navigate(route = "${Screen.Detail.route}/${gifJson}")
+                    onDetail = { id ->
+                        navController.navigate(route = "${Screen.Detail.route}/${id}")
                     },
                     onAdd = {
                         navController.navigate(route = Screen.Add.route)
@@ -262,16 +260,15 @@ fun BottomNavigationBar(movePinScreen: () -> Unit, moveLogInScreen: () -> Unit, 
                 )
             }
             composable(
-                route = "${Screen.Detail.route}/{gift}",
+                route = "${Screen.Detail.route}/{id}",
                 arguments = listOf(
-                    navArgument("gift") {
+                    navArgument("id") {
                         type = NavType.StringType
                     }
                 )
             ) { navBackStackEntry ->
-                val giftJson = navBackStackEntry.arguments?.getString("gift")
-                val gift = Gson().fromJson(giftJson, Gift::class.java)
-                DetailScreen(gift) {
+                val id = navBackStackEntry.arguments?.getString("id") ?: ""
+                DetailScreen(id) {
                     navController.popBackStack()
                 }
             }
@@ -282,9 +279,8 @@ fun BottomNavigationBar(movePinScreen: () -> Unit, moveLogInScreen: () -> Unit, 
             }
             composable(Screen.Used.route) {
                 UsedScreen(
-                    onDetail = { gift ->
-                        val gifJson = Uri.encode(Gson().toJson(gift))
-                        navController.navigate(route = "${Screen.Detail.route}/${gifJson}")
+                    onDetail = { id ->
+                        navController.navigate(route = "${Screen.Detail.route}/${id}")
                     }
                 )
             }

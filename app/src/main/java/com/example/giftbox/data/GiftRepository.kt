@@ -59,11 +59,13 @@ class GiftRepository @Inject constructor(
 
     /* 로컬 */
     fun insertGift(gift: Gift) {
-        val giftEntity = GiftEntity(id = gift.id, uid = gift.uid, photo = gift.photo, name = gift.name, brand = gift.brand, endDt = gift.endDt, addDt = gift.addDt, memo = gift.memo, usedDt = gift.usedDt)
+        val giftEntity = GiftEntity(id = gift.id, uid = gift.uid, photo = gift.photo, name = gift.name, brand = gift.brand, endDt = gift.endDt, addDt = gift.addDt, memo = gift.memo, usedDt = gift.usedDt, cash = gift.cash)
         giftLocalDataSource.insertGift(giftEntity)
     }
 
     fun getAllGift() = giftLocalDataSource.getAllGift()
+
+    fun getGift(id: String) = giftLocalDataSource.getGift(id)
 
     fun getAllUsedGift() = giftLocalDataSource.getAllUsedGift()
 
