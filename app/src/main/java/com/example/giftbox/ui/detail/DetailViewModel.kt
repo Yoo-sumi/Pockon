@@ -1,13 +1,16 @@
 package com.example.giftbox.ui.detail
 
+import android.content.SharedPreferences
 import android.net.Uri
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.giftbox.R
+import com.example.giftbox.alarm.MyAlarmManager
 import com.example.giftbox.data.GiftRepository
 import com.example.giftbox.model.Gift
+import com.example.giftbox.ui.utils.getDdayInt
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.collectLatest
@@ -19,8 +22,12 @@ import javax.inject.Inject
 
 @HiltViewModel
 class DetailViewModel @Inject constructor(
-    private val giftRepository: GiftRepository
+    private val giftRepository: GiftRepository,
+    private val myAlarmManager: MyAlarmManager,
+    private val sharedPref: SharedPreferences
 ) : ViewModel() {
+
+    private var isNotiEndDt = sharedPref.getBoolean("noti_end_dt", true)
 
     private val _gift = mutableStateOf(Gift())
     val gift: State<Gift> = _gift
@@ -49,6 +56,15 @@ class DetailViewModel @Inject constructor(
     private val _isShowUseCashDialog = mutableStateOf(false)
     val isShowUseCashDialog: State<Boolean> = _isShowUseCashDialog
 
+    private val _isShowDatePicker = mutableStateOf(false)
+    val isShowDatePicker: State<Boolean> = _isShowDatePicker
+
+    private val _isCheckedCash = mutableStateOf(false)
+    val isCheckedCash: State<Boolean> = _isCheckedCash
+
+    private val _isEdit = mutableStateOf(false)
+    val isEdit: State<Boolean> = _isEdit
+
     fun getGift(id: String) {
         viewModelScope.launch(Dispatchers.IO) {
             giftRepository.getGift(id).collectLatest { gift ->
@@ -58,7 +74,7 @@ class DetailViewModel @Inject constructor(
     }
 
     private fun setGift(gift: Gift) {
-        this._gift.value = gift
+        if (!_isEdit.value) this._gift.value = gift
         _name.value = gift.name
         _brand.value = gift.brand
         _cash.value = gift.cash
@@ -66,6 +82,17 @@ class DetailViewModel @Inject constructor(
         _memo.value = gift.memo
         _usedDt.value = gift.usedDt
         _photo.value = Uri.parse(gift.photo)
+        _isCheckedCash.value = gift.cash.isNotEmpty()
+    }
+
+    fun setGift(index: Int, value: String) {
+        when (index) {
+            0 -> _name.value = value
+            1 -> _brand.value = value.trim()
+            2 -> _cash.value = value
+            3 -> _endDate.value = value
+            4 -> _memo.value = value
+        }
     }
 
     fun getLabelList(index: Int): Int {
@@ -88,6 +115,43 @@ class DetailViewModel @Inject constructor(
 
     fun setIsShowUseCashDialog(flag: Boolean) {
         _isShowUseCashDialog.value = flag
+    }
+
+    fun setIsEdit(flag: Boolean) {
+        _isEdit.value = flag
+    }
+
+    fun setPhoto(photo: Uri?) {
+        _photo.value = photo
+    }
+
+    fun updateGift(onComplete: (Boolean) -> Unit) {
+        viewModelScope.launch {
+            val updateGift = if (_isCheckedCash.value) {
+                Gift(id = _gift.value.id, uid = _gift.value.uid, photo = _photo.value.toString(), name = _name.value, brand = _brand.value, endDt = _endDate.value, addDt = _gift.value.addDt, memo = _memo.value, usedDt = _gift.value.usedDt, cash = _cash.value)
+            } else {
+                Gift(id = _gift.value.id, uid = _gift.value.uid, photo = _photo.value.toString(), name = _name.value, brand = _brand.value, endDt = _endDate.value, addDt = _gift.value.addDt, memo = _memo.value, usedDt = _gift.value.usedDt, cash = "")
+            }
+            giftRepository.updateGift(updateGift).collect { result ->
+                // 수정 성공
+                if (result) {
+                    // 로컬 수정
+                    viewModelScope.launch(Dispatchers.IO) {
+                        giftRepository.insertGift(updateGift)
+                    }
+                    myAlarmManager.cancel(updateGift.id)
+                    // 알림 등록
+                    if (isNotiEndDt && getDdayInt(updateGift.endDt) in 0..1) {
+                        myAlarmManager.schedule(updateGift, getDdayInt(updateGift.endDt))
+                    }
+                    _gift.value = updateGift
+                    _isEdit.value = false
+                    onComplete(true)
+                } else { // 수정 실패
+                    onComplete(false)
+                }
+            }
+        }
     }
 
     fun setIsUsed(flag: Boolean, cash: Int? = null) {
@@ -114,5 +178,30 @@ class DetailViewModel @Inject constructor(
                 }
             }
         }
+    }
+
+    fun chgCheckedCash() {
+        _isCheckedCash.value = !_isCheckedCash.value
+    }
+
+    fun changeDatePickerState() {
+        _isShowDatePicker.value = !_isShowDatePicker.value
+    }
+
+    fun isValid(): Int? {
+        var msg: Int? = null
+        if (_photo.value == null) {
+            msg = R.string.msg_no_photo
+        } else if (_name.value.isEmpty()) {
+            msg = R.string.msg_no_name
+        } else if (_brand.value.isEmpty()) {
+            msg = R.string.msg_no_brand
+        } else if (_endDate.value.isEmpty() || _endDate.value.length < 8) {
+            msg = R.string.msg_no_end_date
+        } else if (_isCheckedCash.value && _cash.value.isEmpty()) {
+            msg = R.string.msg_no_cash
+        }
+
+        return msg
     }
 }

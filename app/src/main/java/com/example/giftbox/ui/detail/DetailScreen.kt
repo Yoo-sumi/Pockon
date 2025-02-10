@@ -2,6 +2,9 @@ package com.example.giftbox.ui.detail
 
 import android.net.Uri
 import androidx.activity.compose.BackHandler
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.PickVisualMediaRequest
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -31,37 +34,46 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.DateRange
+import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.CenterAlignedTopAppBar
+import androidx.compose.material3.Checkbox
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.FilterChipDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.LocalMinimumInteractiveComponentEnforcement
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SheetState
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.rotate
+import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
@@ -69,7 +81,6 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
@@ -77,7 +88,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import coil.compose.AsyncImage
 import com.example.giftbox.ui.utils.DateTransformation
 import com.example.giftbox.R
-import com.example.giftbox.model.Gift
+import com.example.giftbox.ui.add.CustomDatePickerDialog
 import com.example.giftbox.ui.utils.decimalFormat
 import com.example.giftbox.ui.utils.thousandSeparatorTransformation
 import kotlinx.coroutines.CoroutineScope
@@ -87,7 +98,7 @@ import kotlinx.coroutines.launch
 @Composable
 fun DetailScreen(id: String, onBack: () -> Unit) {
     val detailViewModel = hiltViewModel<DetailViewModel>()
-    detailViewModel.getGift(id)
+    if (!detailViewModel.isEdit.value) detailViewModel.getGift(id)
 
     // scroll
     val scrollSate = rememberScrollState()
@@ -104,32 +115,27 @@ fun DetailScreen(id: String, onBack: () -> Unit) {
     val sheetState = rememberModalBottomSheetState(
         skipPartiallyExpanded = true
     )
+    // snackbar
+    val snackbarHostState = remember { SnackbarHostState() }
     val scope = rememberCoroutineScope()
+    val context = LocalContext.current
+
+    // select photo
+    val galleryLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.PickVisualMedia()
+    ) { uri ->
+        uri?.let {
+            detailViewModel.setPhoto(it)
+        }
+    }
 
     BackHandler {
         onBack()
     }
 
     Scaffold(
-        topBar = {
-            CenterAlignedTopAppBar(
-                title = {
-                    Text(
-                        text = stringResource(id = R.string.title_detail_gift),
-                        style = MaterialTheme.typography.titleSmall
-                    )
-                },
-                navigationIcon = {
-                    IconButton(onClick = {
-                        onBack()
-                    }) {
-                        Icon(
-                            imageVector = Icons.AutoMirrored.Filled.ArrowBack
-                            , contentDescription = "back button"
-                        )
-                    }
-                }
-            )
+        snackbarHost = {
+            SnackbarHost(hostState = snackbarHostState)
         },
         modifier = Modifier
             .fillMaxSize()
@@ -137,47 +143,159 @@ fun DetailScreen(id: String, onBack: () -> Unit) {
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .background(MaterialTheme.colorScheme.background)
                 .padding(innerPadding)
+                .background(MaterialTheme.colorScheme.background)
                 .verticalScroll(scrollSate)
-                .padding(25.dp)
+                .padding(5.dp)
         ) {
-            // gift image
-            GiftImage(detailViewModel.photo.value, detailViewModel.usedDt.value) {
-                if (detailViewModel.usedDt.value.isEmpty()) {
-                    detailViewModel.setIsShowBottomSheet(true)
-                } else {
-                    detailViewModel.setIsShowCancelDialog(true)
+            // topbar
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.SpaceBetween,
+            ) {
+                IconButton(
+                    onClick = {
+                        onBack()
+                    }
+                ) {
+                    Icon(
+                        Icons.AutoMirrored.Default.ArrowBack,
+                        contentDescription = "More Filter"
+                    )
+                }
+                Text(
+                    modifier = Modifier,
+                    text = stringResource(id = R.string.title_detail_gift),
+                    fontSize = 16.sp,
+                )
+                IconButton(
+                    onClick = {
+                        detailViewModel.setIsEdit(true)
+                    }
+                ) {
+                    if (!detailViewModel.isEdit.value) {
+                        Icon(
+                            Icons.Default.Edit,
+                            contentDescription = "Edit"
+                        )
+                    } else {
+                        Text(
+                            modifier = Modifier.clickable { detailViewModel.setIsEdit(false) },
+                            text = stringResource(id = R.string.btn_cancel),
+                            fontSize = 14.sp
+                        )
+                    }
                 }
             }
-
-            // text field
-            for (i in inputDataList.indices) {
-                if (i == 2 && detailViewModel.cash.value.isEmpty()) continue
-                InputDataTextField(
-                    value = inputDataList[i],
-                    label = detailViewModel.getLabelList(i),
-                    index = i
-                )
-            }
-
-            // use or cancel button
-            Button(
-                onClick = {
-                    if (detailViewModel.usedDt.value.isEmpty()) {
+            Column(modifier = Modifier.padding(end = 20.dp, start = 20.dp, top = 10.dp)) {
+                // gift image
+                GiftImage(detailViewModel.photo.value, detailViewModel.usedDt.value) {
+                    if (detailViewModel.isEdit.value) {
+                        galleryLauncher.launch(
+                            PickVisualMediaRequest(
+                                ActivityResultContracts.PickVisualMedia.ImageOnly
+                            )
+                        )
+                    } else if (detailViewModel.usedDt.value.isEmpty()) {
                         detailViewModel.setIsShowBottomSheet(true)
                     } else {
                         detailViewModel.setIsShowCancelDialog(true)
                     }
-                },
-                shape = RectangleShape,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(top = 20.dp),
-                colors = if (detailViewModel.usedDt.value.isNotEmpty()) ButtonDefaults.buttonColors(containerColor = Color.LightGray) else ButtonDefaults.buttonColors()
-            ) {
-                if (detailViewModel.usedDt.value.isEmpty()) Text(text = stringResource(id = R.string.btn_use))
-                else Text(text = stringResource(id = R.string.btn_use_cancel), color = Color.White, fontWeight = FontWeight.Bold)
+                }
+                if (detailViewModel.isEdit.value) {
+                    // cash
+                    Box(
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        Row(
+                            modifier = Modifier
+                                .align(Alignment.CenterEnd),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Text(
+                                modifier = Modifier
+                                    .fillMaxHeight()
+                                    .padding(end = 8.dp),
+                                text = stringResource(R.string.txt_cash_certificate),
+                                textAlign = TextAlign.Center
+                            )
+                            CompositionLocalProvider(LocalMinimumInteractiveComponentEnforcement provides false) {
+                                Checkbox(
+                                    modifier = Modifier
+                                        .scale(0.8f),
+                                    checked = detailViewModel.isCheckedCash.value,
+                                    onCheckedChange = {
+                                        detailViewModel.chgCheckedCash()
+                                    }
+                                )
+                            }
+                        }
+                    }
+                }
+
+                // text field
+                for (i in inputDataList.indices) {
+                    if (detailViewModel.isEdit.value && i == 2 && !detailViewModel.isCheckedCash.value) continue
+                    if (!detailViewModel.isEdit.value && i == 2 && detailViewModel.cash.value.isEmpty()) continue
+                    InputDataTextField(
+                        value = inputDataList[i],
+                        label = detailViewModel.getLabelList(i),
+                        index = i,
+                        detailViewModel.isEdit.value,
+                        onValueChange = { index, value ->
+                            detailViewModel.setGift(index, value)
+                        },
+                        onDatePicker = {
+                            if (i == 3) {
+                                detailViewModel.changeDatePickerState()
+                            }
+                        }
+                    )
+                }
+
+                // use or cancel button
+                Button(
+                    onClick = {
+                        if (detailViewModel.isEdit.value) {
+                            val msg = detailViewModel.isValid()
+                            if (msg != null) {
+                                scope.launch {
+                                    snackbarHostState.showSnackbar(message = context.getString(msg))
+                                }
+                            } else {
+                                detailViewModel.updateGift { result ->
+                                    scope.launch {
+                                        if (result) snackbarHostState.showSnackbar(message = context.getString(R.string.msg_ok_update))
+                                        else snackbarHostState.showSnackbar(message = context.getString(R.string.msg_no_update))
+                                    }
+                                }
+
+                            }
+                        } else if (detailViewModel.usedDt.value.isEmpty()) {
+                            detailViewModel.setIsShowBottomSheet(true)
+                        } else {
+                            detailViewModel.setIsShowCancelDialog(true)
+                        }
+                    },
+                    shape = RectangleShape,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(top = 20.dp),
+                    colors = if (detailViewModel.usedDt.value.isNotEmpty()) ButtonDefaults.buttonColors(containerColor = Color.LightGray) else ButtonDefaults.buttonColors()
+                ) {
+                    if (detailViewModel.isEdit.value) {
+                        Text(text = stringResource(id = R.string.btn_save))
+                    } else if (detailViewModel.usedDt.value.isEmpty()) {
+                        Text(text = stringResource(id = R.string.btn_use))
+                    } else {
+                        Text(
+                            text = stringResource(id = R.string.btn_use_cancel),
+                            color = Color.White,
+                            fontWeight = FontWeight.Bold
+                        )
+                    }
+                }
             }
         }
 
@@ -229,11 +347,24 @@ fun DetailScreen(id: String, onBack: () -> Unit) {
                 }
             }
         }
+
+        // DatePicker
+        if (detailViewModel.isShowDatePicker.value) {
+            CustomDatePickerDialog(
+                selectedDate = detailViewModel.endDate.value,
+                onCancel = { detailViewModel.changeDatePickerState() },
+                onConfirm = {
+                    detailViewModel.changeDatePickerState()
+                    detailViewModel.setGift(3, value = it)
+                }
+            )
+        }
     }
 }
 
 @Composable
-fun InputDataTextField(value: String, label: Int, index: Int) {
+fun InputDataTextField(value: String, label: Int, index: Int, isEdit: Boolean, onValueChange: (Int, String) -> Unit, onDatePicker: () -> Unit)
+{
     var modifier = Modifier
         .fillMaxWidth()
         .padding(top = 5.dp)
@@ -242,17 +373,31 @@ fun InputDataTextField(value: String, label: Int, index: Int) {
     }
 
     OutlinedTextField(
-        readOnly = true,
+        readOnly = !isEdit,
         modifier = modifier,
         value = value,
-        onValueChange = {},
+        onValueChange = { 
+            if (it.length > 8 && index == 3) return@OutlinedTextField
+            onValueChange(index, it)
+        },
         maxLines = if (index == 4) 50 else 1,
         label = { Text(stringResource(id = label)) },
         visualTransformation = when(index) {
             2 -> thousandSeparatorTransformation(true)
             3 -> DateTransformation()
             else -> VisualTransformation.None
-        }
+        },
+        trailingIcon = {
+            if (index == 3 && isEdit) {
+                IconButton(onClick = { onDatePicker() }) {
+                    Icon(
+                        imageVector = Icons.Filled.DateRange,
+                        contentDescription = "DateRange"
+                    )
+                }
+            }
+        },
+        keyboardOptions = if (isEdit && (index == 2 || index == 3)) KeyboardOptions.Default.copy(keyboardType = KeyboardType.Number) else KeyboardOptions.Default
     )
 }
 
@@ -269,6 +414,10 @@ fun GiftImage(selectedImage: Uri?, usedDt: String, onClick: () -> Unit) {
             modifier = Modifier
                 .width(200.dp)
                 .height(200.dp)
+                .background(Color.LightGray)
+                .clickable {
+                    onClick()
+                }
         ) {
             if (selectedImage == null) {
                 Image(
@@ -282,10 +431,7 @@ fun GiftImage(selectedImage: Uri?, usedDt: String, onClick: () -> Unit) {
             } else {
                 AsyncImage(
                     modifier = Modifier
-                        .fillMaxSize()
-                        .clickable {
-                            onClick()
-                        },
+                        .fillMaxSize(),
                     model = selectedImage,
                     contentDescription = "detail photo",
                     contentScale = ContentScale.Crop
