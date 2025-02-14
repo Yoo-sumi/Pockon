@@ -2,13 +2,13 @@ package com.example.giftbox.ui.list
 
 import androidx.compose.animation.animateContentSize
 import com.example.giftbox.R
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -22,10 +22,12 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.MoreVert
+import androidx.compose.material.icons.filled.CheckCircle
+import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CenterAlignedTopAppBar
+import androidx.compose.material3.Checkbox
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -33,7 +35,8 @@ import androidx.compose.material3.FilterChip
 import androidx.compose.material3.FilterChipDefaults
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
+import androidx.compose.material3.LocalContentColor
+import androidx.compose.material3.LocalMinimumInteractiveComponentEnforcement
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SmallFloatingActionButton
@@ -46,6 +49,7 @@ import androidx.compose.material3.pulltorefresh.PullToRefreshContainer
 import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
 import androidx.compose.material3.rememberSwipeToDismissBoxState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -55,8 +59,8 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.colorResource
@@ -75,18 +79,30 @@ import com.example.giftbox.ui.utils.getDday
 @Composable
 fun ListScreen(listViewModel: ListViewModel = viewModel(), onDetail: (String) -> Unit, onAdd: () -> Unit) {
     val refreshState = rememberPullToRefreshState()
-    var showRemoveDlg by remember { mutableStateOf(false) }
+    var showRemoveDlg by rememberSaveable { mutableStateOf(false) }
+    var isEdit by rememberSaveable { mutableStateOf(false) }
+    var isAllSelect by rememberSaveable { mutableStateOf(false) }
 
     if (refreshState.isRefreshing) {
         listViewModel.getGiftList()
         listViewModel.setTopTitle(R.string.top_app_bar_recent)
         refreshState.endRefresh()
+        isEdit = false
+        listViewModel.clearCheckedGiftList()
     }
 
     if (showRemoveDlg) {
         RemoveDialog(onConfirm = {
-            listViewModel.removeGift()
             showRemoveDlg = false
+            if (isEdit) {
+                listViewModel.deleteSelection {
+                    isEdit = !isEdit
+                    isAllSelect = false
+                    listViewModel.clearCheckedGiftList()
+                }
+            } else {
+                listViewModel.removeGift()
+            }
         }) {
             showRemoveDlg = false
         }
@@ -99,13 +115,34 @@ fun ListScreen(listViewModel: ListViewModel = viewModel(), onDetail: (String) ->
                     containerColor = MaterialTheme.colorScheme.secondaryContainer,
                 ),
                 title = {
-                    Text(text = stringResource(id = listViewModel.topTitle.value))
-                },
-                actions = {
-                    TopAppBarDropDownMenu { title ->
+                    TopAppBarDropDownMenu(listViewModel.topTitle.value) { title ->
                         listViewModel.setTopTitle(title)
                         listViewModel.orderBy()
                     }
+                },
+                actions = {
+                    val title = if (isEdit) {
+                        R.string.btn_delete
+                    } else {
+                        R.string.btn_edit
+                    }
+                    Text(
+                        modifier = Modifier
+                            .padding(end = 15.dp)
+                            .clickable {
+                                // 삭제
+                                if (isEdit) {
+                                    if (listViewModel.checkedGiftList.value.isEmpty()) isEdit = false
+                                    else showRemoveDlg = true
+                                } else { // 편집
+                                    isEdit = true
+                                    isAllSelect = false
+                                    listViewModel.clearCheckedGiftList()
+                                }
+                            },
+                        text = stringResource(id = title),
+                        fontSize = 14.sp
+                    )
                 }
             )
         }
@@ -117,7 +154,7 @@ fun ListScreen(listViewModel: ListViewModel = viewModel(), onDetail: (String) ->
                 .nestedScroll(refreshState.nestedScrollConnection)
         ) {
             Column(
-                modifier = Modifier.padding(20.dp)
+                modifier = Modifier.padding(end = 20.dp, start = 20.dp, top = 10.dp)
             ) {
                 // chip
                 LazyRow {
@@ -127,6 +164,7 @@ fun ListScreen(listViewModel: ListViewModel = viewModel(), onDetail: (String) ->
                             val key = keys[idx]
                             FilterChip(
                                 onClick = {
+                                    isAllSelect = false
                                     listViewModel.changeChipState(listOf(key))
                                 },
                                 label = {
@@ -157,6 +195,27 @@ fun ListScreen(listViewModel: ListViewModel = viewModel(), onDetail: (String) ->
                     }
                 }
 
+                // all delete
+                if (isEdit) {
+                    Row(
+                        modifier = Modifier.padding(top = 5.dp, bottom = 10.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        CompositionLocalProvider(LocalMinimumInteractiveComponentEnforcement provides false) {
+                            Checkbox(
+                                modifier = Modifier
+                                    .scale(0.8f),
+                                checked = isAllSelect,
+                                onCheckedChange = {
+                                    isAllSelect = !isAllSelect
+                                    listViewModel.selectAll(isAllSelect)
+                                }
+                            )
+                        }
+                        Text(text = "전체 선택")
+                    }
+                }
+                
                 // gift item
                 LazyColumn(
                     modifier = Modifier
@@ -212,7 +271,17 @@ fun ListScreen(listViewModel: ListViewModel = viewModel(), onDetail: (String) ->
                                 }
                             }
                         ) {
-                            GiftItem(gift = gift, formatString(gift.endDt), getDday(gift.endDt)) { onDetail(it) }
+                            GiftItem(
+                                isEdit = isEdit,
+                                gift = gift,
+                                formattedEndDate = formatString(gift.endDt),
+                                dDay = getDday(gift.endDt),
+                                isCheck = listViewModel.checkedGiftList.value.contains(gift.id),
+                                onClick = {
+                                    if (isEdit) listViewModel.checkedGift(gift.id)
+                                    else onDetail(gift.id)
+                                }
+                            )
                         }
 
                         when (swipeState.currentValue) {
@@ -264,19 +333,21 @@ fun ListScreen(listViewModel: ListViewModel = viewModel(), onDetail: (String) ->
 }
 
 @Composable
-fun GiftItem(gift: Gift, formattedEndDate: String, dDay: Pair<String, Boolean>, onDetail: (String) -> Unit) {
+fun GiftItem(isEdit: Boolean, gift: Gift, formattedEndDate: String, dDay: Pair<String, Boolean>, isCheck: Boolean, onClick: () -> Unit) {
     Box(
         modifier = Modifier
+            .height(120.dp)
+            .fillMaxWidth()
             .padding(3.dp)
             .clip(shape = RoundedCornerShape(10.dp))
             .clickable {
-                onDetail(gift.id)
+                onClick()
             }
     ) {
         Row(
             modifier = Modifier
                 .background(MaterialTheme.colorScheme.surfaceContainerLowest)
-                .height(120.dp)
+                .fillMaxHeight()
         ) {
             Box(modifier = Modifier
                 .size(120.dp)
@@ -331,24 +402,47 @@ fun GiftItem(gift: Gift, formattedEndDate: String, dDay: Pair<String, Boolean>, 
                 .padding(start = 15.dp, end = 15.dp, top = 5.dp, bottom = 5.dp),
             color = MaterialTheme.colorScheme.surfaceContainerLowest
         )
+
+        // selected color
+        if (isEdit && isCheck) {
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .background(Color.Black.copy(0.3f))
+            ) {
+                CompositionLocalProvider(LocalContentColor provides Color.White) {
+                    Icon(
+                        modifier = Modifier
+                            .align(Alignment.Center)
+                            .size(30.dp),
+                        imageVector = Icons.Filled.CheckCircle,
+                        contentDescription = "check")
+                }
+            }
+        }
     }
 }
 
 @Composable
-fun TopAppBarDropDownMenu(setTopTitle: (Int) -> Unit) {
+fun TopAppBarDropDownMenu(topTitle: Int, setTopTitle: (Int) -> Unit) {
     val expanded = remember {
         mutableStateOf(false)
     }
 
-    Box {
-        IconButton(onClick = {
+    Row(
+        modifier = Modifier.clickable {
             expanded.value = true
-        }) {
-            Icon(
-                Icons.Filled.MoreVert,
-                contentDescription = "More Filter"
-            )
-        }
+        },
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Text(
+            text = stringResource(id = topTitle),
+            fontSize = 20.sp
+        )
+        Icon(
+            Icons.Filled.KeyboardArrowDown,
+            contentDescription = "More Filter"
+        )
     }
 
     DropdownMenu(

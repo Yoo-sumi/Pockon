@@ -145,31 +145,30 @@ fun DetailScreen(id: String, onBack: () -> Unit) {
                 .fillMaxSize()
                 .padding(innerPadding)
                 .background(MaterialTheme.colorScheme.background)
-                .verticalScroll(scrollSate)
                 .padding(5.dp)
         ) {
             // topbar
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.SpaceBetween,
+            Box(
+                modifier = Modifier.fillMaxWidth()
             ) {
                 IconButton(
+                    modifier = Modifier.align(Alignment.CenterStart),
                     onClick = {
                         onBack()
                     }
                 ) {
                     Icon(
                         Icons.AutoMirrored.Default.ArrowBack,
-                        contentDescription = "More Filter"
+                        contentDescription = "back button"
                     )
                 }
                 Text(
-                    modifier = Modifier,
+                    modifier = Modifier.align(Alignment.Center),
                     text = stringResource(id = R.string.title_detail_gift),
                     fontSize = 16.sp,
                 )
                 IconButton(
+                    modifier = Modifier.align(Alignment.CenterEnd),
                     onClick = {
                         detailViewModel.setIsEdit(true)
                     }
@@ -188,7 +187,11 @@ fun DetailScreen(id: String, onBack: () -> Unit) {
                     }
                 }
             }
-            Column(modifier = Modifier.padding(end = 20.dp, start = 20.dp, top = 10.dp)) {
+            Column(
+                modifier = Modifier
+                    .padding(end = 20.dp, start = 20.dp, top = 10.dp)
+                    .verticalScroll(scrollSate)
+            ) {
                 // gift image
                 GiftImage(detailViewModel.photo.value, detailViewModel.usedDt.value) {
                     if (detailViewModel.isEdit.value) {

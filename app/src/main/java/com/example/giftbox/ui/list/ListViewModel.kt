@@ -16,10 +16,10 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
-import java.util.ArrayList
 import java.util.Date
 import java.util.Locale
 import javax.inject.Inject
+import kotlin.collections.ArrayList
 
 @HiltViewModel
 class ListViewModel @Inject constructor(
@@ -45,6 +45,9 @@ class ListViewModel @Inject constructor(
 
     private val _topTitle = mutableIntStateOf(R.string.top_app_bar_recent)
     val topTitle: State<Int> = _topTitle
+
+    private val _checkedGiftList = mutableStateOf<List<String>>(listOf())
+    val checkedGiftList: State<List<String>> = _checkedGiftList
 
     init {
         observeGiftList() // 관찰자 등록
@@ -143,6 +146,7 @@ class ListViewModel @Inject constructor(
         filterList = beforeFilters
         filterList()
         orderBy()
+        clearCheckedGiftList()
     }
 
     private fun filterList() {
@@ -209,6 +213,62 @@ class ListViewModel @Inject constructor(
                 } else { // 삭제 실패
                     // 네트워크가 불안정합니다. 인터넷 연결을 확인해주세요.
                     TODO()
+                }
+            }
+        }
+    }
+
+    // 선택된 기프티콘 리스트에 추가(for 삭제)
+    fun checkedGift(id: String) {
+        val filterList = _checkedGiftList.value.filter { it != id }
+        if (filterList.size == _checkedGiftList.value.size) {
+            val checkedList = _checkedGiftList.value.toMutableList()
+            checkedList.add(id)
+            _checkedGiftList.value = checkedList
+        } else {
+            _checkedGiftList.value = filterList
+        }
+    }
+
+    // 선택된 기프티콘 리스트 초기화
+    fun clearCheckedGiftList() {
+        _checkedGiftList.value = listOf()
+    }
+
+    // 전체선택/전체해제
+    fun selectAll(isAll: Boolean) {
+        if (isAll) {
+            _checkedGiftList.value = _copyGiftList.value.map { it.id }
+        } else {
+            _checkedGiftList.value = listOf()
+        }
+    }
+
+    // 선택 삭제/전체 삭제
+    fun deleteSelection(onComplete: () -> Unit) {
+        viewModelScope.launch {
+            val resultList = ArrayList<Boolean>()
+            var isFail = false
+            _checkedGiftList.value.forEach { giftId ->
+                giftRepository.removeGift(uid, giftId) { result ->
+                    resultList.add(result)
+                    if (!result) isFail = true
+                    // end
+                    if (resultList.size == _checkedGiftList.value.size) {
+                        if (isFail) {
+                            onComplete()
+                            // 기프티콘 삭제에 실패했습니다.
+                        } else {
+                            _checkedGiftList.value.forEach { id ->
+                                // 로컬 삭제
+                                viewModelScope.launch(Dispatchers.IO) {
+                                    giftRepository.deleteGift(id)
+                                }
+                                myAlarmManager.cancel(id)
+                            }
+                            onComplete()
+                        }
+                    }
                 }
             }
         }
