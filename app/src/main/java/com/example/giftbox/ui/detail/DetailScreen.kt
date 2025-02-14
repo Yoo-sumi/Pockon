@@ -707,35 +707,6 @@ fun UseCashDialog(remainCash: String, onCancel: () -> Unit, onConfirm: (Int) -> 
                 .height(IntrinsicSize.Min)
         ) {
             Button(
-                onClick = { onCancel() },
-                shape = RectangleShape,
-                modifier = Modifier
-                    .weight(1f)
-                    .fillMaxHeight(),
-                colors = ButtonDefaults.buttonColors(
-                    containerColor = Color.White,
-                    contentColor = Color.Red,
-                    disabledContainerColor = Color.Gray,
-                    disabledContentColor = Color.White
-                )
-            ) {
-                Text(
-                    text = stringResource(id = R.string.btn_cancel),
-                    textAlign = TextAlign.Center,
-                    style = TextStyle(
-                        fontSize = 14.sp,
-                        fontWeight = FontWeight.Normal
-                    )
-                )
-            }
-
-            Box(
-                modifier = Modifier
-                    .fillMaxHeight()
-                    .width(1.dp)
-                    .background(color = Color.LightGray)
-            )
-            Button(
                 onClick = { onConfirm(remainCash.toInt() - (if (inputCash.isEmpty()) 0 else inputCash.toInt())) },
                 shape = RectangleShape,
                 modifier = Modifier
@@ -750,6 +721,36 @@ fun UseCashDialog(remainCash: String, onCancel: () -> Unit, onConfirm: (Int) -> 
             ) {
                 Text(
                     text = stringResource(id = R.string.btn_confirm),
+                    textAlign = TextAlign.Center,
+                    style = TextStyle(
+                        fontSize = 14.sp,
+                        fontWeight = FontWeight.Normal
+                    )
+                )
+            }
+
+            Box(
+                modifier = Modifier
+                    .fillMaxHeight()
+                    .width(1.dp)
+                    .background(color = Color.LightGray)
+            )
+
+            Button(
+                onClick = { onCancel() },
+                shape = RectangleShape,
+                modifier = Modifier
+                    .weight(1f)
+                    .fillMaxHeight(),
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = Color.White,
+                    contentColor = Color.Red,
+                    disabledContainerColor = Color.Gray,
+                    disabledContentColor = Color.White
+                )
+            ) {
+                Text(
+                    text = stringResource(id = R.string.btn_cancel),
                     textAlign = TextAlign.Center,
                     style = TextStyle(
                         fontSize = 14.sp,

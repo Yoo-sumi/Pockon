@@ -6,6 +6,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
@@ -14,9 +15,11 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.wrapContentHeight
+import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
-import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -24,7 +27,9 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.KeyboardArrowDown
-import androidx.compose.material3.AlertDialog
+import androidx.compose.material.icons.outlined.Info
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.Checkbox
@@ -40,10 +45,10 @@ import androidx.compose.material3.LocalMinimumInteractiveComponentEnforcement
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SmallFloatingActionButton
+import androidx.compose.material3.Surface
 import androidx.compose.material3.SwipeToDismissBox
 import androidx.compose.material3.SwipeToDismissBoxValue
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.pulltorefresh.PullToRefreshContainer
 import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
@@ -61,14 +66,17 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.window.Dialog
 import androidx.lifecycle.viewmodel.compose.viewModel
 import coil.compose.AsyncImage
 import com.example.giftbox.model.Gift
@@ -485,29 +493,108 @@ fun TopAppBarDropDownMenu(topTitle: Int, setTopTitle: (Int) -> Unit) {
 // 기프티콘 제거 묻는 다이얼로그
 @Composable
 fun RemoveDialog(onConfirm: () -> Unit, onDismiss: () -> Unit) {
-    AlertDialog(
-        onDismissRequest = {},
-        text = {
-            Text(
-                textAlign = TextAlign.Center,
-                text = stringResource(id = R.string.dlg_msg_delete),
-                fontSize = 18.sp
-            )
-        },
-        confirmButton = {
-            TextButton(
-                onClick = { onConfirm() }
+    Dialog(onDismissRequest = {}) {
+        Surface(
+            modifier = Modifier
+                .wrapContentWidth()
+                .wrapContentHeight(),
+            shape = RoundedCornerShape(12.dp),
+            color = Color.White
+        ) {
+            Column(
+                modifier = Modifier.fillMaxWidth()
             ) {
-                Text(text = stringResource(id = R.string.btn_confirm))
+                // title
+                Icon(
+                    imageVector = Icons.Outlined.Info,
+                    contentDescription = "info",
+                    modifier = Modifier
+                        .align(Alignment.CenterHorizontally)
+                        .padding(10.dp)
+                )
+
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(1.dp)
+                        .background(color = Color.LightGray)
+                )
+
+                // text
+                Text(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(20.dp),
+                    text = stringResource(id = R.string.dlg_msg_delete),
+                    fontSize = 16.sp
+                )
+
+                // bottom button
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(1.dp)
+                        .background(color = Color.LightGray)
+                )
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(IntrinsicSize.Min)
+                ) {
+                    Button(
+                        onClick = { onConfirm() },
+                        shape = RectangleShape,
+                        modifier = Modifier
+                            .weight(1f)
+                            .fillMaxHeight(),
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = Color.White,
+                            contentColor = Color.Black,
+                            disabledContainerColor = Color.Gray,
+                            disabledContentColor = Color.White
+                        ),
+                    ) {
+                        Text(
+                            text = stringResource(id = R.string.btn_confirm),
+                            textAlign = TextAlign.Center,
+                            style = TextStyle(
+                                fontSize = 14.sp,
+                                fontWeight = FontWeight.Normal
+                            )
+                        )
+                    }
+
+                    Box(
+                        modifier = Modifier
+                            .fillMaxHeight()
+                            .width(1.dp)
+                            .background(color = Color.LightGray)
+                    )
+
+                    Button(
+                        onClick = { onDismiss() },
+                        shape = RectangleShape,
+                        modifier = Modifier
+                            .weight(1f)
+                            .fillMaxHeight(),
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = Color.White,
+                            contentColor = Color.Red,
+                            disabledContainerColor = Color.Gray,
+                            disabledContentColor = Color.White
+                        )
+                    ) {
+                        Text(
+                            text = stringResource(id = R.string.btn_cancel),
+                            textAlign = TextAlign.Center,
+                            style = TextStyle(
+                                fontSize = 14.sp,
+                                fontWeight = FontWeight.Normal
+                            )
+                        )
+                    }
+                }
             }
-        },
-        dismissButton = {
-            TextButton(
-                onClick = { onDismiss() }
-            ) {
-                Text(text = stringResource(id = R.string.btn_cancel))
-            }
-        },
-        shape = RoundedCornerShape(10.dp)
-    )
+        }
+    }
 }
