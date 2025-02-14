@@ -100,20 +100,25 @@ fun ListScreen(listViewModel: ListViewModel = viewModel(), onDetail: (String) ->
     }
 
     if (showRemoveDlg) {
-        RemoveDialog(onConfirm = {
-            showRemoveDlg = false
-            if (isEdit) {
-                listViewModel.deleteSelection {
-                    isEdit = !isEdit
-                    isAllSelect = false
-                    listViewModel.clearCheckedGiftList()
+        ConfirmDialog(
+            text = R.string.dlg_msg_delete,
+            onConfirm = {
+                showRemoveDlg = false
+                if (isEdit) {
+                    listViewModel.deleteSelection {
+                        isEdit = !isEdit
+                        isAllSelect = false
+                        listViewModel.clearCheckedGiftList()
+                    }
+                } else {
+                    listViewModel.removeGift()
                 }
-            } else {
-                listViewModel.removeGift()
+            },
+            onDismiss = {
+                showRemoveDlg = false
+
             }
-        }) {
-            showRemoveDlg = false
-        }
+        )
     }
 
     Scaffold(
@@ -220,7 +225,7 @@ fun ListScreen(listViewModel: ListViewModel = viewModel(), onDetail: (String) ->
                                 }
                             )
                         }
-                        Text(text = "전체 선택")
+                        Text(text = stringResource(id = R.string.txt_all_select))
                     }
                 }
                 
@@ -228,6 +233,7 @@ fun ListScreen(listViewModel: ListViewModel = viewModel(), onDetail: (String) ->
                 LazyColumn(
                     modifier = Modifier
                         .fillMaxSize()
+                        .padding(bottom = 10.dp)
                 ) {
                     itemsIndexed(items = listViewModel.copyGiftList.value) { index, gift ->
                         val swipeState = rememberSwipeToDismissBoxState()
@@ -346,7 +352,7 @@ fun GiftItem(isEdit: Boolean, gift: Gift, formattedEndDate: String, dDay: Pair<S
         modifier = Modifier
             .height(120.dp)
             .fillMaxWidth()
-            .padding(3.dp)
+            .padding(top = 3.dp, bottom = 3.dp)
             .clip(shape = RoundedCornerShape(10.dp))
             .clickable {
                 onClick()
@@ -490,9 +496,9 @@ fun TopAppBarDropDownMenu(topTitle: Int, setTopTitle: (Int) -> Unit) {
     }
 }
 
-// 기프티콘 제거 묻는 다이얼로그
+// 확인 다이얼로그
 @Composable
-fun RemoveDialog(onConfirm: () -> Unit, onDismiss: () -> Unit) {
+fun ConfirmDialog(text: Int, onConfirm: () -> Unit, onDismiss: () -> Unit) {
     Dialog(onDismissRequest = {}) {
         Surface(
             modifier = Modifier
@@ -525,7 +531,7 @@ fun RemoveDialog(onConfirm: () -> Unit, onDismiss: () -> Unit) {
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(20.dp),
-                    text = stringResource(id = R.string.dlg_msg_delete),
+                    text = stringResource(id = text),
                     fontSize = 16.sp
                 )
 

@@ -31,11 +31,10 @@ import androidx.compose.ui.draw.scale
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.giftbox.R
+import com.example.giftbox.ui.list.ConfirmDialog
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -134,7 +133,8 @@ fun SettingScreen(onUsedGift: () -> Unit, movePinScreen: () -> Unit, moveLogInSc
         }
 
         if (showLogoutDlg) {
-            LogoutDialog(
+            ConfirmDialog(
+                text = R.string.dlg_msg_logout,
                 onConfirm = {
                     showLogoutDlg = false
                     settingViewModel.logout()
@@ -147,7 +147,8 @@ fun SettingScreen(onUsedGift: () -> Unit, movePinScreen: () -> Unit, moveLogInSc
         }
 
         if (showRemoveDlg) {
-            RemoveAccountDialog(
+            ConfirmDialog(
+                text = R.string.dlg_msg_remove_account,
                 onConfirm = {
                     showRemoveDlg = false
                     settingViewModel.removeAccount { result ->
@@ -219,63 +220,4 @@ fun SettingItem(text: String, isTitle: Boolean = false, isSwitch: Boolean = fals
             }
         }
     }
-}
-
-// 기프티콘 제거 묻는 다이얼로그
-@Composable
-fun LogoutDialog(onConfirm: () -> Unit, onDismiss: () -> Unit) {
-    AlertDialog(
-        onDismissRequest = {},
-        text = {
-            Text(
-                textAlign = TextAlign.Center,
-                text = stringResource(id = R.string.dlg_msg_logout),
-                fontSize = 18.sp
-            )
-        },
-        confirmButton = {
-            TextButton(
-                onClick = { onConfirm() }
-            ) {
-                Text(text = stringResource(id = R.string.btn_confirm))
-            }
-        },
-        dismissButton = {
-            TextButton(
-                onClick = { onDismiss() }
-            ) {
-                Text(text = stringResource(id = R.string.btn_cancel))
-            }
-        },
-        shape = RoundedCornerShape(10.dp)
-    )
-}
-
-@Composable
-fun RemoveAccountDialog(onConfirm: () -> Unit, onDismiss: () -> Unit) {
-    AlertDialog(
-        onDismissRequest = {},
-        text = {
-            Text(
-                textAlign = TextAlign.Center,
-                text = stringResource(id = R.string.dlg_msg_remove_account),
-                fontSize = 18.sp
-            )
-        },
-        confirmButton = {
-            TextButton(
-                onClick = { onConfirm() }
-            ) {
-                Text(text = stringResource(id = R.string.btn_confirm))
-            }
-        },
-        dismissButton = {
-            TextButton(
-                onClick = { onDismiss() }
-            ) {
-                Text(text = stringResource(id = R.string.btn_cancel))
-            }
-        },
-        shape = RoundedCornerShape(10.dp)
-    )
 }

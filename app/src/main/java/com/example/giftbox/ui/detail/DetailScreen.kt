@@ -89,6 +89,7 @@ import coil.compose.AsyncImage
 import com.example.giftbox.ui.utils.DateTransformation
 import com.example.giftbox.R
 import com.example.giftbox.ui.add.CustomDatePickerDialog
+import com.example.giftbox.ui.list.ConfirmDialog
 import com.example.giftbox.ui.utils.decimalFormat
 import com.example.giftbox.ui.utils.thousandSeparatorTransformation
 import kotlinx.coroutines.CoroutineScope
@@ -317,7 +318,8 @@ fun DetailScreen(id: String, onBack: () -> Unit) {
             }
         }
         if (detailViewModel.isShowCancelDialog.value) {
-            UsedCancelDialog(
+            ConfirmDialog(
+                text = R.string.dlg_msg_use_cancel,
                 onConfirm = {
                     detailViewModel.setIsUsed(false)
                     detailViewModel.setIsShowCancelDialog(false)
@@ -557,35 +559,6 @@ fun UsedStamp(usedDate: String) {
                 .rotate(-20f)
         )
     }
-}
-
-@Composable
-fun UsedCancelDialog(onConfirm: () -> Unit, onDismiss: () -> Unit) {
-    AlertDialog(
-        onDismissRequest = {},
-        text = {
-            Text(
-                textAlign = TextAlign.Center,
-                text = stringResource(id = R.string.dlg_msg_use_cancel),
-                fontSize = 18.sp
-            )
-        },
-        confirmButton = {
-            TextButton(
-                onClick = { onConfirm() }
-            ) {
-                Text(text = stringResource(id = R.string.btn_confirm))
-            }
-        },
-        dismissButton = {
-            TextButton(
-                onClick = { onDismiss() }
-            ) {
-                Text(text = stringResource(id = R.string.btn_cancel))
-            }
-        },
-        shape = RoundedCornerShape(10.dp)
-    )
 }
 
 // 사용 금액 입력 다이얼로그
