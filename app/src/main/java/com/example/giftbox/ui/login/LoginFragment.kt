@@ -13,6 +13,7 @@ import androidx.credentials.exceptions.GetCredentialException
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.Navigation
+import com.example.giftbox.BuildConfig
 import com.example.giftbox.R
 import com.example.giftbox.databinding.FragmentLoginBinding
 import com.google.android.libraries.identity.googleid.GetGoogleIdOption
@@ -35,7 +36,7 @@ class LoginFragment : Fragment() {
         val googleIdOption = GetGoogleIdOption
             .Builder()
             .setFilterByAuthorizedAccounts(false)
-            .setServerClientId(ContextCompat.getString(requireContext(), R.string.client_id))
+            .setServerClientId(BuildConfig.GOOGLE_CLIENT_ID)
             .setAutoSelectEnabled(true)
             .build()
 

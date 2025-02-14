@@ -31,6 +31,7 @@ android {
 
         addManifestPlaceholders(mapOf("NAVER_MAP_CLIENT_ID" to gradleLocalProperties(rootDir, providers).getProperty("NAVER_MAP_CLIENT_ID")))
         buildConfigField("String", "KAKAO_REST_API_KEY", properties.getProperty("KAKAO_REST_API_KEY"))
+        buildConfigField("String", "GOOGLE_CLIENT_ID", properties.getProperty("GOOGLE_CLIENT_ID"))
     }
 
     buildTypes {

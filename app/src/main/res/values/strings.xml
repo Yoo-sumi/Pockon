@@ -1,6 +1,5 @@
 <resources>
     <string name="app_name">GiftBox</string>
-    <string name="client_id">932270434147-j6m9po06glua87bmp8afhk1v34i0ca37.apps.googleusercontent.com</string>
     <string name="preference_file_key">key_login</string>
     <string name="login_state">login_state</string>
     <string name="home">홈</string>
