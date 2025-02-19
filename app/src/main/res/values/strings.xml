@@ -56,7 +56,7 @@
     <string name="chip_all">전체</string>
     <string name="top_app_bar_recent">최신순</string>
     <string name="top_app_bar_end_date">디데이순</string>
-    <string name="txt_no_gift">현재 사용 가능한 쿠폰이 존재하지 않습니다.</string>
+    <string name="txt_no_gift">사용 가능한 기프티콘이 없습니다.</string>
     <string name="txt_used_stamp">사용완료\n%1$s</string>
     <string name="txt_create_pin">PIN 번호를 생성하세요.</string>
     <string name="txt_check_pin">입력한 PIN 번호를 확인합니다.</string>

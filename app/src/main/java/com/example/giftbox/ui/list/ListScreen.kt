@@ -134,7 +134,9 @@ fun ListScreen(listViewModel: ListViewModel = viewModel(), onDetail: (String) ->
                     }
                 },
                 actions = {
-                    val title = if (isEdit) {
+                    val title = if (isEdit && listViewModel.checkedGiftList.value.isEmpty()) {
+                        R.string.btn_cancel
+                    } else if (isEdit && listViewModel.checkedGiftList.value.isNotEmpty()) {
                         R.string.btn_delete
                     } else {
                         R.string.btn_edit

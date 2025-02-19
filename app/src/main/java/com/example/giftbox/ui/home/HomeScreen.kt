@@ -3,14 +3,16 @@ package com.example.giftbox.ui.home
 import android.annotation.SuppressLint
 import android.location.Location
 import android.net.Uri
-import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -48,6 +50,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -98,93 +101,109 @@ fun HomeScreen(onAdd: () -> Unit, showMap: () -> Unit, onDetail: (String) -> Uni
             Column(
                 modifier = Modifier
                     .fillMaxSize()
-                    .padding(20.dp)
+                    .padding(top = 10.dp, end = 20.dp, start = 20.dp)
                     .verticalScroll(scrollState)
             ) {
                 Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    verticalAlignment = Alignment.CenterVertically
+                    modifier = Modifier
+                        .fillMaxWidth(),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.SpaceBetween
                 ) {
-                    Text(
-                        modifier = Modifier.wrapContentSize(),
-                        text = stringResource(id = R.string.txt_use_near),
-                        style = MaterialTheme.typography.titleLarge,
-                        textAlign = TextAlign.Start
-                    )
-                    // 기본 padding 없애기
-                    CompositionLocalProvider(
-                        LocalMinimumInteractiveComponentEnforcement provides false,
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically
                     ) {
-                        IconButton(onClick = {
-                            getLocation(fusedLocationClient) {
-                                homeViewModel.setLocation(it)
-                                homeViewModel.getBrandInfoList() // 위치 동기화 후 브랜드만 재검색
+                        Text(
+                            text = stringResource(id = R.string.txt_use_near),
+                            fontSize = 18.sp,
+                            softWrap = true
+                        )
+                        // 기본 padding 없애기
+                        CompositionLocalProvider(
+                            LocalMinimumInteractiveComponentEnforcement provides false,
+                        ) {
+                            IconButton(onClick = {
+                                getLocation(fusedLocationClient) {
+                                    homeViewModel.setLocation(it)
+                                    homeViewModel.getBrandInfoList() // 위치 동기화 후 브랜드만 재검색
+                                }
+                            }) {
+                                Icon(
+                                    imageVector = Icons.Filled.Refresh,
+                                    contentDescription = "refresh button",
+                                )
                             }
-                        }) {
-                            Icon(
-                                imageVector = Icons.Filled.Refresh,
-                                contentDescription = "refresh button",
-                            )
                         }
                     }
 
                     Text(
                         text = stringResource(id = R.string.btn_open_map),
-                        style = MaterialTheme.typography.titleSmall,
-                        textAlign = TextAlign.End,
+                        fontSize = 14.sp,
                         color = MaterialTheme.colorScheme.secondary,
                         modifier = Modifier
                             .clickable {
-                                showMap()
-                            }
-                            .fillMaxWidth()
+                                if (homeViewModel.displayGiftList.value.isNotEmpty()) showMap()
+                            },
+                        softWrap = true
                     )
                 }
 
-                // gift item
-                LazyRow(
-                    modifier = Modifier
-                        .padding(top = 10.dp)
-                        .wrapContentHeight(Alignment.CenterVertically)
-                ) {
-
-                    itemsIndexed(items = homeViewModel.displayGiftList.value) { index, gift ->
-                        HomeGiftItem(gift.first, formatString(gift.first.endDt), getDday(gift.first.endDt), gift.second) {
-                            onDetail(gift.first.id)
+                if (homeViewModel.displayGiftList.value.isEmpty()) {
+                    EmptyNear()
+                } else {
+                    // gift item
+                    LazyRow(
+                        modifier = Modifier
+                            .padding(top = 5.dp)
+                            .wrapContentHeight(Alignment.CenterVertically)
+                    ) {
+                        itemsIndexed(items = homeViewModel.displayGiftList.value) { index, gift ->
+                            HomeGiftItem(
+                                gift.first,
+                                formatString(gift.first.endDt),
+                                getDday(gift.first.endDt),
+                                gift.second
+                            ) {
+                                onDetail(gift.first.id)
+                            }
                         }
                     }
                 }
-
 
                 // 기한 만료
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(top = 30.dp),
+                        .padding(top = 10.dp),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Text(
-                        modifier = Modifier.wrapContentSize(),
+                        modifier = Modifier
+                            .wrapContentSize()
+                            .padding(bottom = 3.dp),
                         text = stringResource(id = R.string.txt_use_end),
-                        style = MaterialTheme.typography.titleLarge,
+                        fontSize = 18.sp,
                         textAlign = TextAlign.Start
                     )
                 }
 
-                // gift item
-                LazyRow(
-                    modifier = Modifier
-                        .padding(top = 10.dp)
-                        .wrapContentHeight(Alignment.CenterVertically)
-                ) {
+                if (homeViewModel.closeToGiftList.value.isEmpty()) {
+                    EmptyNear()
+                } else {
+                    // gift item
+                    LazyRow(
+                        modifier = Modifier
+                            .padding(top = 5.dp)
+                            .wrapContentHeight(Alignment.CenterVertically)
+                    ) {
 
-                    items(items = homeViewModel.closeToGiftList.value) { gift ->
-                        HomeGiftItem(gift, formatString(gift.endDt), getDday(gift.endDt)) {
-                            onDetail(gift.id)
+                        items(items = homeViewModel.closeToGiftList.value) { gift ->
+                            HomeGiftItem(gift, formatString(gift.endDt), getDday(gift.endDt)) {
+                                onDetail(gift.id)
+                            }
                         }
                     }
                 }
-
             }
 
             // + 추가 버튼
@@ -219,10 +238,10 @@ fun HomeGiftItem(gift: Gift, formattedEndDate: String, dDay: Pair<String, Boolea
         Column(
             modifier = Modifier
                 .background(MaterialTheme.colorScheme.surfaceContainerLowest)
-                .width(150.dp)
+                .width(160.dp)
         ) {
             AsyncImage(
-                modifier = Modifier.size(150.dp),
+                modifier = Modifier.size(160.dp),
                 model = Uri.parse(gift.photo),
                 contentDescription = "add photo",
                 contentScale = ContentScale.Crop
@@ -231,42 +250,46 @@ fun HomeGiftItem(gift: Gift, formattedEndDate: String, dDay: Pair<String, Boolea
             Column(
                 modifier = Modifier.padding(5.dp)
             ) {
-
                 Text(
                     text = gift.brand,
                     style = MaterialTheme.typography.bodyMedium,
                     textAlign = TextAlign.Start,
                     color = MaterialTheme.colorScheme.secondary,
                     modifier = Modifier
-                        .fillMaxWidth()
+                        .fillMaxWidth(),
+                    softWrap = true
                 )
                 Text(
                     text = gift.name,
-                    maxLines = 1,
                     overflow = TextOverflow.Ellipsis,
                     style = MaterialTheme.typography.bodyLarge,
                     textAlign = TextAlign.Start,
                     modifier = Modifier
-                        .fillMaxWidth()
+                        .fillMaxWidth(),
+                    softWrap = true
                 )
-                Box {
-                    document?.let {
-                        Text(
-                            text = "${document.distance}m",
-                            style = MaterialTheme.typography.bodyMedium,
-                            textAlign = TextAlign.Start,
-                            color = MaterialTheme.colorScheme.error,
-                            modifier = Modifier
-                                .fillMaxWidth()
-                        )
+                Row(
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    val distance = if (document == null) {
+                        ""
+                    } else {
+                        "${document.distance}m"
                     }
+                    Text(
+                        text = distance,
+                        style = MaterialTheme.typography.bodyMedium,
+                        textAlign = TextAlign.Start,
+                        color = MaterialTheme.colorScheme.error,
+                        softWrap = true
+                    )
                     Text(
                         text = "~ $formattedEndDate",
                         style = MaterialTheme.typography.bodyMedium,
                         textAlign = TextAlign.End,
                         color = MaterialTheme.colorScheme.secondary,
-                        modifier = Modifier
-                            .fillMaxWidth()
+                        softWrap = true
                     )
                 }
             }
@@ -288,7 +311,32 @@ fun HomeGiftItem(gift: Gift, formattedEndDate: String, dDay: Pair<String, Boolea
                     shape = CardDefaults.shape
                 )
                 .padding(start = 15.dp, end = 15.dp, top = 5.dp, bottom = 5.dp),
-            color = MaterialTheme.colorScheme.surfaceContainerLowest
+            color = MaterialTheme.colorScheme.surfaceContainerLowest,
+            softWrap = true
+        )
+    }
+}
+
+@Composable
+fun EmptyNear() {
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(220.dp)
+            .border(
+                width = 2.dp,
+                color = Color.LightGray,
+                shape = RoundedCornerShape(10.dp)
+            ),
+        verticalArrangement = Arrangement.Center,
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        Text(
+            text = stringResource(id = R.string.txt_no_gift),
+            textAlign = TextAlign.Center,
+            color = Color.LightGray,
+            fontWeight = FontWeight.Bold,
+            softWrap = true
         )
     }
 }
