@@ -28,7 +28,7 @@ class LoginFragment : Fragment() {
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
         binding = FragmentLoginBinding.inflate(inflater, container, false)
-        val btnGoogle: TextView = binding.googleLoginBtn.getChildAt(0) as TextView
+        val btnGoogle: TextView = binding.btnGoogleLogin.getChildAt(0) as TextView
         btnGoogle.text = getString(R.string.btn_goggle_login)
 
         val credentialManager = CredentialManager.create(requireContext())
@@ -44,6 +44,10 @@ class LoginFragment : Fragment() {
             .Builder()
             .addCredentialOption(googleIdOption)
             .build()
+
+        binding.btnGuestLogin.setOnClickListener {
+            loginViewModel.loginAsGuest() // 게스트로 로그인
+        }
 
         btnGoogle.setOnClickListener {
             lifecycleScope.launch {

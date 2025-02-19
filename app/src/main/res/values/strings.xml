@@ -33,6 +33,7 @@
     <string name="btn_use_cancel">사용 취소</string>
     <string name="btn_open_map">지도보기</string>
     <string name="btn_goggle_login">Sign In With Google</string>
+    <string name="btn_guest_login">"Sign In As Guest</string>
     <string name="btn_delete">삭제</string>
     <string name="btn_edit">편집</string>
     <string name="dlg_msg_logout">로그아웃을 하시겠습니까?</string>

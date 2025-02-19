@@ -322,7 +322,7 @@ fun EmptyNear() {
     Column(
         modifier = Modifier
             .fillMaxWidth()
-            .height(220.dp)
+            .height(230.dp)
             .border(
                 width = 2.dp,
                 color = Color.LightGray,

@@ -34,6 +34,11 @@ class LoginViewModel @Inject constructor(
         return isPinUse
     }
 
+    fun loginAsGuest() {
+        isPinUse = true
+        _isLogin.value = true
+    }
+
     fun login(result: GetCredentialResponse) {
         isPinUse = true
         when (val credential = result.credential) {
