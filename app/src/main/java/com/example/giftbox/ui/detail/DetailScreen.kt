@@ -310,7 +310,11 @@ fun DetailScreen(id: String, onBack: () -> Unit) {
                         detailViewModel.setIsShowUseCashDialog(true)
                         detailViewModel.setIsShowBottomSheet(false)
                     } else {
-                        detailViewModel.setIsUsed(true)
+                        detailViewModel.setIsUsed(true) { result ->
+                            scope.launch {
+                                if (!result) snackbarHostState.showSnackbar(message = context.getString(R.string.msg_no_use))
+                            }
+                        }
                     }
                 } else {
                     detailViewModel.setIsShowBottomSheet(false)
@@ -321,7 +325,11 @@ fun DetailScreen(id: String, onBack: () -> Unit) {
             ConfirmDialog(
                 text = R.string.dlg_msg_use_cancel,
                 onConfirm = {
-                    detailViewModel.setIsUsed(false)
+                    detailViewModel.setIsUsed(false) { result ->
+                        scope.launch {
+                            if (!result) snackbarHostState.showSnackbar(message = context.getString(R.string.msg_no_use_cancel))
+                        }
+                    }
                     detailViewModel.setIsShowCancelDialog(false)
                 },
                 onDismiss = {
@@ -346,7 +354,11 @@ fun DetailScreen(id: String, onBack: () -> Unit) {
                             detailViewModel.setIsShowUseCashDialog(false)
                         },
                         onConfirm = { useCash ->
-                            detailViewModel.setIsUsed(true, useCash)
+                            detailViewModel.setIsUsed(true, useCash) { result ->
+                                scope.launch {
+                                    if (!result) snackbarHostState.showSnackbar(message = context.getString(R.string.msg_no_use))
+                                }
+                            }
                         }
                     )
                 }

@@ -30,6 +30,7 @@ class ListViewModel @Inject constructor(
     private var uid = sharedPref.getString("uid", "") ?: ""
     private var isNotiEndDt = sharedPref.getBoolean("noti_end_dt", true)
     private var registerNoti = sharedPref.getBoolean("noti_register", false)
+    private var isGuestMode = sharedPref.getBoolean("guest_mode", false)
     private var removeGift: Gift? = null
 
     private val _giftList = mutableStateOf<List<Gift>>(listOf())
@@ -91,6 +92,7 @@ class ListViewModel @Inject constructor(
 
     // 서버에서 기프티콘 리스트 가져오기
     fun getGiftList() {
+        if (isGuestMode) return // 게스트 모드는 서버 안탐
         giftRepository.getAllGift(uid) { giftList ->
             if (giftList.isNotEmpty()) {
                 // 로컬 저장(기프티콘)
@@ -172,7 +174,7 @@ class ListViewModel @Inject constructor(
     }
 
     // 기프티콘 수정
-    fun usedGift(gift: Gift) {
+    fun usedGift(gift: Gift, onComplete: (Boolean) -> Unit) {
         viewModelScope.launch {
             val nowDt = SimpleDateFormat(
                 "yyyy.MM.dd",
@@ -188,15 +190,14 @@ class ListViewModel @Inject constructor(
                     }
                     myAlarmManager.cancel(gift.id)
                 } else { // 수정 실패
-                    // 네트워크가 불안정합니다. 인터넷 연결을 확인해주세요.
-                    TODO()
+                    onComplete(false)
                 }
             }
         }
     }
 
     // 기프티콘 삭제
-    fun removeGift() {
+    fun removeGift(onComplete: (Boolean) -> Unit) {
         if (removeGift ==  null) return
         if (removeGift?.id?.isEmpty() == true) return
         val uid = removeGift!!.uid
@@ -211,8 +212,7 @@ class ListViewModel @Inject constructor(
                     }
                     myAlarmManager.cancel(id)
                 } else { // 삭제 실패
-                    // 네트워크가 불안정합니다. 인터넷 연결을 확인해주세요.
-                    TODO()
+                    onComplete(false)
                 }
             }
         }
@@ -245,7 +245,7 @@ class ListViewModel @Inject constructor(
     }
 
     // 선택 삭제/전체 삭제
-    fun deleteSelection(onComplete: () -> Unit) {
+    fun deleteSelection(onComplete: (Boolean) -> Unit) {
         viewModelScope.launch {
             val resultList = ArrayList<Boolean>()
             var isFail = false
@@ -256,8 +256,7 @@ class ListViewModel @Inject constructor(
                     // end
                     if (resultList.size == _checkedGiftList.value.size) {
                         if (isFail) {
-                            onComplete()
-                            // 기프티콘 삭제에 실패했습니다.
+                            onComplete(false)
                         } else {
                             _checkedGiftList.value.forEach { id ->
                                 // 로컬 삭제
@@ -266,11 +265,13 @@ class ListViewModel @Inject constructor(
                                 }
                                 myAlarmManager.cancel(id)
                             }
-                            onComplete()
+                            onComplete(true)
                         }
                     }
                 }
             }
         }
     }
+
+    fun getIsGuestMode() = isGuestMode
 }

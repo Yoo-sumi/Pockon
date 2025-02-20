@@ -34,7 +34,7 @@ class GiftRepository @Inject constructor(
         val giftList = mutableListOf<Gift>()
         giftDataSource.loadAllData(uid) { gifts ->
             if (gifts.isEmpty()) onComplete(giftList)
-            gifts.forEachIndexed { idx, gift ->
+            gifts.forEach { gift ->
                 giftPhotoDataSource.downloadData(gift.uid, gift.id) { uri ->
                     giftList.add(gift.copy(photo = uri.toString()))
                     if (gifts.size == giftList.size) {
@@ -51,9 +51,12 @@ class GiftRepository @Inject constructor(
 
     fun removeGift(uid: String, document: String, onComplete: (Boolean) -> Unit) {
         giftPhotoDataSource.removeData(uid, document) { result ->
-            if (!result) onComplete(false) // 사진 삭제 실패이면 정보 삭제 X
-            giftDataSource.deleteData(document) {
-                onComplete(it)
+            if (!result) {
+                onComplete(false) // 사진 삭제 실패이면 정보 삭제 X
+            } else {
+                giftDataSource.deleteData(document) {
+                    onComplete(it)
+                }
             }
         }
     }

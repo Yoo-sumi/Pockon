@@ -154,7 +154,7 @@ class DetailViewModel @Inject constructor(
         }
     }
 
-    fun setIsUsed(flag: Boolean, cash: Int? = null) {
+    fun setIsUsed(flag: Boolean, cash: Int? = null, onComplete: (Boolean) -> Unit) {
         viewModelScope.launch {
             var nowDt = ""
             if ((flag && cash == null) || (flag && cash == 0)) {
@@ -173,8 +173,7 @@ class DetailViewModel @Inject constructor(
                     _isShowBottomSheet.value = false
                     _isShowUseCashDialog.value = false
                 } else { // 수정 실패
-                    // 네트워크가 불안정합니다. 인터넷 연결을 확인해주세요.
-                    TODO()
+                    onComplete(false)
                 }
             }
         }

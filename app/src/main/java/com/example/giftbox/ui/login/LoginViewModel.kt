@@ -1,16 +1,20 @@
 package com.example.giftbox.ui.login
 
 import android.content.SharedPreferences
+import androidx.credentials.ClearCredentialStateRequest
+import androidx.credentials.CredentialManager
 import androidx.credentials.CustomCredential
 import androidx.credentials.GetCredentialResponse
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import com.example.giftbox.data.LoginRepository
 import com.google.android.libraries.identity.googleid.GoogleIdTokenCredential
 import com.google.android.libraries.identity.googleid.GoogleIdTokenParsingException
 import com.google.firebase.auth.GoogleAuthProvider
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
@@ -40,9 +44,10 @@ class LoginViewModel @Inject constructor(
     fun loginAsGuest() {
         isPinUse = true
         _isLogin.value = true
+        sharedPref.edit().putBoolean("guest_mode", true).apply()
     }
 
-    fun login(result: GetCredentialResponse) {
+    fun login(credentialManager: CredentialManager, result: GetCredentialResponse) {
         isPinUse = true
         // 구글 사용자 정보 가져오는 부분은 Repository 단에 androidx import 하고 싶지 않아서 여기서 처리
         when (val credential = result.credential) {
@@ -72,6 +77,10 @@ class LoginViewModel @Inject constructor(
             else -> {
                 _isFail.value = true
             }
+        }
+        viewModelScope.launch {
+            // 구글 사용자 인증 정보 유지X
+            credentialManager.clearCredentialState(request = ClearCredentialStateRequest())
         }
     }
 

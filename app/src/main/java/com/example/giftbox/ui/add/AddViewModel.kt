@@ -31,6 +31,9 @@ class AddViewModel @Inject constructor(
     private val _isShowDatePicker = mutableStateOf(false)
     val isShowDatePicker: State<Boolean> = _isShowDatePicker
 
+    private val _isCheckedCash = mutableStateOf(false)
+    val isCheckedCash: State<Boolean> = _isCheckedCash
+
     private val _photo = mutableStateOf<Uri?>(null)
     val photo: State<Uri?> = _photo
     private val _name = mutableStateOf("")
@@ -77,7 +80,11 @@ class AddViewModel @Inject constructor(
             Locale.getDefault()
         ).format(Date(System.currentTimeMillis()))
 
-        val gift = Gift(uid = uid, name = _name.value, brand = _brand.value, endDt = _endDate.value, addDt = addDate, memo = _memo.value, cash = _cash.value)
+        val gift = if (_isCheckedCash.value) {
+            Gift(uid = uid, name = _name.value, brand = _brand.value, endDt = _endDate.value, addDt = addDate, memo = _memo.value, cash = _cash.value)
+        } else {
+            Gift(uid = uid, name = _name.value, brand = _brand.value, endDt = _endDate.value, addDt = addDate, memo = _memo.value)
+        }
         viewModelScope.launch {
             giftRepository.addGift(gift, _photo.value!!) { isSuccess ->
                 onAddComplete(isSuccess)
@@ -98,7 +105,7 @@ class AddViewModel @Inject constructor(
         _isShowDatePicker.value = !_isShowDatePicker.value
     }
 
-    fun isValid(checkedCash: Boolean): Int? {
+    fun isValid(): Int? {
         var msg: Int? = null
         if (_photo.value == null) {
             msg = R.string.msg_no_photo
@@ -108,7 +115,7 @@ class AddViewModel @Inject constructor(
             msg = R.string.msg_no_brand
         } else if (_endDate.value.isEmpty() || _endDate.value.length < 8) {
             msg = R.string.msg_no_end_date
-        } else if (checkedCash && _cash.value.isEmpty()) {
+        } else if (_isCheckedCash.value && _cash.value.isEmpty()) {
             msg = R.string.msg_no_cash
         }
 
@@ -123,5 +130,9 @@ class AddViewModel @Inject constructor(
             3 -> R.string.txt_end_date
             else -> R.string.txt_memo
         }
+    }
+
+    fun chgCheckedCash() {
+        _isCheckedCash.value = !_isCheckedCash.value
     }
 }

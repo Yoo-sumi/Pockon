@@ -48,8 +48,11 @@
     <string name="msg_no_end_date">유효기간을 입력해주세요.</string>
     <string name="msg_no_cash">금액을 입력해주세요.</string>
     <string name="msg_no_register">기프티콘 추가에 실패했습니다.</string>
-    <string name="msg_ok_update">수정이 완료되었습니다.</string>
+    <string name="msg_no_delete">기프티콘 삭제에 실패했습니다.</string>
+    <string name="msg_ok_update">기프티콘 수정이 완료되었습니다.</string>
     <string name="msg_no_update">기프티콘 수정에 실패했습니다.</string>
+    <string name="msg_no_use">기프티콘 사용 처리에 실패했습니다.</string>
+    <string name="msg_no_use_cancel">기프티콘 사용 취소에 실패했습니다.</string>
     <string name="msg_noti_end_dt_today">오늘은 기프티콘 만료일 입니다!</string>
     <string name="msg_noti_end_dt">기프티콘 만료일 %d일 전입니다.</string>
     <string name="msg_login_fail">로그인에 실패했습니다.</string>

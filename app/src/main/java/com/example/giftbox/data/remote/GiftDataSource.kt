@@ -41,7 +41,6 @@ class GiftDataSource @Inject constructor(
         firestore
             .collection("gift")
             .whereEqualTo("uid", uid)
-//            .whereEqualTo("usedDt", "")
             .get()
             .addOnCompleteListener { task ->
                 val giftList: MutableList<Gift>  = mutableListOf()

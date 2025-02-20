@@ -82,9 +82,6 @@ fun AddGifticon(onBack: (Boolean) -> Unit) {
     val addViewModel = hiltViewModel<AddViewModel>()
     val context = LocalContext.current
 
-    // 금액권 체크박스
-    var checkedCash by rememberSaveable { mutableStateOf(false) }
-
     // snackbar
     val snackbarHostState = remember { SnackbarHostState() }
     val scope = rememberCoroutineScope()
@@ -166,9 +163,9 @@ fun AddGifticon(onBack: (Boolean) -> Unit) {
                         Checkbox(
                             modifier = Modifier
                                 .scale(0.8f),
-                            checked = checkedCash,
+                            checked = addViewModel.isCheckedCash.value,
                             onCheckedChange = {
-                                checkedCash = !checkedCash
+                                addViewModel.chgCheckedCash()
                             }
                         )
                     }
@@ -176,7 +173,7 @@ fun AddGifticon(onBack: (Boolean) -> Unit) {
             }
             // text field
             for (i in inputDataList.indices) {
-                if (i == 2 && !checkedCash) continue
+                if (i == 2 && !addViewModel.isCheckedCash.value) continue
                 InputDataTextField(
                     value = inputDataList[i],
                     label = addViewModel.getLabelList(i),
@@ -195,14 +192,16 @@ fun AddGifticon(onBack: (Boolean) -> Unit) {
             // add button
             Button(
                 onClick = {
-                    val msg = addViewModel.isValid(checkedCash)
+                    val msg = addViewModel.isValid()
                     if (msg != null) {
                         scope.launch {
                             snackbarHostState.showSnackbar(message = context.getString(msg))
                         }
                     } else {
                         addViewModel.addGift { result ->
-                            if (result) onBack(true)
+                            if (result) {
+                                onBack(true)
+                            }
                             else {
                                 scope.launch {
                                     snackbarHostState.showSnackbar(message = context.getString(R.string.msg_no_register))

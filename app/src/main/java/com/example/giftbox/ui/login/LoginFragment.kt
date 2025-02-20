@@ -6,7 +6,6 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
-import androidx.core.content.ContextCompat
 import androidx.credentials.CredentialManager
 import androidx.credentials.GetCredentialRequest
 import androidx.credentials.exceptions.GetCredentialException
@@ -57,11 +56,10 @@ class LoginFragment : Fragment() {
                         request = request,
                         context = requireContext()
                     )
-                    loginViewModel.login(result) // 구글 로그인 이어서 진행
+                    loginViewModel.login(credentialManager, result) // 구글 로그인 이어서 진행
                 } catch (e: GetCredentialException) { // 구글 로그인 실패
                     Snackbar.make(binding.root, getString(R.string.msg_login_fail), Snackbar.LENGTH_SHORT).show()
                 }
-//                credentialManager.clearCredentialState(request = ClearCredentialStateRequest()) >> 로그아웃할때 필요
             }
         }
 

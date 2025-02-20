@@ -45,6 +45,8 @@ import androidx.compose.material3.LocalMinimumInteractiveComponentEnforcement
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SmallFloatingActionButton
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Surface
 import androidx.compose.material3.SwipeToDismissBox
 import androidx.compose.material3.SwipeToDismissBoxValue
@@ -59,6 +61,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -69,6 +72,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
@@ -82,6 +86,7 @@ import coil.compose.AsyncImage
 import com.example.giftbox.model.Gift
 import com.example.giftbox.ui.utils.formatString
 import com.example.giftbox.ui.utils.getDday
+import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -91,7 +96,12 @@ fun ListScreen(listViewModel: ListViewModel = viewModel(), onDetail: (String) ->
     var isEdit by rememberSaveable { mutableStateOf(false) }
     var isAllSelect by rememberSaveable { mutableStateOf(false) }
 
-    if (refreshState.isRefreshing) {
+    // snackbar
+    val snackbarHostState = remember { SnackbarHostState() }
+    val scope = rememberCoroutineScope()
+    val context = LocalContext.current
+
+    if (refreshState.isRefreshing && !listViewModel.getIsGuestMode()) {
         listViewModel.getGiftList()
         listViewModel.setTopTitle(R.string.top_app_bar_recent)
         refreshState.endRefresh()
@@ -105,13 +115,20 @@ fun ListScreen(listViewModel: ListViewModel = viewModel(), onDetail: (String) ->
             onConfirm = {
                 showRemoveDlg = false
                 if (isEdit) {
-                    listViewModel.deleteSelection {
+                    listViewModel.deleteSelection { result ->
+                        scope.launch {
+                            if (!result) snackbarHostState.showSnackbar(message = context.getString(R.string.msg_no_delete))
+                        }
                         isEdit = !isEdit
                         isAllSelect = false
                         listViewModel.clearCheckedGiftList()
                     }
                 } else {
-                    listViewModel.removeGift()
+                    listViewModel.removeGift { result ->
+                        scope.launch {
+                            if (!result) snackbarHostState.showSnackbar(message = context.getString(R.string.msg_no_delete))
+                        }
+                    }
                 }
             },
             onDismiss = {
@@ -122,6 +139,9 @@ fun ListScreen(listViewModel: ListViewModel = viewModel(), onDetail: (String) ->
     }
 
     Scaffold(
+        snackbarHost = {
+            SnackbarHost(hostState = snackbarHostState)
+        },
         topBar = {
             CenterAlignedTopAppBar(
                 colors = TopAppBarDefaults.topAppBarColors(
@@ -303,7 +323,11 @@ fun ListScreen(listViewModel: ListViewModel = viewModel(), onDetail: (String) ->
                         when (swipeState.currentValue) {
                             SwipeToDismissBoxValue.EndToStart -> {
                                 LaunchedEffect(swipeState) {
-                                    listViewModel.usedGift(gift)
+                                    listViewModel.usedGift(gift) { result ->
+                                        scope.launch {
+                                            if (!result) snackbarHostState.showSnackbar(message = context.getString(R.string.msg_no_use))
+                                        }
+                                    }
                                     swipeState.snapTo(SwipeToDismissBoxValue.Settled)
                                 }
                             }
