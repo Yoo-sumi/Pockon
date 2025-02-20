@@ -18,6 +18,7 @@ import com.example.giftbox.data.local.BrandDataSource
 import com.example.giftbox.data.local.GiftLocalDataSource
 import com.example.giftbox.data.remote.GiftDataSource
 import com.example.giftbox.data.remote.GiftPhotoDataSource
+import com.example.giftbox.data.remote.LoginDataSource
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.firestore.FirebaseFirestore
@@ -48,8 +49,14 @@ class DiModule {
 
     @Singleton
     @Provides
-    fun provideLoginRepository(auth: FirebaseAuth) : LoginRepository {
-        return LoginRepository(auth)
+    fun provideLoginRepository(loginDataSource: LoginDataSource) : LoginRepository {
+        return LoginRepository(loginDataSource)
+    }
+
+    @Singleton
+    @Provides
+    fun provideLoginDataSource(auth: FirebaseAuth) : LoginDataSource {
+        return LoginDataSource(auth)
     }
 
     @Singleton

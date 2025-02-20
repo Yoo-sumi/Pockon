@@ -28,8 +28,7 @@ class GiftPhotoDataSource @Inject constructor(
             }
     }
 
-    fun removeData(uid: String, id: String?, onComplete: (Boolean) -> Unit) {
-        if (id == null) onComplete(false)
+    fun removeData(uid: String, id: String, onComplete: (Boolean) -> Unit) {
         storageRef.child("${uid}/${id}.jpg")
             .delete()
             .addOnCompleteListener { task ->

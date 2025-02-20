@@ -1,28 +1,27 @@
 package com.example.giftbox.data
 
+import com.example.giftbox.data.remote.LoginDataSource
 import com.google.firebase.auth.AuthCredential
-import com.google.firebase.auth.FirebaseAuth
 import javax.inject.Inject
 
 class LoginRepository @Inject constructor(
-    private val auth: FirebaseAuth
+    private val loginDataSource: LoginDataSource
 ) {
     fun login(firebaseCredential: AuthCredential, onComplete: (String) -> Unit) {
-        auth.signInWithCredential(firebaseCredential)
-            .addOnCompleteListener { task ->
-                onComplete(task.result.user?.uid ?: "")
-            }
-    }
-
-    fun logout() {
-        auth.signOut()
-    }
-
-    fun removeAccount(onComplete: (Boolean) -> Unit) {
-        auth.currentUser?.delete()?.addOnCompleteListener { task ->
-            onComplete(task.isSuccessful)
+        loginDataSource.login(firebaseCredential) { uid ->
+            onComplete(uid)
         }
     }
 
-    fun getCurrentUser() = auth.currentUser
+    fun logout() {
+        loginDataSource.logout()
+    }
+
+    fun removeAccount(onComplete: (Boolean) -> Unit) {
+        loginDataSource.removeAccount {
+            onComplete(it)
+        }
+    }
+
+    fun getCurrentUser() = loginDataSource.getCurrentUser()
 }

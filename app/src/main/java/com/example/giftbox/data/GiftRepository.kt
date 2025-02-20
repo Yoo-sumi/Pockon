@@ -50,9 +50,9 @@ class GiftRepository @Inject constructor(
     }
 
     fun removeGift(uid: String, document: String, onComplete: (Boolean) -> Unit) {
-        giftDataSource.deleteData(document) { result ->
-            if (!result) onComplete(false)
-            giftPhotoDataSource.removeData(uid, document) {
+        giftPhotoDataSource.removeData(uid, document) { result ->
+            if (!result) onComplete(false) // 사진 삭제 실패이면 정보 삭제 X
+            giftDataSource.deleteData(document) {
                 onComplete(it)
             }
         }

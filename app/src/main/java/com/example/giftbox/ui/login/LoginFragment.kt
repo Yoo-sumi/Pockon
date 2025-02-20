@@ -17,6 +17,7 @@ import com.example.giftbox.BuildConfig
 import com.example.giftbox.R
 import com.example.giftbox.databinding.FragmentLoginBinding
 import com.google.android.libraries.identity.googleid.GetGoogleIdOption
+import com.google.android.material.snackbar.Snackbar
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
 
@@ -56,9 +57,9 @@ class LoginFragment : Fragment() {
                         request = request,
                         context = requireContext()
                     )
-                    loginViewModel.login(result)
-                } catch (e: GetCredentialException) {
-                    TODO()
+                    loginViewModel.login(result) // 구글 로그인 이어서 진행
+                } catch (e: GetCredentialException) { // 구글 로그인 실패
+                    Snackbar.make(binding.root, getString(R.string.msg_login_fail), Snackbar.LENGTH_SHORT).show()
                 }
 //                credentialManager.clearCredentialState(request = ClearCredentialStateRequest()) >> 로그아웃할때 필요
             }
@@ -71,6 +72,13 @@ class LoginFragment : Fragment() {
                 navController.popBackStack()
                 if (loginViewModel.getIsPinUse()) navController.navigate(R.id.pinFragment)
                 else navController.navigate(R.id.mainFragment)
+            }
+        }
+
+        loginViewModel.isFail.observe(viewLifecycleOwner) {
+            if (it) {
+                // 로그인 실패 스낵바
+                Snackbar.make(binding.root, getString(R.string.msg_login_fail), Snackbar.LENGTH_LONG).show()
             }
         }
 

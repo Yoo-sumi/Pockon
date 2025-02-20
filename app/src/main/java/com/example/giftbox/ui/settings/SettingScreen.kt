@@ -8,20 +8,20 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.wrapContentSize
-import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -30,11 +30,13 @@ import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.giftbox.R
 import com.example.giftbox.ui.list.ConfirmDialog
+import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -46,7 +48,15 @@ fun SettingScreen(onUsedGift: () -> Unit, movePinScreen: () -> Unit, moveLogInSc
     var checkedAlarm by rememberSaveable { mutableStateOf(settingViewModel.getIsNotiEndDt()) }
     var checkedPwd by rememberSaveable { mutableStateOf(settingViewModel.getIsAuthPin()) }
 
+    // snackbar
+    val snackbarHostState = remember { SnackbarHostState() }
+    val scope = rememberCoroutineScope()
+    val context = LocalContext.current
+
     Scaffold(
+        snackbarHost = {
+            SnackbarHost(hostState = snackbarHostState)
+        },
         topBar = {
             CenterAlignedTopAppBar(
                 colors = TopAppBarDefaults.topAppBarColors(
@@ -69,12 +79,12 @@ fun SettingScreen(onUsedGift: () -> Unit, movePinScreen: () -> Unit, moveLogInSc
             ) {
                 // 사용내역
                 SettingItem(
-                    text = "사용내역",
+                    text = stringResource(id = R.string.txt_usage_history),
                     isTitle = true
                 )
 
                 SettingItem(
-                    text = "사용완료 기프티콘",
+                    text = stringResource(id = R.string.txt_usage_history),
                     onClick = {
                         onUsedGift()
                     }
@@ -82,12 +92,12 @@ fun SettingScreen(onUsedGift: () -> Unit, movePinScreen: () -> Unit, moveLogInSc
 
                 // 설정
                 SettingItem(
-                    text = "설정",
+                    text = stringResource(id = R.string.setting),
                     isTitle = true
                 )
 
                 SettingItem(
-                    text = "사용 임박 알림",
+                    text = stringResource(id = R.string.txt_noti_of_imminent_use),
                     isSwitch = true,
                     checked = checkedAlarm,
                     onCheck = {
@@ -97,7 +107,7 @@ fun SettingScreen(onUsedGift: () -> Unit, movePinScreen: () -> Unit, moveLogInSc
                 )
 
                 SettingItem(
-                    text = "비밀번호 사용",
+                    text = stringResource(id = R.string.txt_use_pwd),
                     isSwitch = true,
                     checked = checkedPwd,
                     onCheck = {
@@ -112,19 +122,19 @@ fun SettingScreen(onUsedGift: () -> Unit, movePinScreen: () -> Unit, moveLogInSc
 
                 // 사용자
                 SettingItem(
-                    text = "사용자",
+                    text = stringResource(id = R.string.txt_user),
                     isTitle = true
                 )
 
                 SettingItem(
-                    text = "로그아웃",
+                    text = stringResource(id = R.string.txt_logout),
                     onClick = {
                         showLogoutDlg = true
                     }
                 )
 
                 SettingItem(
-                    text = "회원 탈퇴",
+                    text = stringResource(id = R.string.txt_remove_account),
                     onClick = {
                         showRemoveDlg = true
                     }
@@ -152,10 +162,13 @@ fun SettingScreen(onUsedGift: () -> Unit, movePinScreen: () -> Unit, moveLogInSc
                 onConfirm = {
                     showRemoveDlg = false
                     settingViewModel.removeAccount { result ->
-                        if (result) {
+                        if (result) { // 로그인 화면으로 이동
                             moveLogInScreen()
                         }
-                        else { // 네트워크가 불안정합니다. 인터넷 연결을 확인해주세요.
+                        else { // "회원탈퇴에 실패했습니다."
+                            scope.launch {
+                                snackbarHostState.showSnackbar(message = context.getString(R.string.msg_remove_account_fail))
+                            }
                         }
                     }
                 },

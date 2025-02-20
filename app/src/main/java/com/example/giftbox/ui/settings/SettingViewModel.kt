@@ -66,29 +66,40 @@ class SettingViewModel @Inject constructor(
     }
 
     fun removeAccount(onSuccess: (Boolean) -> Unit) {
-        loginRepository.removeAccount { result ->
-            if (result) {
-                viewModelScope.launch {
-                    giftRepository.getAllGift().collectLatest { gifts ->
-                        gifts.forEach { gift ->
-                            // remote 데이터 삭제
-                            giftRepository.removeGift(uid, gift.id) {
-                                if (!it) {
-                                    onSuccess(it) // 삭제 실패
-                                }
-                            }
+        viewModelScope.launch {
+            giftRepository.getAllGift().collectLatest { gifts ->
+                val removeList = ArrayList<String>()
+                gifts.forEach { gift ->
+                    // remote 데이터 삭제
+                    giftRepository.removeGift(uid, gift.id) {
+                        if (!it) {
+                            removeList.add(gift.id)
                         }
-                        // 로컬 데이터 삭제
-                        viewModelScope.launch(Dispatchers.IO) {
-                            giftRepository.deleteAllGift()
-                            brandSearchRepository.deleteAllBrands()
-                        }
-                        sharedPref.edit().clear().apply()
-                        onSuccess(result)
                     }
                 }
-            } else {
-                onSuccess(result)
+                // 서버 삭제 깔끔하게 완료
+                // 로컬 데이터 삭제
+                if (removeList.size == gifts.size) {
+                    viewModelScope.launch(Dispatchers.IO) {
+                        giftRepository.deleteAllGift()
+                        brandSearchRepository.deleteAllBrands()
+                    }
+                } else { // 삭제된 것만 지우기(일부)
+                    viewModelScope.launch(Dispatchers.IO) {
+                        brandSearchRepository.deleteAllBrands()
+                        removeList.forEach { id ->
+                            giftRepository.deleteGift(id)
+                        }
+                    }
+                    onSuccess(false) // 중간에 삭제 실패하면 삭제 중단
+                }
+
+                // 모두 삭제(remote/local)
+                // 계정 삭제
+                loginRepository.removeAccount { result ->
+                    if (result)  sharedPref.edit().clear().apply()
+                    onSuccess(result)
+                }
             }
         }
     }

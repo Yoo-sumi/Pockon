@@ -36,8 +36,6 @@
     <string name="btn_guest_login">"Sign In As Guest</string>
     <string name="btn_delete">삭제</string>
     <string name="btn_edit">편집</string>
-    <string name="dlg_msg_logout">로그아웃을 하시겠습니까?</string>
-    <string name="dlg_msg_remove_account">회원 탈퇴를 하시겠습니까?\n저장된 데이터가 모두 삭제됩니다.</string>
     <string name="dlg_msg_delete">정말 삭제하시겠습니까?\n삭제된 기프티콘은 복구할 수 없습니다.</string>
     <string name="dlg_msg_use_cancel">기프티콘 사용을 취소하시겠습니까?</string>
     <string name="dlg_msg_use_pin">소중한 기프티콘을 지킬 수 있는 보안을 설정하시겠습니까?</string>
@@ -54,6 +52,7 @@
     <string name="msg_no_update">기프티콘 수정에 실패했습니다.</string>
     <string name="msg_noti_end_dt_today">오늘은 기프티콘 만료일 입니다!</string>
     <string name="msg_noti_end_dt">기프티콘 만료일 %d일 전입니다.</string>
+    <string name="msg_login_fail">로그인에 실패했습니다.</string>
     <string name="chip_all">전체</string>
     <string name="top_app_bar_recent">최신순</string>
     <string name="top_app_bar_end_date">디데이순</string>
@@ -72,4 +71,17 @@
     <string name="format_end_date">~%s</string>
     <string name="format_cash">%s원</string>
     <string name="format_remain_cash">잔액: %s원</string>
+
+    <!--설정-->
+    <string name="msg_remove_account_fail">회원 탈퇴에 실패했습니다.</string>
+    <string name="txt_usage_history">사용내역</string>
+    <string name="txt_used_gifticon">사용완료 기프티콘</string>
+    <string name="txt_noti_of_imminent_use">사용 임박 알림</string>
+    <string name="txt_use_pwd">비밀번호 사용</string>
+    <string name="txt_user">사용자</string>
+    <string name="txt_logout">로그아웃</string>
+    <string name="txt_remove_account">회원 탈퇴</string>
+    <string name="dlg_msg_logout">로그아웃을 하시겠습니까?</string>
+    <string name="dlg_msg_remove_account">회원 탈퇴를 하시겠습니까?\n저장된 데이터가 모두 삭제됩니다.</string>
+
 </resources>
