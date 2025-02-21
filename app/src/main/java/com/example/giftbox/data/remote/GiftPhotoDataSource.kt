@@ -8,8 +8,7 @@ import javax.inject.Inject
 class GiftPhotoDataSource @Inject constructor(
     private val storageRef: StorageReference
 ) {
-    fun uploadData(data: Uri, uid: String, id: String?, onComplete: (Boolean) -> Unit) {
-        if (id == null) onComplete(false)
+    fun uploadData(data: Uri, uid: String, id: String, onComplete: (Boolean) -> Unit) {
         storageRef.child("${uid}/${id}.jpg")
             .putFile(data)
             .addOnCompleteListener { task ->

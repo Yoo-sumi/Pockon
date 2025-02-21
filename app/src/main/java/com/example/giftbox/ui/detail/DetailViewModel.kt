@@ -132,17 +132,20 @@ class DetailViewModel @Inject constructor(
             } else {
                 Gift(id = _gift.value.id, uid = _gift.value.uid, photo = _photo.value.toString(), name = _name.value, brand = _brand.value, endDt = _endDate.value, addDt = _gift.value.addDt, memo = _memo.value, usedDt = _gift.value.usedDt, cash = "")
             }
-            giftRepository.updateGift(updateGift).collect { result ->
+            giftRepository.updateGift(updateGift, true) { result ->
                 // 수정 성공
                 if (result) {
                     // 로컬 수정
                     viewModelScope.launch(Dispatchers.IO) {
                         giftRepository.insertGift(updateGift)
                     }
-                    myAlarmManager.cancel(updateGift.id)
-                    // 알림 등록
-                    if (isNotiEndDt && getDdayInt(updateGift.endDt) in 0..1) {
-                        myAlarmManager.schedule(updateGift, getDdayInt(updateGift.endDt))
+                    // 날짜 수정 했을때만 알람 수정
+                    if(_gift.value.endDt != _endDate.value) {
+                        myAlarmManager.cancel(updateGift.id)
+                        // 알림 등록
+                        if (isNotiEndDt && getDdayInt(updateGift.endDt) in 0..1) {
+                            myAlarmManager.schedule(updateGift, getDdayInt(updateGift.endDt))
+                        }
                     }
                     _gift.value = updateGift
                     _isEdit.value = false
@@ -164,7 +167,7 @@ class DetailViewModel @Inject constructor(
                 ).format(Date(System.currentTimeMillis()))
             }
             val gift = if (cash == null) _gift.value.copy(usedDt = nowDt) else _gift.value.copy(usedDt = nowDt, cash = cash.toString())
-            giftRepository.updateGift(gift).collect { result ->
+            giftRepository.updateGift(gift, false) { result ->
                 if (result) {
                     // 로컬 수정
                     viewModelScope.launch(Dispatchers.IO) {

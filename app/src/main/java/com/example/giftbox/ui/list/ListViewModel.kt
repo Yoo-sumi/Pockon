@@ -181,7 +181,7 @@ class ListViewModel @Inject constructor(
                 Locale.getDefault()
             ).format(Date(System.currentTimeMillis()))
             val updateGift = gift.copy(usedDt = nowDt)
-            giftRepository.updateGift(updateGift).collect { result ->
+            giftRepository.updateGift(updateGift, false) { result ->
                 // 수정 성공
                 if (result) {
                     // 로컬 수정

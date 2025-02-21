@@ -16,8 +16,12 @@ class GiftRepository @Inject constructor(
 ) {
     fun addGift(gift: Gift, photo: Uri, onComplete: (Boolean) -> Unit) {
         giftDataSource.uploadData(gift) { id ->
-            giftPhotoDataSource.uploadData(photo, gift.uid, id) {
-                onComplete(it)
+            if (id == null) {
+                onComplete(false)
+            } else {
+                giftPhotoDataSource.uploadData(photo, gift.uid, id) {
+                    onComplete(it)
+                }
             }
         }
     }
@@ -45,8 +49,22 @@ class GiftRepository @Inject constructor(
         }
     }
 
-    fun updateGift(gift: Gift): Flow<Boolean> {
-        return giftDataSource.updateData(gift)
+    fun updateGift(gift: Gift, isPhoto: Boolean, onComplete: (Boolean) -> Unit){
+        giftDataSource.updateData(gift) { result ->
+            if (result) {
+                if (!isPhoto) {
+                    onComplete(true)
+                } else if (!gift.photo.contains("firebase")) {
+                    giftPhotoDataSource.uploadData(Uri.parse(gift.photo), gift.uid, gift.id) {
+                        onComplete(it)
+                    }
+                } else {
+                    onComplete(true)
+                }
+            } else {
+                onComplete(false)
+            }
+        }
     }
 
     fun removeGift(uid: String, document: String, onComplete: (Boolean) -> Unit) {

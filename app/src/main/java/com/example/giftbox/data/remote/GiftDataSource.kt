@@ -53,17 +53,14 @@ class GiftDataSource @Inject constructor(
             }
     }
 
-    fun updateData(gift: Gift): Flow<Boolean> {
-        return callbackFlow {
-            firestore
-                .collection("gift")
-                .document(gift.id)
-                .set(gift)
-                .addOnCompleteListener { task ->
-                    trySend(task.isSuccessful)
-                }
-            awaitClose()
-        }
+    fun updateData(gift: Gift, onComplete: (Boolean) -> Unit) {
+        firestore
+            .collection("gift")
+            .document(gift.id)
+            .set(gift)
+            .addOnCompleteListener { task ->
+                onComplete(task.isSuccessful)
+            }
     }
 
     fun deleteData(document: String, onComplete: (Boolean) -> Unit) {
