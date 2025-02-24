@@ -1,7 +1,7 @@
 package com.example.giftbox.ui.add
 
 import android.content.SharedPreferences
-import android.net.Uri
+import android.graphics.Bitmap
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
@@ -34,8 +34,8 @@ class AddViewModel @Inject constructor(
     private val _isCheckedCash = mutableStateOf(false)
     val isCheckedCash: State<Boolean> = _isCheckedCash
 
-    private val _photo = mutableStateOf<Uri?>(null)
-    val photo: State<Uri?> = _photo
+    private val _photo = mutableStateOf<Bitmap?>(null)
+    val photo: State<Bitmap?> = _photo
     private val _name = mutableStateOf("")
     val name: State<String> = _name
     private val _brand = mutableStateOf("")
@@ -59,7 +59,7 @@ class AddViewModel @Inject constructor(
                 _brand.value = it.brand
                 _endDate.value = it.endDt
                 _memo.value = it.memo
-                _photo.value = Uri.parse(it.photo)
+                _photo.value = it.photo
             }
         }
     }
@@ -97,7 +97,7 @@ class AddViewModel @Inject constructor(
         }
     }
 
-    fun setPhoto(photo: Uri?) {
+    fun setPhoto(photo: Bitmap?) {
         _photo.value = photo
     }
 

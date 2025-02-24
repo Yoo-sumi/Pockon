@@ -1,6 +1,5 @@
 package com.example.giftbox.ui.home
 
-import android.location.Location
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
@@ -31,13 +30,35 @@ class HomeViewModel @Inject constructor(
     private val _closeToGiftList = mutableStateOf<List<Gift>>(listOf())
     val closeToGiftList: State<List<Gift>> = _closeToGiftList
 
-    private var location: Location? = null
+    private var longitude: Double? = null
+    private var latitude: Double? = null
+
+    init {
+        observeGiftList()
+    }
 
     // 로컬 기프티콘 목록 변화 감지해서 가져오기
-    fun observeGiftList() {
+    private fun observeGiftList() {
         viewModelScope.launch(Dispatchers.IO) {
             giftRepository.getAllGift().collectLatest { allGift ->
-                if (allGift.isNotEmpty()) {
+                // 목록 변화가 있을 경우만 화면 갱신
+                var isChange = false
+                if (allGift.size != giftList.size) {
+                    isChange = true
+                } else {
+                    allGift.forEachIndexed { index, giftEntity ->
+                        if (giftList[index].id != giftEntity.id) isChange = true
+                        else if (giftList[index].name != giftEntity.name) isChange = true
+                        else if (giftList[index].brand != giftEntity.brand) isChange = true
+                        else if (giftList[index].photo != giftEntity.photo) isChange = true
+                        else if (giftList[index].endDt != giftEntity.endDt) isChange = true
+                        else if (giftList[index].usedDt != giftEntity.usedDt) isChange = true
+
+                        if (isChange) return@forEachIndexed
+                    }
+                }
+
+                if (allGift.isNotEmpty() && isChange) {
                     giftList = allGift.map { gift ->
                         Gift(id = gift.id, uid = gift.uid, photo = gift.photo, name = gift.name, brand = gift.brand, endDt = gift.endDt, addDt = gift.addDt, memo = gift.memo, usedDt = gift.usedDt, cash = gift.cash)
                     }
@@ -47,7 +68,7 @@ class HomeViewModel @Inject constructor(
                     _closeToGiftList.value = giftList.sortedBy { gift -> dateFormat.parse(gift.endDt)?.time }.filterIndexed { index, gift -> index < 30 }
 
                     getBrandInfoList() // 브랜드 검색
-                } else {
+                } else if (allGift.isEmpty()) {
                     _closeToGiftList.value = listOf()
                     _displayGiftList.value = listOf()
                 }
@@ -57,36 +78,42 @@ class HomeViewModel @Inject constructor(
 
     // 브랜드 검색 후 로컬에 저장
     fun getBrandInfoList() {
+        _closeToGiftList.value = giftList
         val allList: ArrayList<Pair<Gift, Document>> = arrayListOf()
 
         val brandNames = ArrayList<String>()
         giftList.forEach {
             if (!brandNames.contains(it.brand)) brandNames.add(it.brand)
         }
-        if (brandNames.isNotEmpty()) brandSearchRepository.searchBrandInfoList(location, brandNames) { brandInfoList ->
-            giftList.forEach { gift ->
-                // 가장 가까운 첫번째 위치만 보여준다(여러개의 스타벅스 중 가장 가까이 있는 한 곳)
-                if (brandInfoList[gift.brand]?.isEmpty() == true) return@forEach // 검색 결과가 없는 경우 스킵
-                brandInfoList[gift.brand]?.sortedBy { Integer.parseInt(it.distance) }?.get(0).let { doc ->
-                    // gift, doc
-                    if (doc != null) allList.add(Pair(gift, doc))
+        if (brandNames.isNotEmpty() && longitude != null && latitude != null)  {
+            brandSearchRepository.searchBrandInfoList(longitude!!, latitude!!, brandNames) { brandInfoList ->
+                giftList.forEach { gift ->
+                    // 가장 가까운 첫번째 위치만 보여준다(여러개의 스타벅스 중 가장 가까이 있는 한 곳)
+                    if (brandInfoList[gift.brand]?.isEmpty() == true) return@forEach // 검색 결과가 없는 경우 스킵
+                    brandInfoList[gift.brand]?.sortedBy { Integer.parseInt(it.distance) }?.get(0).let { doc ->
+                        // gift, doc
+                        if (doc != null) allList.add(Pair(gift, doc))
+                    }
                 }
-            }
-            // 거리순으로 정렬(스타벅스, 투썸..)
-            allList.sortBy { it.second.distance.toDouble() }
-            _displayGiftList.value = allList
+                // 거리순으로 정렬(스타벅스, 투썸..)
+                allList.sortBy { it.second.distance.toDouble() }
+                _displayGiftList.value = allList
 
-            // 로컬 저장
-            viewModelScope.launch(Dispatchers.IO) {
-                brandSearchRepository.deleteAllBrands()
-                brandInfoList.forEach { (keyword, documents) ->
-                    if (documents != null) brandSearchRepository.insertBrands(keyword, documents) // 키워드별 브랜드 위치정보 저장
+                // 로컬 저장
+                viewModelScope.launch(Dispatchers.IO) {
+                    brandSearchRepository.deleteAllBrands()
+                    brandInfoList.forEach { (keyword, documents) ->
+                        if (documents != null) brandSearchRepository.insertBrands(keyword, documents) // 키워드별 브랜드 위치정보 저장
+                    }
                 }
             }
         }
     }
 
-    fun setLocation(location: Location?) {
-        this.location = location
+    fun setLocation(longitude: Double?, latitude: Double?) {
+        this.longitude = longitude
+        this.latitude = latitude
+
+        if (giftList.isNotEmpty()) { getBrandInfoList() }
     }
 }

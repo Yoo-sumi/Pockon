@@ -94,7 +94,6 @@ fun ListScreen(listViewModel: ListViewModel = viewModel(), onDetail: (String) ->
     val refreshState = rememberPullToRefreshState()
     var showRemoveDlg by rememberSaveable { mutableStateOf(false) }
     var isEdit by rememberSaveable { mutableStateOf(false) }
-    var isAllSelect by rememberSaveable { mutableStateOf(false) }
 
     // snackbar
     val snackbarHostState = remember { SnackbarHostState() }
@@ -120,7 +119,7 @@ fun ListScreen(listViewModel: ListViewModel = viewModel(), onDetail: (String) ->
                             if (!result) snackbarHostState.showSnackbar(message = context.getString(R.string.msg_no_delete))
                         }
                         isEdit = !isEdit
-                        isAllSelect = false
+                        listViewModel.setIsAllSelect(false)
                         listViewModel.clearCheckedGiftList()
                     }
                 } else {
@@ -171,7 +170,7 @@ fun ListScreen(listViewModel: ListViewModel = viewModel(), onDetail: (String) ->
                                     else showRemoveDlg = true
                                 } else { // 편집
                                     isEdit = true
-                                    isAllSelect = false
+                                    listViewModel.setIsAllSelect(false)
                                     listViewModel.clearCheckedGiftList()
                                 }
                             },
@@ -199,7 +198,7 @@ fun ListScreen(listViewModel: ListViewModel = viewModel(), onDetail: (String) ->
                             val key = keys[idx]
                             FilterChip(
                                 onClick = {
-                                    isAllSelect = false
+                                    listViewModel.setIsAllSelect(false)
                                     listViewModel.changeChipState(listOf(key))
                                 },
                                 label = {
@@ -240,10 +239,9 @@ fun ListScreen(listViewModel: ListViewModel = viewModel(), onDetail: (String) ->
                             Checkbox(
                                 modifier = Modifier
                                     .scale(0.8f),
-                                checked = isAllSelect,
+                                checked = listViewModel.isAllSelect.value,
                                 onCheckedChange = {
-                                    isAllSelect = !isAllSelect
-                                    listViewModel.selectAll(isAllSelect)
+                                    listViewModel.onClickAllSelect()
                                 }
                             )
                         }

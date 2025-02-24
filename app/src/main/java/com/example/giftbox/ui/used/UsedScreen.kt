@@ -92,7 +92,7 @@ fun UsedGiftItem(gift: Gift, formattedEndDate: String, dDay: Pair<String, Boolea
                     modifier = Modifier
                         .fillMaxSize()
                         .size(200.dp),
-                    model = Uri.parse(gift.photo),
+                    model = gift.photo,
                     contentDescription = "add photo",
                     contentScale = ContentScale.Crop
                 )

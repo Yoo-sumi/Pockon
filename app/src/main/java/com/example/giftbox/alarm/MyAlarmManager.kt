@@ -14,7 +14,7 @@ class MyAlarmManager(private val context: Context) {
     fun schedule(gift: Gift, dDay: Int) {
         for (i in 0..dDay) {
             val intent = Intent(context, AlarmReceiver::class.java).apply {
-                putExtra("gift", gift)
+                putExtra("gift", gift.copy(photo = null))
                 putExtra("dDay", dDay)
             }
             val year = gift.endDt.substring(0, 4)

@@ -2,7 +2,6 @@ package com.example.giftbox.ui.home
 
 import android.annotation.SuppressLint
 import android.location.Location
-import android.net.Uri
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -41,8 +40,12 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -75,9 +78,17 @@ fun HomeScreen(onAdd: () -> Unit, showMap: () -> Unit, onDetail: (String) -> Uni
     }
     val scrollState = rememberScrollState()
 
+    var longitude: Double? by rememberSaveable { mutableStateOf(null) }
+    var latitude: Double? by rememberSaveable { mutableStateOf(null) }
+
     getLocation(fusedLocationClient) {
-        homeViewModel.setLocation(it) // 위치 가져온 다음
-        homeViewModel.observeGiftList() // 기프티콘 불러오기
+        // 위치 가져오기
+        longitude = it?.longitude
+        latitude = it?.latitude
+    }
+
+    LaunchedEffect(longitude, latitude) {
+        homeViewModel.setLocation(longitude, latitude)
     }
 
     Scaffold(
@@ -124,8 +135,9 @@ fun HomeScreen(onAdd: () -> Unit, showMap: () -> Unit, onDetail: (String) -> Uni
                         ) {
                             IconButton(onClick = {
                                 getLocation(fusedLocationClient) {
-                                    homeViewModel.setLocation(it)
-                                    homeViewModel.getBrandInfoList() // 위치 동기화 후 브랜드만 재검색
+                                    // 위치 동기화
+                                    longitude = it?.longitude
+                                    latitude = it?.latitude
                                 }
                             }) {
                                 Icon(
@@ -242,7 +254,7 @@ fun HomeGiftItem(gift: Gift, formattedEndDate: String, dDay: Pair<String, Boolea
         ) {
             AsyncImage(
                 modifier = Modifier.size(160.dp),
-                model = Uri.parse(gift.photo),
+                model = gift.photo,
                 contentDescription = "add photo",
                 contentScale = ContentScale.Crop
             )

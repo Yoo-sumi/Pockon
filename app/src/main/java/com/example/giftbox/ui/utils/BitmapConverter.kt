@@ -1,33 +1,28 @@
 package com.example.giftbox.ui.utils
 
-import android.content.Context
+import android.content.ContentResolver
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
-import android.graphics.ImageDecoder
 import android.net.Uri
-import android.os.Build
-import android.provider.MediaStore
-import android.util.Base64
 import java.io.ByteArrayOutputStream
 
-fun bitmapToString(bitmap: Bitmap): String {
-    val stream = ByteArrayOutputStream()
-    bitmap.compress(Bitmap.CompressFormat.PNG, 100, stream)
-    val bytes = stream.toByteArray()
-    return Base64.encodeToString(bytes, Base64.DEFAULT)
-}
+// Uri -> Bitmap
+fun getBitmapFromUri(contentResolver: ContentResolver, uri: Uri): Bitmap? {
+    return try {
+        // URI에서 InputStream을 가져옵니다.
+        val inputStream = contentResolver.openInputStream(uri)
 
-fun stringTobitmap(base64string: String): Bitmap? {
-    if (base64string.isEmpty()) return null
-    val decodedBytes = Base64.decode(base64string, Base64.DEFAULT)
-    return BitmapFactory.decodeByteArray(decodedBytes, 0, decodedBytes.size)
-}
-
-fun getBitmapFromUri(context: Context, uri: Uri): Bitmap {
-    if (Build.VERSION.SDK_INT >= 28) {
-        val source = ImageDecoder.createSource(context.contentResolver, uri)
-        return ImageDecoder.decodeBitmap(source)
-    } else {
-        return MediaStore.Images.Media.getBitmap(context.contentResolver, uri)
+        // InputStream을 통해 Bitmap을 디코딩하여 반환
+        BitmapFactory.decodeStream(inputStream)
+    } catch (e: Exception) {
+        e.printStackTrace()
+        null
     }
+}
+
+// Bitmap -> Uri
+fun getBytesFromBitmap(bitmap: Bitmap): ByteArray {
+    val byteArrayOutputStream = ByteArrayOutputStream()
+    bitmap.compress(Bitmap.CompressFormat.JPEG, 100, byteArrayOutputStream) // JPEG로 압축
+    return byteArrayOutputStream.toByteArray()
 }

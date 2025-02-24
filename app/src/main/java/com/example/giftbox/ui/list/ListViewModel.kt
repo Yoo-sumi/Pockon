@@ -14,6 +14,7 @@ import com.example.giftbox.ui.utils.getDdayInt
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.take
 import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
 import java.util.Date
@@ -50,13 +51,20 @@ class ListViewModel @Inject constructor(
     private val _checkedGiftList = mutableStateOf<List<String>>(listOf())
     val checkedGiftList: State<List<String>> = _checkedGiftList
 
+    private val _isAllSelect = mutableStateOf<Boolean>(false)
+    val isAllSelect: State<Boolean> = _isAllSelect
+
     init {
-        observeGiftList() // 관찰자 등록
         getGiftList()
+        observeGiftList() // 관찰자 등록
     }
 
     fun setTopTitle(title: Int) {
         _topTitle.intValue = title
+    }
+
+    fun setIsAllSelect(flag: Boolean) {
+        _isAllSelect.value = flag
     }
 
     // 로컬 기프티콘 목록 변화 감지해서 가져오기
@@ -221,12 +229,15 @@ class ListViewModel @Inject constructor(
     // 선택된 기프티콘 리스트에 추가(for 삭제)
     fun checkedGift(id: String) {
         val filterList = _checkedGiftList.value.filter { it != id }
-        if (filterList.size == _checkedGiftList.value.size) {
+        if (filterList.size == _checkedGiftList.value.size) { // 선택
             val checkedList = _checkedGiftList.value.toMutableList()
             checkedList.add(id)
             _checkedGiftList.value = checkedList
-        } else {
+
+            if (_checkedGiftList.value.size == _copyGiftList.value.size) _isAllSelect.value = true
+        } else { // 해제
             _checkedGiftList.value = filterList
+            if (_checkedGiftList.value.size != _copyGiftList.value.size) _isAllSelect.value = false
         }
     }
 
@@ -236,8 +247,9 @@ class ListViewModel @Inject constructor(
     }
 
     // 전체선택/전체해제
-    fun selectAll(isAll: Boolean) {
-        if (isAll) {
+    fun onClickAllSelect() {
+        _isAllSelect.value = !_isAllSelect.value
+        if (_isAllSelect.value) {
             _checkedGiftList.value = _copyGiftList.value.map { it.id }
         } else {
             _checkedGiftList.value = listOf()
@@ -258,12 +270,14 @@ class ListViewModel @Inject constructor(
                         if (isFail) {
                             onComplete(false)
                         } else {
+                            val idList = ArrayList<String>()
                             _checkedGiftList.value.forEach { id ->
-                                // 로컬 삭제
-                                viewModelScope.launch(Dispatchers.IO) {
-                                    giftRepository.deleteGift(id)
-                                }
+                                idList.add(id)
                                 myAlarmManager.cancel(id)
+                            }
+                            // 로컬 삭제
+                            viewModelScope.launch(Dispatchers.IO) {
+                                giftRepository.deleteGifts(idList)
                             }
                             onComplete(true)
                         }

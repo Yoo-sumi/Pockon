@@ -1,6 +1,6 @@
 package com.example.giftbox.ui.detail
 
-import android.net.Uri
+import android.graphics.Bitmap
 import androidx.activity.compose.BackHandler
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.PickVisualMediaRequest
@@ -55,10 +55,10 @@ import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -91,6 +91,7 @@ import com.example.giftbox.R
 import com.example.giftbox.ui.add.CustomDatePickerDialog
 import com.example.giftbox.ui.list.ConfirmDialog
 import com.example.giftbox.ui.utils.decimalFormat
+import com.example.giftbox.ui.utils.getBitmapFromUri
 import com.example.giftbox.ui.utils.thousandSeparatorTransformation
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
@@ -99,7 +100,11 @@ import kotlinx.coroutines.launch
 @Composable
 fun DetailScreen(id: String, onBack: () -> Unit) {
     val detailViewModel = hiltViewModel<DetailViewModel>()
-    if (!detailViewModel.isEdit.value) detailViewModel.getGift(id)
+
+    // 중복호출 방지
+    LaunchedEffect(id) {
+        if (!detailViewModel.isEdit.value) detailViewModel.getGift(id)
+    }
 
     // scroll
     val scrollSate = rememberScrollState()
@@ -126,7 +131,7 @@ fun DetailScreen(id: String, onBack: () -> Unit) {
         contract = ActivityResultContracts.PickVisualMedia()
     ) { uri ->
         uri?.let {
-            detailViewModel.setPhoto(it)
+            detailViewModel.setPhoto(getBitmapFromUri(context.contentResolver, it))
         }
     }
 
@@ -419,7 +424,7 @@ fun InputDataTextField(value: String, label: Int, index: Int, isEdit: Boolean, o
 }
 
 @Composable
-fun GiftImage(selectedImage: Uri?, usedDt: String, onClick: () -> Unit) {
+fun GiftImage(selectedImage: Bitmap?, usedDt: String, onClick: () -> Unit) {
     Row(
         horizontalArrangement = Arrangement.Center,
         modifier = Modifier
@@ -464,7 +469,7 @@ fun GiftImage(selectedImage: Uri?, usedDt: String, onClick: () -> Unit) {
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun GiftBottomSheet(image: Uri?, scope: CoroutineScope, sheetState: SheetState, onDismiss: (Boolean) -> Unit) {
+fun GiftBottomSheet(image: Bitmap?, scope: CoroutineScope, sheetState: SheetState, onDismiss: (Boolean) -> Unit) {
     val screenHeight = LocalConfiguration.current.screenHeightDp.dp
 
     ModalBottomSheet(

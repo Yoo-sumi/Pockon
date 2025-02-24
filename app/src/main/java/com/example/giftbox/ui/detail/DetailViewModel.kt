@@ -1,7 +1,7 @@
 package com.example.giftbox.ui.detail
 
 import android.content.SharedPreferences
-import android.net.Uri
+import android.graphics.Bitmap
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
@@ -32,8 +32,8 @@ class DetailViewModel @Inject constructor(
     private val _gift = mutableStateOf(Gift())
     val gift: State<Gift> = _gift
 
-    private val _photo = mutableStateOf<Uri?>(null)
-    val photo: State<Uri?> = _photo
+    private val _photo = mutableStateOf<Bitmap?>(null)
+    val photo: State<Bitmap?> = _photo
     private val _name = mutableStateOf("")
     val name: State<String> = _name
     private val _brand = mutableStateOf("")
@@ -81,7 +81,7 @@ class DetailViewModel @Inject constructor(
         _endDate.value = gift.endDt
         _memo.value = gift.memo
         _usedDt.value = gift.usedDt
-        _photo.value = Uri.parse(gift.photo)
+        _photo.value = gift.photo
         _isCheckedCash.value = gift.cash.isNotEmpty()
     }
 
@@ -121,16 +121,16 @@ class DetailViewModel @Inject constructor(
         _isEdit.value = flag
     }
 
-    fun setPhoto(photo: Uri?) {
+    fun setPhoto(photo: Bitmap?) {
         _photo.value = photo
     }
 
     fun updateGift(onComplete: (Boolean) -> Unit) {
         viewModelScope.launch {
             val updateGift = if (_isCheckedCash.value) {
-                Gift(id = _gift.value.id, uid = _gift.value.uid, photo = _photo.value.toString(), name = _name.value, brand = _brand.value, endDt = _endDate.value, addDt = _gift.value.addDt, memo = _memo.value, usedDt = _gift.value.usedDt, cash = _cash.value)
+                Gift(id = _gift.value.id, uid = _gift.value.uid, photo = _photo.value, name = _name.value, brand = _brand.value, endDt = _endDate.value, addDt = _gift.value.addDt, memo = _memo.value, usedDt = _gift.value.usedDt, cash = _cash.value)
             } else {
-                Gift(id = _gift.value.id, uid = _gift.value.uid, photo = _photo.value.toString(), name = _name.value, brand = _brand.value, endDt = _endDate.value, addDt = _gift.value.addDt, memo = _memo.value, usedDt = _gift.value.usedDt, cash = "")
+                Gift(id = _gift.value.id, uid = _gift.value.uid, photo = _photo.value, name = _name.value, brand = _brand.value, endDt = _endDate.value, addDt = _gift.value.addDt, memo = _memo.value, usedDt = _gift.value.usedDt, cash = "")
             }
             giftRepository.updateGift(updateGift, true) { result ->
                 // 수정 성공

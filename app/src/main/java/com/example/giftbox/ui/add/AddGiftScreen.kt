@@ -1,5 +1,6 @@
 package com.example.giftbox.ui.add
 
+import android.graphics.Bitmap
 import android.net.Uri
 import androidx.activity.compose.ManagedActivityResultLauncher
 import androidx.activity.compose.rememberLauncherForActivityResult
@@ -69,6 +70,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import coil.compose.AsyncImage
 import com.example.giftbox.ui.utils.DateTransformation
 import com.example.giftbox.R
+import com.example.giftbox.ui.utils.getBitmapFromUri
 import com.example.giftbox.ui.utils.thousandSeparatorTransformation
 import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
@@ -91,7 +93,7 @@ fun AddGifticon(onBack: (Boolean) -> Unit) {
         contract = ActivityResultContracts.PickVisualMedia()
     ) { uri ->
         uri?.let {
-            addViewModel.setPhoto(it)
+            addViewModel.setPhoto(getBitmapFromUri(context.contentResolver, it))
         }
     }
     // scroll
@@ -271,7 +273,7 @@ fun InputDataTextField(value: String, label: Int, index: Int, onValueChange: (In
 }
 
 @Composable
-fun GiftImage(selectedImage: Uri?, galleryLauncher:  ManagedActivityResultLauncher<PickVisualMediaRequest, Uri?>) {
+fun GiftImage(selectedImage: Bitmap?, galleryLauncher:  ManagedActivityResultLauncher<PickVisualMediaRequest, Uri?>) {
     Row(
         horizontalArrangement = Arrangement.Center,
         modifier = Modifier
@@ -330,7 +332,7 @@ fun CustomDatePickerDialog(
     ) {
         val datePickerState = rememberDatePickerState(
             initialDisplayMode = DisplayMode.Picker,
-            initialSelectedDateMillis = if (selectedDate.isNotEmpty()) {
+            initialSelectedDateMillis = if (selectedDate.isNotEmpty() && selectedDate.length == 8) {
                 val formatter = SimpleDateFormat("yyyyMMdd", Locale.getDefault()).apply {
                     timeZone = TimeZone.getTimeZone("UTC")
                 }

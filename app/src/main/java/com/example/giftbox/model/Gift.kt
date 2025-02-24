@@ -1,11 +1,12 @@
 package com.example.giftbox.model
 
+import android.graphics.Bitmap
 import java.io.Serializable
 
 data class Gift(
     var id: String = "",
     val uid: String = "",
-    val photo: String = "",
+    val photo: Bitmap? = null,
     val name: String = "",
     val brand: String = "",
     val endDt: String = "",
