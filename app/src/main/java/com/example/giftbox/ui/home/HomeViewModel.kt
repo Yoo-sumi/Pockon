@@ -41,24 +41,7 @@ class HomeViewModel @Inject constructor(
     private fun observeGiftList() {
         viewModelScope.launch(Dispatchers.IO) {
             giftRepository.getAllGift().collectLatest { allGift ->
-                // 목록 변화가 있을 경우만 화면 갱신
-                var isChange = false
-                if (allGift.size != giftList.size) {
-                    isChange = true
-                } else {
-                    allGift.forEachIndexed { index, giftEntity ->
-                        if (giftList[index].id != giftEntity.id) isChange = true
-                        else if (giftList[index].name != giftEntity.name) isChange = true
-                        else if (giftList[index].brand != giftEntity.brand) isChange = true
-                        else if (giftList[index].photo != giftEntity.photo) isChange = true
-                        else if (giftList[index].endDt != giftEntity.endDt) isChange = true
-                        else if (giftList[index].usedDt != giftEntity.usedDt) isChange = true
-
-                        if (isChange) return@forEachIndexed
-                    }
-                }
-
-                if (allGift.isNotEmpty() && isChange) {
+                if (allGift.isNotEmpty()) {
                     giftList = allGift.map { gift ->
                         Gift(id = gift.id, uid = gift.uid, photo = gift.photo, name = gift.name, brand = gift.brand, endDt = gift.endDt, addDt = gift.addDt, memo = gift.memo, usedDt = gift.usedDt, cash = gift.cash)
                     }
@@ -68,17 +51,17 @@ class HomeViewModel @Inject constructor(
                     _closeToGiftList.value = giftList.sortedBy { gift -> dateFormat.parse(gift.endDt)?.time }.filterIndexed { index, gift -> index < 30 }
 
                     getBrandInfoList() // 브랜드 검색
-                } else if (allGift.isEmpty()) {
+                } else {
                     _closeToGiftList.value = listOf()
                     _displayGiftList.value = listOf()
+                    giftList = listOf()
                 }
             }
         }
     }
 
     // 브랜드 검색 후 로컬에 저장
-    fun getBrandInfoList() {
-        _closeToGiftList.value = giftList
+    private fun getBrandInfoList() {
         val allList: ArrayList<Pair<Gift, Document>> = arrayListOf()
 
         val brandNames = ArrayList<String>()
