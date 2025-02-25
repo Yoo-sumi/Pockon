@@ -25,24 +25,13 @@ class GiftRepository @Inject constructor(
         }
     }
 
-    fun getGift(uid: String, id:String, onComplete: (Gift?) -> Unit) {
-        giftDataSource.loadData(id) { gift ->
-            giftPhotoDataSource.downloadData(uid, id) { photo ->
-                onComplete(gift?.copy(photo = photo))
-            }
-        }
-    }
-
     fun getAllGift(uid: String, onComplete: (List<Gift>) -> (Unit)) {
-        val giftList = mutableListOf<Gift>()
         giftDataSource.loadAllData(uid) { gifts ->
-            if (gifts.isEmpty()) onComplete(giftList)
-            gifts.forEach { gift ->
-                giftPhotoDataSource.downloadData(gift.uid, gift.id) { photo ->
-                    giftList.add(gift.copy(photo = photo))
-                    if (gifts.size == giftList.size) {
-                        onComplete(giftList)
-                    }
+            if (gifts.isEmpty()) {
+                onComplete(listOf())
+            } else {
+                giftPhotoDataSource.downloadAllData(uid, gifts.map { it.id }) { photoMap ->
+                    onComplete(gifts.map { it.copy(photo = photoMap[it.id]) })
                 }
             }
         }

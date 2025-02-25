@@ -47,23 +47,6 @@ class AddViewModel @Inject constructor(
     private val _memo = mutableStateOf("")
     val memo: State<String> = _memo
 
-    init {
-        getGift()
-    }
-
-    private fun getGift(id: String? = null) {
-        if (id == null) return
-        giftRepository.getGift(uid, id) { gift ->
-            gift?.let {
-                _name.value = it.name
-                _brand.value = it.brand
-                _endDate.value = it.endDt
-                _memo.value = it.memo
-                _photo.value = it.photo
-            }
-        }
-    }
-
     fun setGift(index: Int, value: String) {
         when (index) {
             0 -> _name.value = value
