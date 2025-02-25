@@ -85,13 +85,6 @@ class GiftRepository @Inject constructor(
         giftLocalDataSource.insertGift(giftEntity)
     }
 
-    fun insertGifts(gifts: List<Gift>) {
-        val giftEntityList = gifts.map { gift ->
-            GiftEntity(id = gift.id, uid = gift.uid, photo = gift.photo, name = gift.name, brand = gift.brand, endDt = gift.endDt, addDt = gift.addDt, memo = gift.memo, usedDt = gift.usedDt, cash = gift.cash)
-        }
-        giftLocalDataSource.insertGifts(giftEntityList)
-    }
-
     fun getAllGift() = giftLocalDataSource.getAllGift()
 
     fun getGift(id: String) = giftLocalDataSource.getGift(id)
@@ -103,4 +96,11 @@ class GiftRepository @Inject constructor(
     fun deleteGifts(ids: List<String>) = giftLocalDataSource.deleteGifts(ids)
 
     fun deleteAllGift() = giftLocalDataSource.deleteAllGift()
+
+    fun deleteAllAndInsertGifts(gifts: List<Gift>) {
+        val giftEntityList = gifts.map { gift ->
+            GiftEntity(id = gift.id, uid = gift.uid, photo = gift.photo, name = gift.name, brand = gift.brand, endDt = gift.endDt, addDt = gift.addDt, memo = gift.memo, usedDt = gift.usedDt, cash = gift.cash)
+        }
+        giftLocalDataSource.deleteAllAndInsertGifts(giftEntityList)
+    }
 }

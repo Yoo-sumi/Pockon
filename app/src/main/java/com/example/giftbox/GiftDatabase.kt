@@ -9,6 +9,7 @@ import androidx.room.OnConflictStrategy
 import androidx.room.PrimaryKey
 import androidx.room.Query
 import androidx.room.RoomDatabase
+import androidx.room.Transaction
 import androidx.room.TypeConverters
 import com.example.giftbox.ui.utils.RoomTypeConverter
 import kotlinx.coroutines.flow.Flow
@@ -48,6 +49,13 @@ interface GiftDao {
 
     @Query("DELETE FROM GiftEntity WHERE id IN (:ids)")
     fun deleteGifts(ids: List<String>)
+
+    // 트랜잭션으로 묶기
+    @Transaction
+    fun deleteAllAndInsertGifts(gifts: List<GiftEntity>) {
+        deleteAllGift()
+        insertGifts(gifts)
+    }
 }
 
 @Entity

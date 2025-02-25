@@ -105,10 +105,7 @@ class ListViewModel @Inject constructor(
             if (giftList.isNotEmpty()) {
                 // 로컬 저장(기프티콘)
                 viewModelScope.launch(Dispatchers.IO) {
-                    giftRepository.deleteAllGift()
-                    giftList.forEach { gift ->
-                        giftRepository.insertGift(gift)
-                    }
+                    giftRepository.deleteAllAndInsertGifts(giftList)
                 }
             } else {
                 _giftList.value = listOf()

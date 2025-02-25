@@ -12,10 +12,6 @@ class GiftLocalDataSource @Inject constructor(
         giftDao.insertGift(gift)
     }
 
-    fun insertGifts(gifts: List<GiftEntity>) {
-        giftDao.insertGifts(gifts)
-    }
-
     fun getAllGift() = giftDao.getAllGift()
 
     fun getGift(id: String) = giftDao.getGift(id)
@@ -27,5 +23,7 @@ class GiftLocalDataSource @Inject constructor(
     fun deleteGifts(ids: List<String>) = giftDao.deleteGifts(ids)
 
     fun deleteAllGift() = giftDao.deleteAllGift()
+
+    fun deleteAllAndInsertGifts(gifts: List<GiftEntity>) = giftDao.deleteAllAndInsertGifts(gifts)
 
 }
