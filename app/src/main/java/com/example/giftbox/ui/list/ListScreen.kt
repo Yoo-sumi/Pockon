@@ -100,7 +100,7 @@ fun ListScreen(listViewModel: ListViewModel = viewModel(), onDetail: (String) ->
     val scope = rememberCoroutineScope()
     val context = LocalContext.current
 
-    if (refreshState.isRefreshing && !listViewModel.getIsGuestMode()) {
+    if (refreshState.isRefreshing) {
         listViewModel.getGiftList()
         listViewModel.setTopTitle(R.string.top_app_bar_recent)
         refreshState.endRefresh()

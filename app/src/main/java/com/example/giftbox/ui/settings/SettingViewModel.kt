@@ -40,12 +40,19 @@ class SettingViewModel @Inject constructor(
 
         viewModelScope.launch(Dispatchers.IO) {
             giftRepository.getAllGift().take(1).collectLatest { allGift ->
+                val alarmList = sharedPref.getStringSet("alarm_list", mutableSetOf())?.toMutableSet()
                 allGift.forEach { gift ->
                     val tempGift = Gift(id = gift.id, uid = gift.uid, photo = gift.photo, name = gift.name, brand = gift.brand, endDt = gift.endDt, addDt = gift.addDt, memo = gift.memo, usedDt = gift.usedDt, cash = gift.cash)
-                    myAlarmManager.cancel(tempGift.id)
-                    // 알림 등록
-                    if (isNotiEndDt && getDdayInt(tempGift.endDt) in 0..1) {
-                        myAlarmManager.schedule(tempGift, getDdayInt(tempGift.endDt))
+                    if (isNotiEndDt) {
+                        // 알림 등록
+                        if (getDdayInt(tempGift.endDt) in 0..1 && alarmList?.contains(gift.id) == false) {
+                            alarmList.add(gift.id)
+                            sharedPref.edit().putStringSet("alarm_list", alarmList).apply()
+                            myAlarmManager.schedule(tempGift, getDdayInt(tempGift.endDt))
+                        }
+                    } else {
+                        sharedPref.edit().putStringSet("alarm_list", mutableSetOf()).apply()
+                        myAlarmManager.cancel(tempGift.id)
                     }
                 }
             }

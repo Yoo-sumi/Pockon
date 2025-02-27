@@ -30,7 +30,6 @@ class ListViewModel @Inject constructor(
 ) : ViewModel() {
     private var uid = sharedPref.getString("uid", "") ?: ""
     private var isNotiEndDt = sharedPref.getBoolean("noti_end_dt", true)
-    private var registerNoti = sharedPref.getBoolean("noti_register", false)
     private var isGuestMode = sharedPref.getBoolean("guest_mode", false)
 
     private var removeGift: Gift? = null
@@ -74,18 +73,22 @@ class ListViewModel @Inject constructor(
             giftRepository.getAllGift().collectLatest { allGift ->
                 if (allGift.isNotEmpty()) {
                     val tempList = ArrayList<Gift>()
+                    val alarmList = sharedPref.getStringSet("alarm_list", mutableSetOf())?.toMutableSet()
                     allGift.forEach { gift ->
                         val tempGift = Gift(id = gift.id, uid = gift.uid, photo = gift.photo, name = gift.name, brand = gift.brand, endDt = gift.endDt, addDt = gift.addDt, memo = gift.memo, usedDt = gift.usedDt, cash = gift.cash)
                         tempList.add(tempGift)
-                        if (!registerNoti) {
-                            myAlarmManager.cancel(tempGift.id)
+                        if (isNotiEndDt) {
                             // 알림 등록
-                            if (isNotiEndDt && getDdayInt(tempGift.endDt) in 0..1) {
+                            if (getDdayInt(tempGift.endDt) in 0..1 && alarmList?.contains(gift.id) == false) {
+                                alarmList.add(gift.id)
+                                sharedPref.edit().putStringSet("alarm_list", alarmList).apply()
                                 myAlarmManager.schedule(tempGift, getDdayInt(tempGift.endDt))
                             }
+                        } else {
+                            sharedPref.edit().putStringSet("alarm_list", mutableSetOf()).apply()
+                            myAlarmManager.cancel(tempGift.id)
                         }
                     }
-                    sharedPref.edit().putBoolean("noti_register", true).apply()
                     _giftList.value = tempList
                     _copyGiftList.value = _giftList.value
                     sortChips()

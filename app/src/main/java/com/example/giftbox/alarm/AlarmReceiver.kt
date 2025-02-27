@@ -37,16 +37,24 @@ class AlarmReceiver : BroadcastReceiver() {
         if (intent.action == "android.intent.action.BOOT_COMPLETED") {
             CoroutineScope(Dispatchers.IO).launch {
                 val isNotiEndDt = sharedPref.getBoolean("noti_end_dt", true)
+                sharedPref.edit().putStringSet("alarm_list", mutableSetOf()).apply()
+                val alarmList = mutableSetOf<String>()
                 giftRepository.getAllGift().take(1).collectLatest { allGift ->
                     allGift.forEach { gift ->
                         val tempGift = Gift(id = gift.id, uid = gift.uid, photo = gift.photo, name = gift.name, brand = gift.brand, endDt = gift.endDt, addDt = gift.addDt, memo = gift.memo, usedDt = gift.usedDt, cash = gift.cash)
-                        myAlarmManager.cancel(tempGift.id)
                         // 알림 등록
                         if (isNotiEndDt && getDdayInt(tempGift.endDt) in 0..1) {
+                            alarmList.add(gift.id)
                             myAlarmManager.schedule(tempGift, getDdayInt(tempGift.endDt))
+                        } else {
+                            myAlarmManager.cancel(tempGift.id)
                         }
                     }
-                    sharedPref.edit().putBoolean("noti_register", true).apply()
+                    if (isNotiEndDt) {
+                        sharedPref.edit().putStringSet("alarm_list", alarmList).apply()
+                    } else {
+                        sharedPref.edit().putStringSet("alarm_list", mutableSetOf()).apply()
+                    }
                 }
             }
         } else { // 등록된 알람 수신
@@ -67,7 +75,7 @@ class AlarmReceiver : BroadcastReceiver() {
                 PendingIntent.getActivity(context, 0, myIntent, PendingIntent.FLAG_IMMUTABLE)
 
             val notificationBuilder = NotificationCompat.Builder(context, CHANNEL_ID)
-                .setSmallIcon(R.drawable.ic_launcher_foreground)
+                .setSmallIcon(R.drawable.icon_gift)
                 .setContentTitle("${gift?.brand} ${gift?.name}")
                 .setPriority(NotificationCompat.PRIORITY_HIGH)
                 .setCategory(NotificationCompat.CATEGORY_RECOMMENDATION)

@@ -20,7 +20,7 @@ fun getBitmapFromUri(contentResolver: ContentResolver, uri: Uri): Bitmap? {
     }
 }
 
-// Bitmap -> Uri
+// Bitmap -> Bytes
 fun getBytesFromBitmap(bitmap: Bitmap): ByteArray {
     val byteArrayOutputStream = ByteArrayOutputStream()
     bitmap.compress(Bitmap.CompressFormat.JPEG, 100, byteArrayOutputStream) // JPEG로 압축

@@ -6,10 +6,10 @@ import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.giftbox.model.Gift
-import com.example.giftbox.data.GiftRepository
 import com.example.giftbox.R
 import com.example.giftbox.alarm.MyAlarmManager
+import com.example.giftbox.data.GiftRepository
+import com.example.giftbox.model.Gift
 import com.example.giftbox.ui.utils.getDdayInt
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
@@ -77,9 +77,11 @@ class AddViewModel @Inject constructor(
                     viewModelScope.launch(Dispatchers.IO) {
                         giftRepository.insertGift(gift.copy(id = id))
                     }
-                    myAlarmManager.cancel(gift.id)
+                    val alarmList = sharedPref.getStringSet("alarm_list", mutableSetOf())?.toMutableSet()
                     // 알림 등록
-                    if (isNotiEndDt && getDdayInt(gift.endDt) in 0..1) {
+                    if (isNotiEndDt && getDdayInt(gift.endDt) in 0..1 && alarmList?.contains(gift.id) == false) {
+                        alarmList.add(gift.id)
+                        sharedPref.edit().putStringSet("alarm_list", alarmList).apply()
                         myAlarmManager.schedule(gift, getDdayInt(gift.endDt))
                     }
                 }

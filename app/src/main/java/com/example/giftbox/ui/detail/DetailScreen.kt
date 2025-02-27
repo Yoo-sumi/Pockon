@@ -195,7 +195,7 @@ fun DetailScreen(id: String, onBack: () -> Unit) {
             }
             Column(
                 modifier = Modifier
-                    .padding(end = 20.dp, start = 20.dp, top = 10.dp)
+                    .padding(top = 5.dp, bottom = 5.dp, start = 25.dp, end = 25.dp)
                     .verticalScroll(scrollSate)
             ) {
                 // gift image
