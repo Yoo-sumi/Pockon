@@ -1,10 +1,8 @@
 package com.example.giftbox.data.remote
 
 import com.example.giftbox.model.Gift
+import com.google.android.gms.tasks.Tasks
 import com.google.firebase.firestore.FirebaseFirestore
-import kotlinx.coroutines.channels.awaitClose
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.callbackFlow
 import javax.inject.Inject
 
 
@@ -71,5 +69,19 @@ class GiftDataSource @Inject constructor(
             .addOnCompleteListener { task ->
                 onComplete(task.isSuccessful)
             }
+    }
+
+    fun deleteMultipleData(documents: List<String>, onComplete: (Boolean) -> Unit) {
+        val deleteTasks = documents.map { document ->
+            firestore
+                .collection("gift")
+                .document(document)
+                .delete()
+        }
+
+        // 모든 삭제 작업이 완료될 때까지 기다린 후 onComplete 호출
+        Tasks.whenAllComplete(deleteTasks).addOnCompleteListener { task ->
+            onComplete(task.isSuccessful)
+        }
     }
 }

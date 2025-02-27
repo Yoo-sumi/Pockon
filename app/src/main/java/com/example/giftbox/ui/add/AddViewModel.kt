@@ -12,6 +12,7 @@ import com.example.giftbox.R
 import com.example.giftbox.alarm.MyAlarmManager
 import com.example.giftbox.ui.utils.getDdayInt
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
 import java.util.Date
@@ -27,6 +28,7 @@ class AddViewModel @Inject constructor(
 
     private var uid = sharedPref.getString("uid", "") ?: ""
     private var isNotiEndDt = sharedPref.getBoolean("noti_end_dt", true)
+    private var isGuestMode = sharedPref.getBoolean("guest_mode", false)
 
     private val _isShowDatePicker = mutableStateOf(false)
     val isShowDatePicker: State<Boolean> = _isShowDatePicker
@@ -64,18 +66,24 @@ class AddViewModel @Inject constructor(
         ).format(Date(System.currentTimeMillis()))
 
         val gift = if (_isCheckedCash.value) {
-            Gift(uid = uid, name = _name.value, brand = _brand.value, endDt = _endDate.value, addDt = addDate, memo = _memo.value, cash = _cash.value)
+            Gift(uid = uid, name = _name.value, photo = _photo.value, brand = _brand.value, endDt = _endDate.value, addDt = addDate, memo = _memo.value, cash = _cash.value)
         } else {
-            Gift(uid = uid, name = _name.value, brand = _brand.value, endDt = _endDate.value, addDt = addDate, memo = _memo.value)
+            Gift(uid = uid, name = _name.value, photo = _photo.value, brand = _brand.value, endDt = _endDate.value, addDt = addDate, memo = _memo.value)
         }
         viewModelScope.launch {
-            giftRepository.addGift(gift, _photo.value!!) { isSuccess ->
-                onAddComplete(isSuccess)
-                myAlarmManager.cancel(gift.id)
-                // 알림 등록
-                if (isNotiEndDt && getDdayInt(gift.endDt) in 0..1) {
-                    myAlarmManager.schedule(gift, getDdayInt(gift.endDt))
+            giftRepository.addGift(isGuestMode, gift) { id ->
+                if (id != null) {
+                    // 로컬 수정
+                    viewModelScope.launch(Dispatchers.IO) {
+                        giftRepository.insertGift(gift.copy(id = id))
+                    }
+                    myAlarmManager.cancel(gift.id)
+                    // 알림 등록
+                    if (isNotiEndDt && getDdayInt(gift.endDt) in 0..1) {
+                        myAlarmManager.schedule(gift, getDdayInt(gift.endDt))
+                    }
                 }
+                onAddComplete(id != null)
             }
         }
     }

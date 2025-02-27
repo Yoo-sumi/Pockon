@@ -46,7 +46,7 @@ class MapViewModel @Inject constructor(
                     getAllBrands() // 키워드별 브랜드 위치 정보 가져오기(로컬)
                 } else {
                     // 기프티콘 없음
-                    TODO()
+                    giftList = listOf()
                 }
             }
         }

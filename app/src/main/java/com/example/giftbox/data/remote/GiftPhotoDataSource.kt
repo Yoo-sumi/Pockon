@@ -56,4 +56,16 @@ class GiftPhotoDataSource @Inject constructor(
                 onComplete(task.isSuccessful)
             }
     }
+
+    fun removeMultipleData(uid: String, ids: List<String>, onComplete: (Boolean) -> Unit) {
+        val deleteTasks = ids.map { id ->
+            storageRef.child("${uid}/${id}.jpeg")
+                .delete()
+        }
+
+        // 모든 삭제 작업이 완료될 때까지 기다린 후 onComplete 호출
+        Tasks.whenAllComplete(deleteTasks).addOnCompleteListener { task ->
+            onComplete(task.isSuccessful)
+        }
+    }
 }

@@ -85,6 +85,7 @@
     <string name="txt_logout">로그아웃</string>
     <string name="txt_remove_account">회원 탈퇴</string>
     <string name="dlg_msg_logout">로그아웃을 하시겠습니까?</string>
+    <string name="dlg_msg_logout_in_guest">로그아웃을 하시겠습니까?\n저장된 데이터가 모두 삭제됩니다.</string>
     <string name="dlg_msg_remove_account">회원 탈퇴를 하시겠습니까?\n저장된 데이터가 모두 삭제됩니다.</string>
 
 </resources>

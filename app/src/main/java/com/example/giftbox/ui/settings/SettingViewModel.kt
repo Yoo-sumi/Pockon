@@ -28,6 +28,7 @@ class SettingViewModel @Inject constructor(
     private var uid = sharedPref.getString("uid", "") ?: ""
     private var isAuthPin = sharedPref.getBoolean("auth_pin", false)
     private var isNotiEndDt = sharedPref.getBoolean("noti_end_dt", true)
+    private var isGuestMode = sharedPref.getBoolean("guest_mode", false)
 
     fun getIsNotiEndDt() = isNotiEndDt
 
@@ -57,7 +58,7 @@ class SettingViewModel @Inject constructor(
     }
 
     fun logout() {
-        loginRepository.logout()
+        if (!isGuestMode) loginRepository.logout()
         sharedPref.edit().clear().apply()
         viewModelScope.launch(Dispatchers.IO) {
             giftRepository.deleteAllGift()
@@ -66,49 +67,27 @@ class SettingViewModel @Inject constructor(
     }
 
     fun removeAccount(onSuccess: (Boolean) -> Unit) {
-        viewModelScope.launch {
-            giftRepository.getAllGift().collectLatest { gifts ->
-                val removeList = ArrayList<String>()
-                val remainList = ArrayList<String>()
-                gifts.forEach { gift ->
-                    // remote 데이터 삭제
-                    giftRepository.removeGift(uid, gift.id) {
-                        if (it) removeList.add(gift.id)
-                        else remainList.add(gift.id)
-                        if (removeList.size + remainList.size == gifts.size) {
-                            removeData(removeList, gifts.size) { result ->
-                                    onSuccess(result)
-                            }
+        viewModelScope.launch(Dispatchers.IO) {
+            giftRepository.getAllGift().take(1).collectLatest { gifts ->
+                // remote 데이터 삭제
+                giftRepository.removeGifts(isGuestMode, uid, gifts.map { it.id }) { result ->
+                    if (result) {
+                        // local 데이터 삭제
+                        viewModelScope.launch(Dispatchers.IO) {
+                            giftRepository.deleteAllGift()
+                            brandSearchRepository.deleteAllBrands()
                         }
+                        if (!isGuestMode) loginRepository.logout()
+                        sharedPref.edit().clear().apply()
+                        onSuccess(true)
+                    } else {
+                        onSuccess(false)
                     }
                 }
             }
         }
     }
 
-    private fun removeData(removeList: List<String>, count: Int, onSuccess: (Boolean) -> Unit) {
-        // 서버 삭제 깔끔하게 완료
-        // 로컬 데이터 삭제
-        if (removeList.size == count) {
-            viewModelScope.launch(Dispatchers.IO) {
-                giftRepository.deleteAllGift()
-                brandSearchRepository.deleteAllBrands()
-            }
-            // 모두 삭제(remote/local)
-            // 계정 삭제
-            loginRepository.removeAccount { result ->
-                if (result)  sharedPref.edit().clear().apply()
-                onSuccess(result)
-            }
-        } else { // 삭제된 것만 지우기(일부)
-            viewModelScope.launch(Dispatchers.IO) {
-                brandSearchRepository.deleteAllBrands()
-                removeList.forEach { id ->
-                    giftRepository.deleteGift(id)
-                }
-            }
-            onSuccess(false) // 중간에 삭제 실패하면 삭제 중단
-        }
-    }
+    fun getIsGuestMode() = this.isGuestMode
 
 }

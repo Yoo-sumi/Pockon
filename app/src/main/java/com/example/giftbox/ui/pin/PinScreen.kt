@@ -140,14 +140,13 @@ fun PinScreen(onSuccess: () -> Unit) {
                 modifier = Modifier
                     .wrapContentSize()
                     .align(Alignment.BottomCenter)
-                    .padding(bottom = 20.dp)
+                    .padding(bottom = 20.dp),
+                horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 if (pinViewModel.mode.value != 2) {
                     Text(
                         text = stringResource(id = R.string.txt_no_pin_auth),
                         modifier = Modifier
-                            .padding(16.dp)
-                            .fillMaxWidth()
                             .clickable {
                                 pinViewModel.setMode(4)
                             },

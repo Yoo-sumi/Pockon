@@ -32,6 +32,7 @@ class ListViewModel @Inject constructor(
     private var isNotiEndDt = sharedPref.getBoolean("noti_end_dt", true)
     private var registerNoti = sharedPref.getBoolean("noti_register", false)
     private var isGuestMode = sharedPref.getBoolean("guest_mode", false)
+
     private var removeGift: Gift? = null
 
     private val _giftList = mutableStateOf<List<Gift>>(listOf())
@@ -180,23 +181,21 @@ class ListViewModel @Inject constructor(
 
     // 기프티콘 수정
     fun usedGift(gift: Gift, onComplete: (Boolean) -> Unit) {
-        viewModelScope.launch {
-            val nowDt = SimpleDateFormat(
-                "yyyy.MM.dd",
-                Locale.getDefault()
-            ).format(Date(System.currentTimeMillis()))
-            val updateGift = gift.copy(usedDt = nowDt)
-            giftRepository.updateGift(updateGift, false) { result ->
-                // 수정 성공
-                if (result) {
-                    // 로컬 수정
-                    viewModelScope.launch(Dispatchers.IO) {
-                        giftRepository.insertGift(updateGift)
-                    }
-                    myAlarmManager.cancel(gift.id)
-                } else { // 수정 실패
-                    onComplete(false)
+        val nowDt = SimpleDateFormat(
+            "yyyy.MM.dd",
+            Locale.getDefault()
+        ).format(Date(System.currentTimeMillis()))
+        val updateGift = gift.copy(usedDt = nowDt)
+        giftRepository.updateGift(isGuestMode, updateGift, false) { result ->
+            // 수정 성공
+            if (result) {
+                // 로컬 수정
+                viewModelScope.launch(Dispatchers.IO) {
+                    giftRepository.insertGift(updateGift)
                 }
+                myAlarmManager.cancel(gift.id)
+            } else { // 수정 실패
+                onComplete(false)
             }
         }
     }
@@ -208,17 +207,15 @@ class ListViewModel @Inject constructor(
         val uid = removeGift!!.uid
         val id = removeGift!!.id
         removeGift = null
-        viewModelScope.launch {
-            giftRepository.removeGift(uid, id) { result ->
-                if (result) {
-                    // 로컬 삭제
-                    viewModelScope.launch(Dispatchers.IO) {
-                        giftRepository.deleteGift(id)
-                    }
-                    myAlarmManager.cancel(id)
-                } else { // 삭제 실패
-                    onComplete(false)
+        giftRepository.removeGift(isGuestMode, uid, id) { result ->
+            if (result) {
+                // 로컬 삭제
+                viewModelScope.launch(Dispatchers.IO) {
+                    giftRepository.deleteGift(id)
                 }
+                myAlarmManager.cancel(id)
+            } else { // 삭제 실패
+                onComplete(false)
             }
         }
     }
@@ -255,29 +252,27 @@ class ListViewModel @Inject constructor(
 
     // 선택 삭제/전체 삭제
     fun deleteSelection(onComplete: (Boolean) -> Unit) {
-        viewModelScope.launch {
-            val resultList = ArrayList<Boolean>()
-            var isFail = false
-            _checkedGiftList.value.forEach { giftId ->
-                giftRepository.removeGift(uid, giftId) { result ->
-                    resultList.add(result)
-                    if (!result) isFail = true
-                    // end
-                    if (resultList.size == _checkedGiftList.value.size) {
-                        if (isFail) {
-                            onComplete(false)
-                        } else {
-                            val idList = ArrayList<String>()
-                            _checkedGiftList.value.forEach { id ->
-                                idList.add(id)
-                                myAlarmManager.cancel(id)
-                            }
-                            // 로컬 삭제
-                            viewModelScope.launch(Dispatchers.IO) {
-                                giftRepository.deleteGifts(idList)
-                            }
-                            onComplete(true)
+        val resultList = ArrayList<Boolean>()
+        var isFail = false
+        _checkedGiftList.value.forEach { giftId ->
+            giftRepository.removeGift(isGuestMode, uid, giftId) { result ->
+                resultList.add(result)
+                if (!result) isFail = true
+                // end
+                if (resultList.size == _checkedGiftList.value.size) {
+                    if (isFail) {
+                        onComplete(false)
+                    } else {
+                        val idList = ArrayList<String>()
+                        _checkedGiftList.value.forEach { id ->
+                            idList.add(id)
+                            myAlarmManager.cancel(id)
                         }
+                        // 로컬 삭제
+                        viewModelScope.launch(Dispatchers.IO) {
+                            giftRepository.deleteGifts(idList)
+                        }
+                        onComplete(true)
                     }
                 }
             }

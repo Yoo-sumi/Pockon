@@ -253,8 +253,7 @@ fun BottomNavigationBar(movePinScreen: () -> Unit, moveLogInScreen: () -> Unit, 
                 }
             ) {
                 AddGifticon(
-                    onBack = { isRefresh ->
-                        if (isRefresh) listViewModel.getGiftList()
+                    onBack = {
                         navController.popBackStack()
                     }
                 )

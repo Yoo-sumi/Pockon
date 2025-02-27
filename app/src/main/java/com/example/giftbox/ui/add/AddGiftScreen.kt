@@ -141,7 +141,7 @@ fun AddGifticon(onBack: (Boolean) -> Unit) {
                 .background(MaterialTheme.colorScheme.background)
                 .padding(innerPadding)
                 .verticalScroll(scrollSate)
-                .padding(25.dp)
+                .padding(top = 5.dp, bottom = 5.dp, start = 25.dp, end = 25.dp)
         ) {
             // gift image
             GiftImage(addViewModel.photo.value, galleryLauncher)
@@ -203,8 +203,7 @@ fun AddGifticon(onBack: (Boolean) -> Unit) {
                         addViewModel.addGift { result ->
                             if (result) {
                                 onBack(true)
-                            }
-                            else {
+                            } else {
                                 scope.launch {
                                     snackbarHostState.showSnackbar(message = context.getString(R.string.msg_no_register))
                                 }

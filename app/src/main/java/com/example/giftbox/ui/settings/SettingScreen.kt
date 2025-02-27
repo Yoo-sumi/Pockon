@@ -133,18 +133,24 @@ fun SettingScreen(onUsedGift: () -> Unit, movePinScreen: () -> Unit, moveLogInSc
                     }
                 )
 
-                SettingItem(
-                    text = stringResource(id = R.string.txt_remove_account),
-                    onClick = {
-                        showRemoveDlg = true
-                    }
-                )
+                if (!settingViewModel.getIsGuestMode()) {
+                    SettingItem(
+                        text = stringResource(id = R.string.txt_remove_account),
+                        onClick = {
+                            showRemoveDlg = true
+                        }
+                    )
+                }
             }
         }
 
         if (showLogoutDlg) {
             ConfirmDialog(
-                text = R.string.dlg_msg_logout,
+                text = if (settingViewModel.getIsGuestMode()) {
+                    R.string.dlg_msg_logout_in_guest
+                } else {
+                    R.string.dlg_msg_logout
+                },
                 onConfirm = {
                     showLogoutDlg = false
                     settingViewModel.logout()
@@ -164,8 +170,7 @@ fun SettingScreen(onUsedGift: () -> Unit, movePinScreen: () -> Unit, moveLogInSc
                     settingViewModel.removeAccount { result ->
                         if (result) { // 로그인 화면으로 이동
                             moveLogInScreen()
-                        }
-                        else { // "회원탈퇴에 실패했습니다."
+                        } else { // "회원탈퇴에 실패했습니다."
                             scope.launch {
                                 snackbarHostState.showSnackbar(message = context.getString(R.string.msg_remove_account_fail))
                             }

@@ -28,6 +28,7 @@ class DetailViewModel @Inject constructor(
 ) : ViewModel() {
 
     private var isNotiEndDt = sharedPref.getBoolean("noti_end_dt", true)
+    private var isGuestMode = sharedPref.getBoolean("guest_mode", false)
 
     private val _gift = mutableStateOf(Gift())
     val gift: State<Gift> = _gift
@@ -126,58 +127,54 @@ class DetailViewModel @Inject constructor(
     }
 
     fun updateGift(onComplete: (Boolean) -> Unit) {
-        viewModelScope.launch {
-            val updateGift = if (_isCheckedCash.value) {
-                Gift(id = _gift.value.id, uid = _gift.value.uid, photo = _photo.value, name = _name.value, brand = _brand.value, endDt = _endDate.value, addDt = _gift.value.addDt, memo = _memo.value, usedDt = _gift.value.usedDt, cash = _cash.value)
-            } else {
-                Gift(id = _gift.value.id, uid = _gift.value.uid, photo = _photo.value, name = _name.value, brand = _brand.value, endDt = _endDate.value, addDt = _gift.value.addDt, memo = _memo.value, usedDt = _gift.value.usedDt, cash = "")
-            }
-            giftRepository.updateGift(updateGift, true) { result ->
-                // 수정 성공
-                if (result) {
-                    // 로컬 수정
-                    viewModelScope.launch(Dispatchers.IO) {
-                        giftRepository.insertGift(updateGift)
-                    }
-                    // 날짜 수정 했을때만 알람 수정
-                    if(_gift.value.endDt != _endDate.value) {
-                        myAlarmManager.cancel(updateGift.id)
-                        // 알림 등록
-                        if (isNotiEndDt && getDdayInt(updateGift.endDt) in 0..1) {
-                            myAlarmManager.schedule(updateGift, getDdayInt(updateGift.endDt))
-                        }
-                    }
-                    _gift.value = updateGift
-                    _isEdit.value = false
-                    onComplete(true)
-                } else { // 수정 실패
-                    onComplete(false)
+        val updateGift = if (_isCheckedCash.value) {
+            Gift(id = _gift.value.id, uid = _gift.value.uid, photo = _photo.value, name = _name.value, brand = _brand.value, endDt = _endDate.value, addDt = _gift.value.addDt, memo = _memo.value, usedDt = _gift.value.usedDt, cash = _cash.value)
+        } else {
+            Gift(id = _gift.value.id, uid = _gift.value.uid, photo = _photo.value, name = _name.value, brand = _brand.value, endDt = _endDate.value, addDt = _gift.value.addDt, memo = _memo.value, usedDt = _gift.value.usedDt, cash = "")
+        }
+        giftRepository.updateGift(isGuestMode, updateGift, true) { result ->
+            // 수정 성공
+            if (result) {
+                // 로컬 수정
+                viewModelScope.launch(Dispatchers.IO) {
+                    giftRepository.insertGift(updateGift)
                 }
+                // 날짜 수정 했을때만 알람 수정
+                if(_gift.value.endDt != _endDate.value) {
+                    myAlarmManager.cancel(updateGift.id)
+                    // 알림 등록
+                    if (isNotiEndDt && getDdayInt(updateGift.endDt) in 0..1) {
+                        myAlarmManager.schedule(updateGift, getDdayInt(updateGift.endDt))
+                    }
+                }
+                _gift.value = updateGift
+                _isEdit.value = false
+                onComplete(true)
+            } else { // 수정 실패
+                onComplete(false)
             }
         }
     }
 
     fun setIsUsed(flag: Boolean, cash: Int? = null, onComplete: (Boolean) -> Unit) {
-        viewModelScope.launch {
-            var nowDt = ""
-            if ((flag && cash == null) || (flag && cash == 0)) {
-                nowDt = SimpleDateFormat(
-                    "yyyy.MM.dd",
-                    Locale.getDefault()
-                ).format(Date(System.currentTimeMillis()))
-            }
-            val gift = if (cash == null) _gift.value.copy(usedDt = nowDt) else _gift.value.copy(usedDt = nowDt, cash = cash.toString())
-            giftRepository.updateGift(gift, false) { result ->
-                if (result) {
-                    // 로컬 수정
-                    viewModelScope.launch(Dispatchers.IO) {
-                        giftRepository.insertGift(gift)
-                    }
-                    _isShowBottomSheet.value = false
-                    _isShowUseCashDialog.value = false
-                } else { // 수정 실패
-                    onComplete(false)
+        var nowDt = ""
+        if ((flag && cash == null) || (flag && cash == 0)) {
+            nowDt = SimpleDateFormat(
+                "yyyy.MM.dd",
+                Locale.getDefault()
+            ).format(Date(System.currentTimeMillis()))
+        }
+        val gift = if (cash == null) _gift.value.copy(usedDt = nowDt) else _gift.value.copy(usedDt = nowDt, cash = cash.toString())
+        giftRepository.updateGift(isGuestMode, gift, false) { result ->
+            if (result) {
+                // 로컬 수정
+                viewModelScope.launch(Dispatchers.IO) {
+                    giftRepository.insertGift(gift)
                 }
+                _isShowBottomSheet.value = false
+                _isShowUseCashDialog.value = false
+            } else { // 수정 실패
+                onComplete(false)
             }
         }
     }

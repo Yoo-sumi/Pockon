@@ -15,6 +15,7 @@ import com.google.android.libraries.identity.googleid.GoogleIdTokenParsingExcept
 import com.google.firebase.auth.GoogleAuthProvider
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
+import java.util.UUID
 import javax.inject.Inject
 
 @HiltViewModel
@@ -32,7 +33,7 @@ class LoginViewModel @Inject constructor(
     private var isPinUse = sharedPref.getBoolean("auth_pin", false)
 
     init {
-        loginRepository.getCurrentUser()?.let {
+        if (!sharedPref.getString("uid", null).isNullOrEmpty()) {
             _isLogin.value = true
         }
     }
@@ -44,6 +45,7 @@ class LoginViewModel @Inject constructor(
     fun loginAsGuest() {
         isPinUse = true
         _isLogin.value = true
+        saveMyUid(UUID.randomUUID().toString())
         sharedPref.edit().putBoolean("guest_mode", true).apply()
     }
 

@@ -1,11 +1,13 @@
 package com.example.giftbox.data
 
-import android.graphics.Bitmap
 import com.example.giftbox.GiftEntity
 import com.example.giftbox.data.local.GiftLocalDataSource
 import com.example.giftbox.data.remote.GiftDataSource
 import com.example.giftbox.data.remote.GiftPhotoDataSource
 import com.example.giftbox.model.Gift
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
 import javax.inject.Inject
 
 class GiftRepository @Inject constructor(
@@ -13,13 +15,21 @@ class GiftRepository @Inject constructor(
     private val giftPhotoDataSource: GiftPhotoDataSource,
     private val giftLocalDataSource: GiftLocalDataSource
 ) {
-    fun addGift(gift: Gift, photo: Bitmap, onComplete: (Boolean) -> Unit) {
-        giftDataSource.uploadData(gift) { id ->
-            if (id == null) {
-                onComplete(false)
+    fun addGift(isGuestMode: Boolean, gift: Gift, onComplete: (String?) -> Unit) {
+        if (isGuestMode) {
+            val currentDate = Date()
+            val formatter = SimpleDateFormat("yyyyMMddHHmmssSSS", Locale.getDefault())
+            onComplete(formatter.format(currentDate))
+            return
+        }
+
+        val photo = gift.photo
+        giftDataSource.uploadData(gift.copy(photo = null)) { id ->
+            if (id == null || photo == null) {
+                onComplete(null)
             } else {
                 giftPhotoDataSource.uploadData(photo, gift.uid, id) {
-                    onComplete(it)
+                    onComplete(id)
                 }
             }
         }
@@ -37,7 +47,12 @@ class GiftRepository @Inject constructor(
         }
     }
 
-    fun updateGift(gift: Gift, isPhoto: Boolean, onComplete: (Boolean) -> Unit){
+    fun updateGift(isGuestMode: Boolean, gift: Gift, isPhoto: Boolean, onComplete: (Boolean) -> Unit){
+        if (isGuestMode) {
+            onComplete(true)
+            return
+        }
+
         val photo = gift.photo
         giftDataSource.updateData(gift.copy(photo = null)) { result ->
             if (result) {
@@ -56,12 +71,34 @@ class GiftRepository @Inject constructor(
         }
     }
 
-    fun removeGift(uid: String, document: String, onComplete: (Boolean) -> Unit) {
+    fun removeGift(isGuestMode: Boolean, uid: String, document: String, onComplete: (Boolean) -> Unit) {
+        if (isGuestMode) {
+            onComplete(true)
+            return
+        }
+
         giftPhotoDataSource.removeData(uid, document) { result ->
             if (!result) {
                 onComplete(false) // 사진 삭제 실패이면 정보 삭제 X
             } else {
                 giftDataSource.deleteData(document) {
+                    onComplete(it)
+                }
+            }
+        }
+    }
+
+    fun removeGifts(isGuestMode: Boolean, uid: String, documents: List<String>, onComplete: (Boolean) -> Unit) {
+        if (isGuestMode) {
+            onComplete(true)
+            return
+        }
+
+        giftPhotoDataSource.removeMultipleData(uid, documents) { result ->
+            if (!result) {
+                onComplete(false) // 사진 삭제 실패이면 정보 삭제 X
+            } else {
+                giftDataSource.deleteMultipleData(documents) {
                     onComplete(it)
                 }
             }
