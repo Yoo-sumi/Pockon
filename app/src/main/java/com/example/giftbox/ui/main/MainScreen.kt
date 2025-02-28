@@ -4,6 +4,8 @@ import android.Manifest
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
+import android.net.ConnectivityManager
+import android.net.NetworkCapabilities
 import android.net.Uri
 import android.os.Build
 import android.provider.Settings
@@ -63,7 +65,7 @@ import com.example.giftbox.ui.settings.SettingScreen
 import com.example.giftbox.ui.used.UsedScreen
 
 @Composable
-fun BottomNavigationBar(movePinScreen: () -> Unit, moveLogInScreen: () -> Unit, onFinish: () -> Unit) {
+fun BottomNavigationBar(isGuestMode: Boolean, movePinScreen: () -> Unit, moveLogInScreen: () -> Unit, onFinish: () -> Unit) {
     val navController = rememberNavController()
 
     val navBackStackEntry by navController.currentBackStackEntryAsState()
@@ -236,11 +238,21 @@ fun BottomNavigationBar(movePinScreen: () -> Unit, moveLogInScreen: () -> Unit, 
             }
         }
     }
-    CheckPermission(context, launcherPermissions)
 
-    if (isShowIndicator) {
-        LoadingScreen()
+    // 권한 체크
+    CheckPermission(context, launcherPermissions)
+    // 네트워크 체크(게스트 모드는 네트워크 불필요)
+    if (!isNetworkConnected(context) && !isGuestMode) {
+        AlertDialog.Builder(context)
+            .setTitle(stringResource(id = R.string.txt_alert))
+            .setMessage(stringResource(id = R.string.msg_no_internet))
+            .setPositiveButton(stringResource(id = R.string.btn_confirm)) { dialog, which ->
+                onFinish()
+            }
+            .show()
     }
+    // Loading Indicator
+    if (isShowIndicator) LoadingScreen()
 }
 
 /** 앨범, 위치 권한 체크 */
@@ -276,4 +288,16 @@ sealed class Screen(val route: String, val icon: ImageVector, @StringRes val lab
     data object Detail : Screen("detail", Icons.Filled.Search, R.string.detail)
     data object Map : Screen("map", Icons.Filled.LocationOn, R.string.map)
     data object Used : Screen("used", Icons.Filled.LocationOn, R.string.map)
+}
+
+fun isNetworkConnected(context: Context): Boolean {
+    val connectivityManager = context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+        val network = connectivityManager.activeNetwork
+        val capabilities = connectivityManager.getNetworkCapabilities(network)
+        return capabilities != null && capabilities.hasCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET)
+    } else {
+        val activeNetworkInfo = connectivityManager.activeNetworkInfo
+        return activeNetworkInfo != null && activeNetworkInfo.isConnected
+    }
 }

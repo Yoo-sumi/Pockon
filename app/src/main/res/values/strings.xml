@@ -72,6 +72,7 @@
     <string name="txt_all_select">전체 선택</string>
     <string name="msg_pin_auth_fail">PIN 번호가 일치하지 않습니다.</string>
     <string name="msg_no_permission">권한이 거부되었습니다.\n설정에서 권한을 모두 허용해 주세요.</string>
+    <string name="msg_no_internet">네트워크에 연결되지 않았습니다.\nWi-Fi 또는 모바일 데이터를 켜주세요.</string>
     <string name="format_end_date">~%s</string>
     <string name="format_cash">%s원</string>
     <string name="format_remain_cash">잔액: %s원</string>
