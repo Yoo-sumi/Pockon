@@ -1,5 +1,6 @@
 package com.example.giftbox.ui.used
 
+import android.content.SharedPreferences
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
@@ -17,11 +18,23 @@ import javax.inject.Inject
 
 @HiltViewModel
 class UsedViewModel @Inject constructor(
-    private val giftRepository: GiftRepository
+    private val giftRepository: GiftRepository,
+    private val sharedPref: SharedPreferences
 ) : ViewModel() {
+
+    private var uid = sharedPref.getString("uid", "") ?: ""
+    private var isGuestMode = sharedPref.getBoolean("guest_mode", false)
+
+    private var removeGift: Gift? = null
 
     private val _giftList = mutableStateOf<List<Gift>>(listOf())
     val giftList: State<List<Gift>> = _giftList
+
+    private val _checkedGiftList = mutableStateOf<List<String>>(listOf())
+    val checkedGiftList: State<List<String>> = _checkedGiftList
+
+    private val _isAllSelect = mutableStateOf<Boolean>(false)
+    val isAllSelect: State<Boolean> = _isAllSelect
 
     init {
         observeGiftList()
@@ -41,6 +54,83 @@ class UsedViewModel @Inject constructor(
                     _giftList.value = listOf()
                 }
             }
+        }
+    }
+
+    fun setIsAllSelect(flag: Boolean) {
+        _isAllSelect.value = flag
+    }
+
+    // 선택된 기프티콘 리스트 초기화
+    fun clearCheckedGiftList() {
+        _checkedGiftList.value = listOf()
+    }
+
+    // 선택 삭제/전체 삭제
+    fun deleteSelection(onComplete: (Boolean) -> Unit) {
+        val resultList = ArrayList<Boolean>()
+        var isFail = false
+        _checkedGiftList.value.forEach { giftId ->
+            giftRepository.removeGift(isGuestMode, uid, giftId) { result ->
+                resultList.add(result)
+                if (!result) isFail = true
+                // end
+                if (resultList.size == _checkedGiftList.value.size) {
+                    if (isFail) {
+                        onComplete(false)
+                    } else {
+                        // 로컬 삭제
+                        viewModelScope.launch(Dispatchers.IO) {
+                            giftRepository.deleteGifts(_checkedGiftList.value)
+                        }
+                        onComplete(true)
+                    }
+                }
+            }
+        }
+    }
+
+    // 기프티콘 삭제
+    fun removeGift(onComplete: (Boolean) -> Unit) {
+        if (removeGift ==  null) return
+        if (removeGift?.id?.isEmpty() == true) return
+        val uid = removeGift!!.uid
+        val id = removeGift!!.id
+        removeGift = null
+        giftRepository.removeGift(isGuestMode, uid, id) { result ->
+            if (result) {
+                // 로컬 삭제
+                viewModelScope.launch(Dispatchers.IO) {
+                    giftRepository.deleteGift(id)
+                }
+            } else { // 삭제 실패
+                onComplete(false)
+            }
+        }
+    }
+
+    // 선택된 기프티콘 리스트에 추가(for 삭제)
+    fun checkedGift(id: String) {
+        val filterList = _checkedGiftList.value.filter { it != id }
+        if (filterList.size == _checkedGiftList.value.size) { // 선택
+            val checkedList = _checkedGiftList.value.toMutableList()
+            checkedList.add(id)
+            _checkedGiftList.value = checkedList
+
+            if (_checkedGiftList.value.size == _giftList.value.size) _isAllSelect.value = true
+        } else { // 해제
+            _checkedGiftList.value = filterList
+            if (_checkedGiftList.value.size != _giftList.value.size) _isAllSelect.value = false
+        }
+    }
+
+    // 전체선택/전체해제
+    fun onClickAllSelect() {
+        _isAllSelect.value = !_isAllSelect.value
+        if (_isAllSelect.value) {
+            _checkedGiftList.value = _giftList.value.map { it.id }
+        } else {
+            _checkedGiftList.value = listOf()
         }
     }
 

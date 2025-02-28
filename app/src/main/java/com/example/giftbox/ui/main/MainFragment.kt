@@ -280,6 +280,9 @@ fun BottomNavigationBar(movePinScreen: () -> Unit, moveLogInScreen: () -> Unit, 
                 UsedScreen(
                     onDetail = { id ->
                         navController.navigate(route = "${Screen.Detail.route}/${id}")
+                    },
+                    onBack = {
+                        navController.popBackStack()
                     }
                 )
             }
