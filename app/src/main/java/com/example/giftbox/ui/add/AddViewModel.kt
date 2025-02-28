@@ -36,6 +36,9 @@ class AddViewModel @Inject constructor(
     private val _isCheckedCash = mutableStateOf(false)
     val isCheckedCash: State<Boolean> = _isCheckedCash
 
+    private val _isShowIndicator = mutableStateOf(false)
+    val isShowIndicator: State<Boolean> = _isShowIndicator
+
     private val _photo = mutableStateOf<Bitmap?>(null)
     val photo: State<Bitmap?> = _photo
     private val _name = mutableStateOf("")
@@ -60,6 +63,7 @@ class AddViewModel @Inject constructor(
     }
 
     fun addGift(onAddComplete: (Boolean) -> Unit) {
+        _isShowIndicator.value = true
         val addDate = SimpleDateFormat(
             "yyyyMMddHHmmss",
             Locale.getDefault()
@@ -85,6 +89,7 @@ class AddViewModel @Inject constructor(
                         myAlarmManager.schedule(gift, getDdayInt(gift.endDt))
                     }
                 }
+                _isShowIndicator.value = false
                 onAddComplete(id != null)
             }
         }

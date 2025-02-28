@@ -67,6 +67,9 @@ class DetailViewModel @Inject constructor(
     private val _isEdit = mutableStateOf(false)
     val isEdit: State<Boolean> = _isEdit
 
+    private val _isShowIndicator = mutableStateOf(false)
+    val isShowIndicator: State<Boolean> = _isShowIndicator
+
     fun getGift(id: String) {
         viewModelScope.launch(Dispatchers.IO) {
             giftRepository.getGift(id).collectLatest { gift ->
@@ -128,6 +131,7 @@ class DetailViewModel @Inject constructor(
     }
 
     fun updateGift(onComplete: (Boolean) -> Unit) {
+        _isShowIndicator.value = true
         val updateGift = if (_isCheckedCash.value) {
             Gift(id = _gift.value.id, uid = _gift.value.uid, photo = _photo.value, name = _name.value, brand = _brand.value, endDt = _endDate.value, addDt = _gift.value.addDt, memo = _memo.value, usedDt = _gift.value.usedDt, cash = _cash.value)
         } else {
@@ -154,10 +158,12 @@ class DetailViewModel @Inject constructor(
             } else { // 수정 실패
                 onComplete(false)
             }
+            _isShowIndicator.value = false
         }
     }
 
     fun setIsUsed(flag: Boolean, cash: Int? = null, onComplete: (Boolean) -> Unit) {
+        _isShowIndicator.value = true
         var nowDt = ""
         if ((flag && cash == null) || (flag && cash == 0)) {
             nowDt = SimpleDateFormat(
@@ -177,6 +183,7 @@ class DetailViewModel @Inject constructor(
             } else { // 수정 실패
                 onComplete(false)
             }
+            _isShowIndicator.value = false
         }
     }
 

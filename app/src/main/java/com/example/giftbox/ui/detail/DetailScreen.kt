@@ -88,6 +88,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import coil.compose.AsyncImage
 import com.example.giftbox.ui.utils.DateTransformation
 import com.example.giftbox.R
+import com.example.giftbox.ui.LoadingScreen
 import com.example.giftbox.ui.add.CustomDatePickerDialog
 import com.example.giftbox.ui.list.ConfirmDialog
 import com.example.giftbox.ui.utils.decimalFormat
@@ -173,23 +174,25 @@ fun DetailScreen(id: String, onBack: () -> Unit) {
                     text = stringResource(id = R.string.title_detail_gift),
                     fontSize = 16.sp,
                 )
-                IconButton(
-                    modifier = Modifier.align(Alignment.CenterEnd),
-                    onClick = {
-                        detailViewModel.setIsEdit(true)
-                    }
-                ) {
-                    if (!detailViewModel.isEdit.value) {
-                        Icon(
-                            Icons.Default.Edit,
-                            contentDescription = "Edit"
-                        )
-                    } else {
-                        Text(
-                            modifier = Modifier.clickable { detailViewModel.setIsEdit(false) },
-                            text = stringResource(id = R.string.btn_cancel),
-                            fontSize = 14.sp
-                        )
+                if (detailViewModel.gift.value.usedDt.isEmpty()) {
+                    IconButton(
+                        modifier = Modifier.align(Alignment.CenterEnd),
+                        onClick = {
+                            detailViewModel.setIsEdit(true)
+                        }
+                    ) {
+                        if (!detailViewModel.isEdit.value) {
+                            Icon(
+                                Icons.Default.Edit,
+                                contentDescription = "Edit"
+                            )
+                        } else {
+                            Text(
+                                modifier = Modifier.clickable { detailViewModel.setIsEdit(false) },
+                                text = stringResource(id = R.string.btn_cancel),
+                                fontSize = 14.sp
+                            )
+                        }
                     }
                 }
             }
@@ -381,6 +384,10 @@ fun DetailScreen(id: String, onBack: () -> Unit) {
                 }
             )
         }
+    }
+
+    if (detailViewModel.isShowIndicator.value) {
+        LoadingScreen()
     }
 }
 

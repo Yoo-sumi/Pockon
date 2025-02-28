@@ -36,6 +36,9 @@ class UsedViewModel @Inject constructor(
     private val _isAllSelect = mutableStateOf<Boolean>(false)
     val isAllSelect: State<Boolean> = _isAllSelect
 
+    private val _isShowIndicator = mutableStateOf(false)
+    val isShowIndicator: State<Boolean> = _isShowIndicator
+
     init {
         observeGiftList()
     }
@@ -68,6 +71,7 @@ class UsedViewModel @Inject constructor(
 
     // 선택 삭제/전체 삭제
     fun deleteSelection(onComplete: (Boolean) -> Unit) {
+        _isShowIndicator.value = true
         val resultList = ArrayList<Boolean>()
         var isFail = false
         _checkedGiftList.value.forEach { giftId ->
@@ -85,26 +89,8 @@ class UsedViewModel @Inject constructor(
                         }
                         onComplete(true)
                     }
+                    _isShowIndicator.value = false
                 }
-            }
-        }
-    }
-
-    // 기프티콘 삭제
-    fun removeGift(onComplete: (Boolean) -> Unit) {
-        if (removeGift ==  null) return
-        if (removeGift?.id?.isEmpty() == true) return
-        val uid = removeGift!!.uid
-        val id = removeGift!!.id
-        removeGift = null
-        giftRepository.removeGift(isGuestMode, uid, id) { result ->
-            if (result) {
-                // 로컬 삭제
-                viewModelScope.launch(Dispatchers.IO) {
-                    giftRepository.deleteGift(id)
-                }
-            } else { // 삭제 실패
-                onComplete(false)
             }
         }
     }

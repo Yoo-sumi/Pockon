@@ -47,12 +47,8 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.rememberDatePickerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.runtime.saveable.rememberSaveable
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.scale
@@ -70,6 +66,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import coil.compose.AsyncImage
 import com.example.giftbox.ui.utils.DateTransformation
 import com.example.giftbox.R
+import com.example.giftbox.ui.LoadingScreen
 import com.example.giftbox.ui.utils.getBitmapFromUri
 import com.example.giftbox.ui.utils.thousandSeparatorTransformation
 import kotlinx.coroutines.launch
@@ -82,11 +79,11 @@ import java.util.TimeZone
 @Composable
 fun AddGifticon(onBack: (Boolean) -> Unit) {
     val addViewModel = hiltViewModel<AddViewModel>()
-    val context = LocalContext.current
 
     // snackbar
     val snackbarHostState = remember { SnackbarHostState() }
     val scope = rememberCoroutineScope()
+    val context = LocalContext.current
 
     // select photo
     val galleryLauncher = rememberLauncherForActivityResult(
@@ -231,6 +228,11 @@ fun AddGifticon(onBack: (Boolean) -> Unit) {
                 }
             )
         }
+    }
+
+    // Loading Indicator
+    if (addViewModel.isShowIndicator.value) {
+        LoadingScreen()
     }
 }
 

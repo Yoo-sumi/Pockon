@@ -1,6 +1,5 @@
 package com.example.giftbox.ui.used
 
-import android.net.Uri
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -42,7 +41,9 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.drawWithContent
 import androidx.compose.ui.draw.scale
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
@@ -55,6 +56,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import coil.compose.AsyncImage
 import com.example.giftbox.R
 import com.example.giftbox.model.Gift
+import com.example.giftbox.ui.LoadingScreen
 import com.example.giftbox.ui.detail.UsedStamp
 import com.example.giftbox.ui.list.ConfirmDialog
 import com.example.giftbox.ui.utils.formatString
@@ -83,7 +85,18 @@ fun UsedScreen(onDetail: (String) -> Unit, onBack: () -> Unit) {
         ) {
             // topbar
             Box(
-                modifier = Modifier.fillMaxWidth().padding(top = 5.dp, bottom = 5.dp)
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(top = 5.dp, bottom = 5.dp)
+                    .drawWithContent {
+                        drawContent()
+                        drawLine(
+                            color = Color.LightGray,
+                            start = Offset(0f, size.height),
+                            end = Offset(size.width, size.height),
+                            strokeWidth = 2f
+                        )
+                    }
             ) {
                 IconButton(
                     modifier = Modifier.align(Alignment.CenterStart),
@@ -101,11 +114,7 @@ fun UsedScreen(onDetail: (String) -> Unit, onBack: () -> Unit) {
                     text = stringResource(id = R.string.title_used_gift),
                     fontSize = 16.sp,
                 )
-                IconButton(
-                    modifier = Modifier.align(Alignment.CenterEnd),
-                    onClick = {
-                    }
-                ) {
+                if (usedViewModel.giftList.value.isNotEmpty()) {
                     val title = if (isEdit && usedViewModel.checkedGiftList.value.isEmpty()) {
                         R.string.btn_cancel
                     } else if (isEdit && usedViewModel.checkedGiftList.value.isNotEmpty()) {
@@ -114,7 +123,9 @@ fun UsedScreen(onDetail: (String) -> Unit, onBack: () -> Unit) {
                         R.string.btn_edit
                     }
                     Text(
-                        modifier = Modifier.clickable {
+                        modifier = Modifier.align(Alignment.CenterEnd)
+                            .padding(end = 15.dp)
+                            .clickable {
                             // 삭제
                             if (isEdit) {
                                 if (usedViewModel.checkedGiftList.value.isEmpty()) isEdit = false
@@ -126,15 +137,16 @@ fun UsedScreen(onDetail: (String) -> Unit, onBack: () -> Unit) {
                             }
                         },
                         text = stringResource(id = title),
-                        fontSize = 14.sp
+                        fontSize = 14.sp,
+                        textAlign = TextAlign.Center
                     )
-                }
+                    }
             }
 
             // all delete
             if (isEdit) {
                 Row(
-                    modifier = Modifier.padding(top = 5.dp, bottom = 10.dp, end = 5.dp, start = 5.dp),
+                    modifier = Modifier.padding(top = 5.dp, bottom = 10.dp, start = 10.dp),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     CompositionLocalProvider(LocalMinimumInteractiveComponentEnforcement provides false) {
@@ -180,21 +192,13 @@ fun UsedScreen(onDetail: (String) -> Unit, onBack: () -> Unit) {
             text = R.string.dlg_msg_delete,
             onConfirm = {
                 showRemoveDlg = false
-                if (isEdit) {
-                    usedViewModel.deleteSelection { result ->
-                        scope.launch {
-                            if (!result) snackbarHostState.showSnackbar(message = context.getString(R.string.msg_no_delete))
-                        }
-                        isEdit = !isEdit
-                        usedViewModel.setIsAllSelect(false)
-                        usedViewModel.clearCheckedGiftList()
+                usedViewModel.deleteSelection { result ->
+                    scope.launch {
+                        if (!result) snackbarHostState.showSnackbar(message = context.getString(R.string.msg_no_delete))
                     }
-                } else {
-                    usedViewModel.removeGift { result ->
-                        scope.launch {
-                            if (!result) snackbarHostState.showSnackbar(message = context.getString(R.string.msg_no_delete))
-                        }
-                    }
+                    isEdit = !isEdit
+                    usedViewModel.setIsAllSelect(false)
+                    usedViewModel.clearCheckedGiftList()
                 }
             },
             onDismiss = {
@@ -202,6 +206,10 @@ fun UsedScreen(onDetail: (String) -> Unit, onBack: () -> Unit) {
 
             }
         )
+    }
+
+    if (usedViewModel.isShowIndicator.value) {
+        LoadingScreen()
     }
 }
 

@@ -40,7 +40,7 @@ import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun SettingScreen(onUsedGift: () -> Unit, movePinScreen: () -> Unit, moveLogInScreen: () -> Unit) {
+fun SettingScreen(onUsedGift: () -> Unit, movePinScreen: () -> Unit, moveLogInScreen: () -> Unit, isLoading: (Boolean) -> Unit) {
     val settingViewModel = hiltViewModel<SettingViewModel>()
 
     var showLogoutDlg by remember { mutableStateOf(false) }
@@ -152,9 +152,11 @@ fun SettingScreen(onUsedGift: () -> Unit, movePinScreen: () -> Unit, moveLogInSc
                     R.string.dlg_msg_logout
                 },
                 onConfirm = {
+                    isLoading(true)
                     showLogoutDlg = false
                     settingViewModel.logout()
                     moveLogInScreen()
+                    isLoading(false)
                 },
                 onDismiss = {
                     showLogoutDlg = false
@@ -167,7 +169,9 @@ fun SettingScreen(onUsedGift: () -> Unit, movePinScreen: () -> Unit, moveLogInSc
                 text = R.string.dlg_msg_remove_account,
                 onConfirm = {
                     showRemoveDlg = false
+                    isLoading(true)
                     settingViewModel.removeAccount { result ->
+                        isLoading(false)
                         if (result) { // 로그인 화면으로 이동
                             moveLogInScreen()
                         } else { // "회원탈퇴에 실패했습니다."
