@@ -11,10 +11,10 @@ import com.example.giftbox.alarm.MyAlarmManager
 import com.example.giftbox.model.Gift
 import com.example.giftbox.data.GiftRepository
 import com.example.giftbox.ui.utils.getDdayInt
+import com.example.giftbox.ui.utils.loadImageFromPath
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.collectLatest
-import kotlinx.coroutines.flow.take
 import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
 import java.util.Date
@@ -75,7 +75,7 @@ class ListViewModel @Inject constructor(
                     val tempList = ArrayList<Gift>()
                     val alarmList = sharedPref.getStringSet("alarm_list", mutableSetOf())?.toMutableSet()
                     allGift.forEach { gift ->
-                        val tempGift = Gift(id = gift.id, uid = gift.uid, photo = gift.photo, name = gift.name, brand = gift.brand, endDt = gift.endDt, addDt = gift.addDt, memo = gift.memo, usedDt = gift.usedDt, cash = gift.cash)
+                        val tempGift = Gift(id = gift.id, uid = gift.uid, photo = loadImageFromPath(gift.photoPath), name = gift.name, brand = gift.brand, endDt = gift.endDt, addDt = gift.addDt, memo = gift.memo, usedDt = gift.usedDt, cash = gift.cash)
                         tempList.add(tempGift)
                         if (isNotiEndDt) {
                             // 알림 등록

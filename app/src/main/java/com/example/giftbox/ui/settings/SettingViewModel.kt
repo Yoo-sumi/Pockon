@@ -9,6 +9,7 @@ import com.example.giftbox.data.GiftRepository
 import com.example.giftbox.data.LoginRepository
 import com.example.giftbox.model.Gift
 import com.example.giftbox.ui.utils.getDdayInt
+import com.example.giftbox.ui.utils.loadImageFromPath
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.collectLatest
@@ -42,7 +43,7 @@ class SettingViewModel @Inject constructor(
             giftRepository.getAllGift().take(1).collectLatest { allGift ->
                 val alarmList = sharedPref.getStringSet("alarm_list", mutableSetOf())?.toMutableSet()
                 allGift.forEach { gift ->
-                    val tempGift = Gift(id = gift.id, uid = gift.uid, photo = gift.photo, name = gift.name, brand = gift.brand, endDt = gift.endDt, addDt = gift.addDt, memo = gift.memo, usedDt = gift.usedDt, cash = gift.cash)
+                    val tempGift = Gift(id = gift.id, uid = gift.uid, photo = loadImageFromPath(gift.photoPath), name = gift.name, brand = gift.brand, endDt = gift.endDt, addDt = gift.addDt, memo = gift.memo, usedDt = gift.usedDt, cash = gift.cash)
                     if (isNotiEndDt) {
                         // 알림 등록
                         if (getDdayInt(tempGift.endDt) in 0..1 && alarmList?.contains(gift.id) == false) {

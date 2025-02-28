@@ -4,14 +4,12 @@ import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.giftbox.data.BrandSearchRepository
 import com.example.giftbox.data.GiftRepository
-import com.example.giftbox.model.Document
 import com.example.giftbox.model.Gift
+import com.example.giftbox.ui.utils.loadImageFromPath
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.collectLatest
-import kotlinx.coroutines.flow.take
 import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
 import java.util.Locale
@@ -36,7 +34,7 @@ class UsedViewModel @Inject constructor(
                 if (allGift.isNotEmpty()) {
                     val dateFormat = SimpleDateFormat("yyyyMMdd", Locale.KOREA)
                     _giftList.value =  allGift.map { gift ->
-                        Gift(id = gift.id, uid = gift.uid, photo = gift.photo, name = gift.name, brand = gift.brand, endDt = gift.endDt, addDt = gift.addDt, memo = gift.memo, usedDt = gift.usedDt, cash = gift.cash)
+                        Gift(id = gift.id, uid = gift.uid, photo = loadImageFromPath(gift.photoPath), name = gift.name, brand = gift.brand, endDt = gift.endDt, addDt = gift.addDt, memo = gift.memo, usedDt = gift.usedDt, cash = gift.cash)
                     }.sortedByDescending {  gift -> dateFormat.parse(gift.endDt)?.time }
                 } else {
                     // 기프티콘 없음

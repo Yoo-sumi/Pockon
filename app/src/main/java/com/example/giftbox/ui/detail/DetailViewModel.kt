@@ -11,6 +11,7 @@ import com.example.giftbox.alarm.MyAlarmManager
 import com.example.giftbox.data.GiftRepository
 import com.example.giftbox.model.Gift
 import com.example.giftbox.ui.utils.getDdayInt
+import com.example.giftbox.ui.utils.loadImageFromPath
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.collectLatest
@@ -69,7 +70,7 @@ class DetailViewModel @Inject constructor(
     fun getGift(id: String) {
         viewModelScope.launch(Dispatchers.IO) {
             giftRepository.getGift(id).collectLatest { gift ->
-                setGift(Gift(id = gift.id, uid = gift.uid, photo = gift.photo, name = gift.name, brand = gift.brand, endDt = gift.endDt, addDt = gift.addDt, memo = gift.memo, usedDt = gift.usedDt, cash = gift.cash))
+                setGift(Gift(id = gift.id, uid = gift.uid, photo = loadImageFromPath(gift.photoPath), name = gift.name, brand = gift.brand, endDt = gift.endDt, addDt = gift.addDt, memo = gift.memo, usedDt = gift.usedDt, cash = gift.cash))
             }
         }
     }

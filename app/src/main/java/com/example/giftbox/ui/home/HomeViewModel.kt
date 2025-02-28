@@ -8,6 +8,7 @@ import com.example.giftbox.data.BrandSearchRepository
 import com.example.giftbox.data.GiftRepository
 import com.example.giftbox.model.Document
 import com.example.giftbox.model.Gift
+import com.example.giftbox.ui.utils.loadImageFromPath
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.collectLatest
@@ -43,7 +44,7 @@ class HomeViewModel @Inject constructor(
             giftRepository.getAllGift().collectLatest { allGift ->
                 if (allGift.isNotEmpty()) {
                     giftList = allGift.map { gift ->
-                        Gift(id = gift.id, uid = gift.uid, photo = gift.photo, name = gift.name, brand = gift.brand, endDt = gift.endDt, addDt = gift.addDt, memo = gift.memo, usedDt = gift.usedDt, cash = gift.cash)
+                        Gift(id = gift.id, uid = gift.uid, photo = loadImageFromPath(gift.photoPath), name = gift.name, brand = gift.brand, endDt = gift.endDt, addDt = gift.addDt, memo = gift.memo, usedDt = gift.usedDt, cash = gift.cash)
                     }
 
                     // 기한 임박 기프티콘 목록(TOP 30)

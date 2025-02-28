@@ -1,10 +1,13 @@
 package com.example.giftbox.data
 
+import android.content.Context
 import com.example.giftbox.GiftEntity
 import com.example.giftbox.data.local.GiftLocalDataSource
 import com.example.giftbox.data.remote.GiftDataSource
 import com.example.giftbox.data.remote.GiftPhotoDataSource
 import com.example.giftbox.model.Gift
+import com.example.giftbox.ui.utils.saveBitmapToFile
+import dagger.hilt.android.qualifiers.ApplicationContext
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
@@ -13,7 +16,8 @@ import javax.inject.Inject
 class GiftRepository @Inject constructor(
     private val giftDataSource: GiftDataSource,
     private val giftPhotoDataSource: GiftPhotoDataSource,
-    private val giftLocalDataSource: GiftLocalDataSource
+    private val giftLocalDataSource: GiftLocalDataSource,
+    @ApplicationContext private val context: Context
 ) {
     fun addGift(isGuestMode: Boolean, gift: Gift, onComplete: (String?) -> Unit) {
         if (isGuestMode) {
@@ -107,7 +111,7 @@ class GiftRepository @Inject constructor(
 
     /* 로컬 */
     fun insertGift(gift: Gift) {
-        val giftEntity = GiftEntity(id = gift.id, uid = gift.uid, photo = gift.photo, name = gift.name, brand = gift.brand, endDt = gift.endDt, addDt = gift.addDt, memo = gift.memo, usedDt = gift.usedDt, cash = gift.cash)
+        val giftEntity = GiftEntity(id = gift.id, uid = gift.uid, photoPath = saveBitmapToFile(gift.photo, context), name = gift.name, brand = gift.brand, endDt = gift.endDt, addDt = gift.addDt, memo = gift.memo, usedDt = gift.usedDt, cash = gift.cash)
         giftLocalDataSource.insertGift(giftEntity)
     }
 
@@ -125,7 +129,7 @@ class GiftRepository @Inject constructor(
 
     fun deleteAllAndInsertGifts(gifts: List<Gift>) {
         val giftEntityList = gifts.map { gift ->
-            GiftEntity(id = gift.id, uid = gift.uid, photo = gift.photo, name = gift.name, brand = gift.brand, endDt = gift.endDt, addDt = gift.addDt, memo = gift.memo, usedDt = gift.usedDt, cash = gift.cash)
+            GiftEntity(id = gift.id, uid = gift.uid, photoPath = saveBitmapToFile(gift.photo, context), name = gift.name, brand = gift.brand, endDt = gift.endDt, addDt = gift.addDt, memo = gift.memo, usedDt = gift.usedDt, cash = gift.cash)
         }
         giftLocalDataSource.deleteAllAndInsertGifts(giftEntityList)
     }

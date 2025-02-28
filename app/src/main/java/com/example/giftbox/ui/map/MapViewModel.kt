@@ -8,6 +8,7 @@ import com.example.giftbox.data.BrandSearchRepository
 import com.example.giftbox.data.GiftRepository
 import com.example.giftbox.model.Document
 import com.example.giftbox.model.Gift
+import com.example.giftbox.ui.utils.loadImageFromPath
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.collectLatest
@@ -41,7 +42,7 @@ class MapViewModel @Inject constructor(
             giftRepository.getAllGift().take(1).collectLatest { allGift -> // 지도에서는 실시간 갱신 안함 > 1로제한
                 if (allGift.isNotEmpty()) {
                     giftList =  allGift.map { gift ->
-                        Gift(id = gift.id, uid = gift.uid, photo = gift.photo, name = gift.name, brand = gift.brand, endDt = gift.endDt, addDt = gift.addDt, memo = gift.memo, usedDt = gift.usedDt, cash = gift.cash)
+                        Gift(id = gift.id, uid = gift.uid, photo = loadImageFromPath(gift.photoPath), name = gift.name, brand = gift.brand, endDt = gift.endDt, addDt = gift.addDt, memo = gift.memo, usedDt = gift.usedDt, cash = gift.cash)
                     }
                     getAllBrands() // 키워드별 브랜드 위치 정보 가져오기(로컬)
                 } else {

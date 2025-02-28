@@ -10,15 +10,12 @@ import androidx.room.PrimaryKey
 import androidx.room.Query
 import androidx.room.RoomDatabase
 import androidx.room.Transaction
-import androidx.room.TypeConverters
-import com.example.giftbox.ui.utils.RoomTypeConverter
 import kotlinx.coroutines.flow.Flow
 
 @Database(
     entities = [GiftEntity::class],
     version = 1
 )
-@TypeConverters(RoomTypeConverter::class)
 abstract class GiftDatabase : RoomDatabase() {
     abstract fun giftDao(): GiftDao
 }
@@ -62,7 +59,7 @@ interface GiftDao {
 data class GiftEntity(
     @PrimaryKey val id: String = "",
     val uid: String = "",
-    val photo: Bitmap? = null,
+    val photoPath: String = "",
     val name: String = "",
     val brand: String = "",
     val endDt: String = "",

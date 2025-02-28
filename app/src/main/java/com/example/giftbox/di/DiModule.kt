@@ -61,8 +61,8 @@ class DiModule {
 
     @Singleton
     @Provides
-    fun provideGiftRepository(giftDataSource: GiftDataSource, giftPhotoDataSource: GiftPhotoDataSource, giftLocalDataSource: GiftLocalDataSource) : GiftRepository {
-        return GiftRepository(giftDataSource, giftPhotoDataSource, giftLocalDataSource)
+    fun provideGiftRepository(giftDataSource: GiftDataSource, giftPhotoDataSource: GiftPhotoDataSource, giftLocalDataSource: GiftLocalDataSource, @ApplicationContext context: Context) : GiftRepository {
+        return GiftRepository(giftDataSource, giftPhotoDataSource, giftLocalDataSource, context)
     }
 
     @Singleton
