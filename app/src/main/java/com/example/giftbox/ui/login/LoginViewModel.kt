@@ -30,6 +30,9 @@ class LoginViewModel @Inject constructor(
     private val _isFail = MutableLiveData(false)
     val isFail: LiveData<Boolean> = _isFail
 
+    private val _isLoading = MutableLiveData(false)
+    val isLoading: LiveData<Boolean> = _isLoading
+
     private var isPinUse = sharedPref.getBoolean("auth_pin", false)
 
     init {
@@ -54,6 +57,7 @@ class LoginViewModel @Inject constructor(
         // 구글 사용자 정보 가져오는 부분은 Repository 단에 androidx import 하고 싶지 않아서 여기서 처리
         when (val credential = result.credential) {
             is CustomCredential -> {
+                _isLoading.value = true
                 if (credential.type == GoogleIdTokenCredential.TYPE_GOOGLE_ID_TOKEN_CREDENTIAL) {
                     try {
                         val googleIdTokenCredential = GoogleIdTokenCredential.createFrom(credential.data)
@@ -61,6 +65,7 @@ class LoginViewModel @Inject constructor(
                         val firebaseCredential = GoogleAuthProvider.getCredential(idToken, null)
 
                         loginRepository.login(firebaseCredential) {
+                            _isLoading.value = false
                             if (it.isEmpty()) {
                                 _isLogin.value = false
                                 _isFail.value = true
@@ -70,13 +75,16 @@ class LoginViewModel @Inject constructor(
                             }
                         }
                     } catch (e: GoogleIdTokenParsingException) {
+                        _isLoading.value = false
                         _isFail.value = true
                     }
                 } else {
+                    _isLoading.value = false
                     _isFail.value = true
                 }
             }
             else -> {
+                _isLoading.value = false
                 _isFail.value = true
             }
         }

@@ -15,6 +15,7 @@ import androidx.navigation.Navigation
 import com.example.giftbox.BuildConfig
 import com.example.giftbox.R
 import com.example.giftbox.databinding.FragmentLoginBinding
+import com.example.giftbox.ui.LoadingScreen
 import com.google.android.libraries.identity.googleid.GetGoogleIdOption
 import com.google.android.material.snackbar.Snackbar
 import dagger.hilt.android.AndroidEntryPoint
@@ -77,6 +78,12 @@ class LoginFragment : Fragment() {
             if (it) {
                 // 로그인 실패 스낵바
                 Snackbar.make(binding.root, getString(R.string.msg_login_fail), Snackbar.LENGTH_LONG).show()
+            }
+        }
+
+        loginViewModel.isLoading.observe(viewLifecycleOwner) {
+            binding.cvLoadingScreen.setContent {
+                if (it) LoadingScreen()
             }
         }
 
