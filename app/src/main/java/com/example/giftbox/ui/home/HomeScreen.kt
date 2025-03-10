@@ -1,6 +1,8 @@
 package com.example.giftbox.ui.home
 
-import android.annotation.SuppressLint
+import android.Manifest
+import android.content.Context
+import android.content.pm.PackageManager
 import android.location.Location
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -58,6 +60,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.core.content.ContextCompat
 import androidx.hilt.navigation.compose.hiltViewModel
 import coil.compose.AsyncImage
 import com.example.giftbox.R
@@ -81,7 +84,7 @@ fun HomeScreen(onAdd: () -> Unit, showMap: () -> Unit, onDetail: (String) -> Uni
     var longitude: Double? by rememberSaveable { mutableStateOf(null) }
     var latitude: Double? by rememberSaveable { mutableStateOf(null) }
 
-    getLocation(fusedLocationClient) {
+    getLocation(context, fusedLocationClient) {
         // 위치 가져오기
         longitude = it?.longitude
         latitude = it?.latitude
@@ -134,7 +137,7 @@ fun HomeScreen(onAdd: () -> Unit, showMap: () -> Unit, onDetail: (String) -> Uni
                             LocalMinimumInteractiveComponentEnforcement provides false,
                         ) {
                             IconButton(onClick = {
-                                getLocation(fusedLocationClient) {
+                                getLocation(context, fusedLocationClient) {
                                     // 위치 동기화
                                     longitude = it?.longitude
                                     latitude = it?.latitude
@@ -354,16 +357,27 @@ fun EmptyNear() {
     }
 }
 
-@SuppressLint("MissingPermission")
 private fun getLocation(
+    context: Context,
     fusedLocationClient: FusedLocationProviderClient,
     onComplete: (Location?) -> Unit
 ) {
-    fusedLocationClient.lastLocation
-        .addOnSuccessListener {
-            onComplete(it)
-        }
-        .addOnFailureListener {
-            onComplete(null)
-        }
+    val permissions = arrayOf(Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION)
+
+    if (permissions.all {
+            ContextCompat.checkSelfPermission(
+                context,
+                it
+            ) == PackageManager.PERMISSION_GRANTED
+        }) {
+        fusedLocationClient.lastLocation
+            .addOnSuccessListener {
+                onComplete(it)
+            }
+            .addOnFailureListener {
+                onComplete(null)
+            }
+    } else {
+        onComplete(null)
+    }
 }

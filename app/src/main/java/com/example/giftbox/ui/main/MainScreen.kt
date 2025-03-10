@@ -89,7 +89,7 @@ fun BottomNavigationBar(isGuestMode: Boolean, movePinScreen: () -> Unit, moveLog
             AlertDialog.Builder(context)
                 .setTitle(context.getString(R.string.txt_alert))
                 .setMessage(context.getString(R.string.msg_no_permission))
-                .setPositiveButton("확인") { dialog, which ->
+                .setPositiveButton(context.getString(R.string.btn_confirm)) { dialog, which ->
                     // 긍정 버튼 클릭 동작 처리
                     val intent = Intent(
                         Settings.ACTION_APPLICATION_DETAILS_SETTINGS,
