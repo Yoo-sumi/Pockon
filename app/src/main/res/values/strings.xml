@@ -80,7 +80,6 @@
     <!--설정-->
     <string name="msg_remove_account_fail">회원 탈퇴에 실패했습니다.</string>
     <string name="txt_usage_history">사용내역</string>
-    <string name="txt_used_gifticon">사용완료 기프티콘</string>
     <string name="txt_noti_of_imminent_use">사용 임박 알림</string>
     <string name="txt_use_pwd">비밀번호 사용</string>
     <string name="txt_user">사용자</string>

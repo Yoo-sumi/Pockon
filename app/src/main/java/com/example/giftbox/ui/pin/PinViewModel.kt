@@ -40,6 +40,7 @@ class PinViewModel @Inject constructor(
 
     fun setMode(mode: Int) {
         this._mode.intValue = mode
+        _error.value = null
     }
 
     fun getPinSize(): Int {

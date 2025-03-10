@@ -197,6 +197,7 @@ class ListViewModel @Inject constructor(
                     giftRepository.insertGift(updateGift)
                 }
                 myAlarmManager.cancel(gift.id)
+                onComplete(true)
             } else { // 수정 실패
                 onComplete(false)
             }
@@ -217,6 +218,7 @@ class ListViewModel @Inject constructor(
                     giftRepository.deleteGift(id)
                 }
                 myAlarmManager.cancel(id)
+                onComplete(true)
             } else { // 삭제 실패
                 onComplete(false)
             }

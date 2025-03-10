@@ -145,62 +145,66 @@ fun ListScreen(onDetail: (String) -> Unit, onAdd: () -> Unit, isLoading: (Boolea
         )
     }
 
-    if (listViewModel.giftList.value.isEmpty()) {
-        EmptyScreen {
-            onAdd()
-        }
-    } else {
-        Scaffold(
-            snackbarHost = {
-                SnackbarHost(hostState = snackbarHostState)
-            },
-            topBar = {
-                CenterAlignedTopAppBar(
-                    colors = TopAppBarDefaults.topAppBarColors(
-                        containerColor = MaterialTheme.colorScheme.secondaryContainer,
-                    ),
-                    title = {
-                        TopAppBarDropDownMenu(listViewModel.topTitle.value) { title ->
-                            listViewModel.setTopTitle(title)
-                            listViewModel.orderBy()
-                        }
-                    },
-                    actions = {
-                        val title = if (isEdit && listViewModel.checkedGiftList.value.isEmpty()) {
-                            R.string.btn_cancel
-                        } else if (isEdit && listViewModel.checkedGiftList.value.isNotEmpty()) {
-                            R.string.btn_delete
-                        } else {
-                            R.string.btn_edit
-                        }
-                        Text(
-                            modifier = Modifier
-                                .padding(end = 15.dp)
-                                .clickable {
-                                    // 삭제
-                                    if (isEdit) {
-                                        if (listViewModel.checkedGiftList.value.isEmpty()) isEdit =
-                                            false
-                                        else showRemoveDlg = true
-                                    } else { // 편집
-                                        isEdit = true
-                                        listViewModel.setIsAllSelect(false)
-                                        listViewModel.clearCheckedGiftList()
-                                    }
-                                },
-                            text = stringResource(id = title),
-                            fontSize = 14.sp
-                        )
+    Scaffold(
+        snackbarHost = {
+            SnackbarHost(hostState = snackbarHostState)
+        },
+        topBar = {
+            CenterAlignedTopAppBar(
+                colors = TopAppBarDefaults.topAppBarColors(
+                    containerColor = MaterialTheme.colorScheme.secondaryContainer,
+                ),
+                title = {
+                    TopAppBarDropDownMenu(listViewModel.topTitle.value) { title ->
+                        listViewModel.setTopTitle(title)
+                        listViewModel.orderBy()
                     }
+                },
+                actions = {
+                    val title = if (isEdit && listViewModel.checkedGiftList.value.isEmpty()) {
+                        R.string.btn_cancel
+                    } else if (isEdit && listViewModel.checkedGiftList.value.isNotEmpty()) {
+                        R.string.btn_delete
+                    } else {
+                        R.string.btn_edit
+                    }
+                    Text(
+                        modifier = Modifier
+                            .padding(end = 15.dp)
+                            .clickable {
+                                if (listViewModel.giftList.value.isEmpty()) return@clickable
+                                // 삭제
+                                if (isEdit) {
+                                    if (listViewModel.checkedGiftList.value.isEmpty()) isEdit =
+                                        false
+                                    else showRemoveDlg = true
+                                } else { // 편집
+                                    isEdit = true
+                                    listViewModel.setIsAllSelect(false)
+                                    listViewModel.clearCheckedGiftList()
+                                }
+                            },
+                        text = stringResource(id = title),
+                        fontSize = 14.sp
+                    )
+                }
+            )
+        }
+    ) { innerPadding ->
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(innerPadding)
+                .nestedScroll(refreshState.nestedScrollConnection)
+        ) {
+            // empty screen
+            if (listViewModel.giftList.value.isEmpty()) {
+                Text(
+                    modifier = Modifier.align(Alignment.Center),
+                    fontSize = 18.sp,
+                    text = stringResource(id = R.string.txt_no_gift),
                 )
-            }
-        ) { innerPadding ->
-            Box(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(innerPadding)
-                    .nestedScroll(refreshState.nestedScrollConnection)
-            ) {
+            } else {
                 Column(
                     modifier = Modifier.padding(end = 20.dp, start = 20.dp, top = 10.dp)
                 ) {
@@ -363,27 +367,27 @@ fun ListScreen(onDetail: (String) -> Unit, onAdd: () -> Unit, isLoading: (Boolea
                         }
                     }
                 }
+            }
 
-                PullToRefreshContainer(
-                    state = refreshState,
-                    containerColor = MaterialTheme.colorScheme.surfaceContainerLowest,
-                    contentColor = MaterialTheme.colorScheme.primary,
-                    modifier = Modifier.align(Alignment.TopCenter)
-                )
+            PullToRefreshContainer(
+                state = refreshState,
+                containerColor = MaterialTheme.colorScheme.surfaceContainerLowest,
+                contentColor = MaterialTheme.colorScheme.primary,
+                modifier = Modifier.align(Alignment.TopCenter)
+            )
 
-                SmallFloatingActionButton(
-                    onClick = {
-                        onAdd()
-                    },
-                    containerColor = MaterialTheme.colorScheme.secondaryContainer,
-                    contentColor = MaterialTheme.colorScheme.secondary,
-                    shape = CircleShape,
-                    modifier = Modifier
-                        .align(Alignment.BottomEnd)
-                        .padding(15.dp)
-                ) {
-                    Icon(imageVector = Icons.Filled.Add, contentDescription = "")
-                }
+            SmallFloatingActionButton(
+                onClick = {
+                    onAdd()
+                },
+                containerColor = MaterialTheme.colorScheme.secondaryContainer,
+                contentColor = MaterialTheme.colorScheme.secondary,
+                shape = CircleShape,
+                modifier = Modifier
+                    .align(Alignment.BottomEnd)
+                    .padding(15.dp)
+            ) {
+                Icon(imageVector = Icons.Filled.Add, contentDescription = "")
             }
         }
     }
@@ -643,55 +647,6 @@ fun ConfirmDialog(text: Int, onConfirm: () -> Unit, onDismiss: () -> Unit) {
                         )
                     }
                 }
-            }
-        }
-    }
-}
-
-@Composable
-fun EmptyScreen(onAdd: () -> Unit) {
-    Box(
-        modifier = Modifier
-            .fillMaxSize()
-    ) {
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(30.dp),
-            verticalArrangement = Arrangement.Center,
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
-            Text(
-                fontSize = 18.sp,
-                text = stringResource(id = R.string.txt_no_gift),
-            )
-
-            Spacer(modifier = Modifier
-                .fillMaxWidth()
-                .padding(bottom = 40.dp))
-
-            Image(
-                modifier = Modifier
-                    .width(80.dp)
-                    .height(80.dp),
-                painter = painterResource(id = R.drawable.icon_empty_box),
-                contentDescription = "add photo",
-                contentScale = ContentScale.Crop
-            )
-
-            Spacer(modifier = Modifier
-                .fillMaxWidth()
-                .padding(bottom = 40.dp))
-
-            Button(
-                modifier = Modifier
-                    .fillMaxWidth(),
-                shape = RectangleShape,
-                onClick = {
-                    onAdd()
-                }
-            ) {
-                Text(text = stringResource(id = R.string.btn_register))
             }
         }
     }
