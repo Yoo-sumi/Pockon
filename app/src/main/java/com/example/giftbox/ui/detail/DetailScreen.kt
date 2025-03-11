@@ -202,7 +202,7 @@ fun DetailScreen(id: String, onBack: () -> Unit) {
                     .verticalScroll(scrollSate)
             ) {
                 // gift image
-                GiftImage(detailViewModel.photo.value, detailViewModel.usedDt.value) {
+                GiftImage(detailViewModel.isEdit.value, detailViewModel.photo.value, detailViewModel.usedDt.value) {
                     if (detailViewModel.isEdit.value) {
                         galleryLauncher.launch(
                             PickVisualMediaRequest(
@@ -222,26 +222,25 @@ fun DetailScreen(id: String, onBack: () -> Unit) {
                     ) {
                         Row(
                             modifier = Modifier
-                                .align(Alignment.CenterEnd),
+                                .align(Alignment.CenterEnd)
+                                .padding(0.dp),
                             verticalAlignment = Alignment.CenterVertically
                         ) {
                             Text(
                                 modifier = Modifier
-                                    .fillMaxHeight()
-                                    .padding(end = 8.dp),
+                                    .fillMaxHeight(),
                                 text = stringResource(R.string.txt_cash_certificate),
                                 textAlign = TextAlign.Center
                             )
-                            CompositionLocalProvider(LocalMinimumInteractiveComponentEnforcement provides false) {
-                                Checkbox(
-                                    modifier = Modifier
-                                        .scale(0.8f),
-                                    checked = detailViewModel.isCheckedCash.value,
-                                    onCheckedChange = {
-                                        detailViewModel.chgCheckedCash()
-                                    }
-                                )
-                            }
+                            Checkbox(
+                                modifier = Modifier
+                                    .scale(0.8f)
+                                    .padding(0.dp) ,
+                                checked = detailViewModel.isCheckedCash.value,
+                                onCheckedChange = {
+                                    detailViewModel.chgCheckedCash()
+                                }
+                            )
                         }
                     }
                 }
@@ -396,7 +395,7 @@ fun InputDataTextField(value: String, label: Int, index: Int, isEdit: Boolean, o
 {
     var modifier = Modifier
         .fillMaxWidth()
-        .padding(top = 5.dp)
+        .padding(end = 5.dp, start = 5.dp, bottom = 5.dp, top = 0.dp)
     if (index == 4) {
         modifier = modifier.height(150.dp)
     }
@@ -431,12 +430,12 @@ fun InputDataTextField(value: String, label: Int, index: Int, isEdit: Boolean, o
 }
 
 @Composable
-fun GiftImage(selectedImage: Bitmap?, usedDt: String, onClick: () -> Unit) {
+fun GiftImage(isEdit: Boolean, selectedImage: Bitmap?, usedDt: String, onClick: () -> Unit) {
     Row(
         horizontalArrangement = Arrangement.Center,
         modifier = Modifier
             .fillMaxWidth()
-            .padding(bottom = 20.dp)
+            .padding(bottom = if (isEdit) 8.dp else 20.dp)
     ) {
         Box(
             contentAlignment = Alignment.Center,

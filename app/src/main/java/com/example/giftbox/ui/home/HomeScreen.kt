@@ -30,18 +30,12 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.CenterAlignedTopAppBar
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.LocalMinimumInteractiveComponentEnforcement
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SmallFloatingActionButton
 import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -71,7 +65,6 @@ import com.example.giftbox.ui.utils.getDday
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationServices
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun HomeScreen(onAdd: () -> Unit, showMap: () -> Unit, onDetail: (String) -> Unit) {
     val homeViewModel = hiltViewModel<HomeViewModel>()
@@ -94,22 +87,11 @@ fun HomeScreen(onAdd: () -> Unit, showMap: () -> Unit, onDetail: (String) -> Uni
         homeViewModel.setLocation(longitude, latitude)
     }
 
-    Scaffold(
-        topBar = {
-            CenterAlignedTopAppBar(
-                colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.secondaryContainer,
-                ),
-                title = {
-                    Text(text = stringResource(id = R.string.home))
-                }
-            )
-        }
-    ) { innerPadding ->
+    Column {
+        HomeScreenTopBar()
         Box(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(innerPadding)
                 .background(MaterialTheme.colorScheme.background)
         ) {
             Column(
@@ -132,22 +114,19 @@ fun HomeScreen(onAdd: () -> Unit, showMap: () -> Unit, onDetail: (String) -> Uni
                             fontSize = 18.sp,
                             softWrap = true
                         )
-                        // 기본 padding 없애기
-                        CompositionLocalProvider(
-                            LocalMinimumInteractiveComponentEnforcement provides false,
-                        ) {
-                            IconButton(onClick = {
-                                getLocation(context, fusedLocationClient) {
-                                    // 위치 동기화
+                        IconButton(
+                            onClick = {
+                                getLocation(context, fusedLocationClient) { // 위치 동기화
                                     longitude = it?.longitude
                                     latitude = it?.latitude
                                 }
-                            }) {
-                                Icon(
-                                    imageVector = Icons.Filled.Refresh,
-                                    contentDescription = "refresh button",
-                                )
-                            }
+                            },
+                            modifier = Modifier.padding(0.dp)
+                        ) {
+                            Icon(
+                                imageVector = Icons.Filled.Refresh,
+                                contentDescription = "refresh button",
+                            )
                         }
                     }
 
@@ -379,5 +358,22 @@ private fun getLocation(
             }
     } else {
         onComplete(null)
+    }
+}
+
+@Composable
+fun HomeScreenTopBar() {
+    // topbar
+    Box(
+        modifier = Modifier.fillMaxWidth()
+            .background(MaterialTheme.colorScheme.secondaryContainer)
+            .padding(10.dp)
+            .padding(top = 5.dp, bottom = 5.dp)
+    ) {
+        Text(
+            modifier = Modifier.align(Alignment.Center),
+            text = stringResource(id = R.string.home),
+            fontSize = 18.sp,
+        )
     }
 }

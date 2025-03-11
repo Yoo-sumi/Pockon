@@ -76,7 +76,6 @@ import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.colorResource
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
@@ -148,227 +147,223 @@ fun ListScreen(onDetail: (String) -> Unit, onAdd: () -> Unit, isLoading: (Boolea
     Scaffold(
         snackbarHost = {
             SnackbarHost(hostState = snackbarHostState)
-        },
-        topBar = {
-            CenterAlignedTopAppBar(
-                colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.secondaryContainer,
-                ),
-                title = {
-                    TopAppBarDropDownMenu(listViewModel.topTitle.value) { title ->
-                        listViewModel.setTopTitle(title)
-                        listViewModel.orderBy()
-                    }
-                },
-                actions = {
-                    val title = if (isEdit && listViewModel.checkedGiftList.value.isEmpty()) {
-                        R.string.btn_cancel
-                    } else if (isEdit && listViewModel.checkedGiftList.value.isNotEmpty()) {
-                        R.string.btn_delete
-                    } else {
-                        R.string.btn_edit
-                    }
-                    Text(
-                        modifier = Modifier
-                            .padding(end = 15.dp)
-                            .clickable {
-                                if (listViewModel.giftList.value.isEmpty()) return@clickable
-                                // 삭제
-                                if (isEdit) {
-                                    if (listViewModel.checkedGiftList.value.isEmpty()) isEdit =
-                                        false
-                                    else showRemoveDlg = true
-                                } else { // 편집
-                                    isEdit = true
-                                    listViewModel.setIsAllSelect(false)
-                                    listViewModel.clearCheckedGiftList()
-                                }
-                            },
-                        text = stringResource(id = title),
-                        fontSize = 14.sp
-                    )
-                }
-            )
         }
     ) { innerPadding ->
-        Box(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(innerPadding)
-                .nestedScroll(refreshState.nestedScrollConnection)
-        ) {
-            // empty screen
-            if (listViewModel.giftList.value.isEmpty()) {
-                Text(
-                    modifier = Modifier.align(Alignment.Center),
-                    fontSize = 18.sp,
-                    text = stringResource(id = R.string.txt_no_gift),
+        val title = if (isEdit && listViewModel.checkedGiftList.value.isEmpty()) {
+            R.string.btn_cancel
+        } else if (isEdit && listViewModel.checkedGiftList.value.isNotEmpty()) {
+            R.string.btn_delete
+        } else {
+            R.string.btn_edit
+        }
+        Box {
+            Column {
+                ListScreenTopBar(
+                    title = listViewModel.topTitle.value,
+                    actionText = title,
+                    onDropDown = {
+                        listViewModel.setTopTitle(it)
+                        listViewModel.orderBy()
+                    },
+                    onClick = {
+                        if (listViewModel.giftList.value.isEmpty()) return@ListScreenTopBar
+                        // 삭제
+                        if (isEdit) {
+                            if (listViewModel.checkedGiftList.value.isEmpty()) isEdit =
+                                false
+                            else showRemoveDlg = true
+                        } else { // 편집
+                            isEdit = true
+                            listViewModel.setIsAllSelect(false)
+                            listViewModel.clearCheckedGiftList()
+                        }
+                    }
                 )
-            } else {
-                Column(
-                    modifier = Modifier.padding(end = 20.dp, start = 20.dp, top = 10.dp)
+
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(innerPadding)
+                        .nestedScroll(refreshState.nestedScrollConnection)
                 ) {
-                    // chip
-                    LazyRow {
-                        listViewModel.chipElement.value?.let { chips ->
-                            val keys = chips.keys.toList()
-                            items(chips.size) { idx ->
-                                val key = keys[idx]
-                                FilterChip(
-                                    onClick = {
-                                        listViewModel.setIsAllSelect(false)
-                                        listViewModel.changeChipState(listOf(key))
-                                    },
-                                    label = {
-                                        if (idx == 0) {
-                                            Text(
-                                                color = if (chips[key] == true) MaterialTheme.colorScheme.onPrimary else Color.Unspecified,
-                                                text = stringResource(id = R.string.chip_all),
-                                                fontWeight = FontWeight.Bold
-                                            )
-                                        } else {
-                                            Text(
-                                                color = if (chips[key] == true) MaterialTheme.colorScheme.onPrimary else Color.Unspecified,
-                                                text = keys[idx],
-                                                fontWeight = FontWeight.Bold
-                                            )
-                                        }
-                                    },
-                                    selected = chips[key] ?: false,
-                                    shape = RoundedCornerShape(50.dp),
-                                    colors = FilterChipDefaults.filterChipColors().copy(
-                                        containerColor = MaterialTheme.colorScheme.surfaceContainerHighest,
-                                        selectedContainerColor = MaterialTheme.colorScheme.primary
-                                    ),
-                                    border = null
-                                )
-                                Spacer(modifier = Modifier.padding(3.dp))
-                            }
-                        }
-                    }
-
-                    // all delete
-                    if (isEdit) {
-                        Row(
-                            modifier = Modifier.padding(top = 5.dp, bottom = 10.dp),
-                            verticalAlignment = Alignment.CenterVertically
+                    // empty screen
+                    if (listViewModel.giftList.value.isEmpty()) {
+                        Text(
+                            modifier = Modifier.align(Alignment.Center),
+                            fontSize = 18.sp,
+                            text = stringResource(id = R.string.txt_no_gift),
+                        )
+                    } else {
+                        Column(
+                            modifier = Modifier.padding(end = 20.dp, start = 20.dp, top = 10.dp)
                         ) {
-                            CompositionLocalProvider(LocalMinimumInteractiveComponentEnforcement provides false) {
-                                Checkbox(
-                                    modifier = Modifier
-                                        .scale(0.8f),
-                                    checked = listViewModel.isAllSelect.value,
-                                    onCheckedChange = {
-                                        listViewModel.onClickAllSelect()
+                            // chip
+                            LazyRow {
+                                listViewModel.chipElement.value?.let { chips ->
+                                    val keys = chips.keys.toList()
+                                    items(chips.size) { idx ->
+                                        val key = keys[idx]
+                                        FilterChip(
+                                            onClick = {
+                                                listViewModel.setIsAllSelect(false)
+                                                listViewModel.changeChipState(listOf(key))
+                                            },
+                                            label = {
+                                                if (idx == 0) {
+                                                    Text(
+                                                        color = if (chips[key] == true) MaterialTheme.colorScheme.onPrimary else Color.Unspecified,
+                                                        text = stringResource(id = R.string.chip_all),
+                                                        fontWeight = FontWeight.Bold
+                                                    )
+                                                } else {
+                                                    Text(
+                                                        color = if (chips[key] == true) MaterialTheme.colorScheme.onPrimary else Color.Unspecified,
+                                                        text = keys[idx],
+                                                        fontWeight = FontWeight.Bold
+                                                    )
+                                                }
+                                            },
+                                            selected = chips[key] ?: false,
+                                            shape = RoundedCornerShape(50.dp),
+                                            colors = FilterChipDefaults.filterChipColors().copy(
+                                                containerColor = MaterialTheme.colorScheme.surfaceContainerHighest,
+                                                selectedContainerColor = MaterialTheme.colorScheme.primary
+                                            ),
+                                            border = null
+                                        )
+                                        Spacer(modifier = Modifier.padding(3.dp))
                                     }
-                                )
-                            }
-                            Text(text = stringResource(id = R.string.txt_all_select))
-                        }
-                    }
-
-                    // gift item
-                    LazyColumn(
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .padding(bottom = 10.dp)
-                    ) {
-                        itemsIndexed(items = listViewModel.copyGiftList.value) { index, gift ->
-                            val swipeState = rememberSwipeToDismissBoxState()
-
-                            val text: String
-                            val alignment: Alignment
-                            val color: Color
-
-                            when (swipeState.dismissDirection) {
-                                SwipeToDismissBoxValue.EndToStart -> {
-                                    text = stringResource(id = R.string.txt_used)
-                                    alignment = Alignment.CenterEnd
-                                    color = colorResource(id = R.color.dark_green)
-                                }
-
-                                SwipeToDismissBoxValue.StartToEnd -> {
-                                    text = stringResource(id = R.string.txt_delete)
-                                    alignment = Alignment.CenterStart
-                                    color = Color.Red.copy(alpha = 0.8f)
-                                }
-
-                                SwipeToDismissBoxValue.Settled -> {
-                                    text = stringResource(id = R.string.txt_used)
-                                    alignment = Alignment.CenterEnd
-                                    color = Color.Green.copy(alpha = 0.8f)
                                 }
                             }
 
-                            SwipeToDismissBox(
-                                modifier = Modifier.animateContentSize(),
-                                state = swipeState,
-                                enableDismissFromEndToStart = true,
-                                enableDismissFromStartToEnd = true,
-                                backgroundContent = {
-                                    Box(
-                                        contentAlignment = alignment,
-                                        modifier = Modifier
-                                            .fillMaxSize()
-                                            .padding(3.dp)
-                                            .clip(shape = RoundedCornerShape(10.dp))
-                                            .background(color)
+                            // all delete
+                            if (isEdit) {
+                                Row(
+                                    modifier = Modifier.padding(top = 5.dp, bottom = 10.dp),
+                                    verticalAlignment = Alignment.CenterVertically
+                                ) {
+                                    CompositionLocalProvider(
+                                        LocalMinimumInteractiveComponentEnforcement provides false
                                     ) {
-                                        Text(
-                                            modifier = Modifier.padding(start = 15.dp, end = 15.dp),
-                                            text = text,
-                                            color = MaterialTheme.colorScheme.onPrimary,
-                                            fontSize = 20.sp
+                                        Checkbox(
+                                            modifier = Modifier
+                                                .scale(0.8f),
+                                            checked = listViewModel.isAllSelect.value,
+                                            onCheckedChange = {
+                                                listViewModel.onClickAllSelect()
+                                            }
                                         )
                                     }
+                                    Text(text = stringResource(id = R.string.txt_all_select))
                                 }
-                            ) {
-                                GiftItem(
-                                    isEdit = isEdit,
-                                    gift = gift,
-                                    formattedEndDate = formatString(gift.endDt),
-                                    dDay = getDday(gift.endDt),
-                                    isCheck = listViewModel.checkedGiftList.value.contains(gift.id),
-                                    onClick = {
-                                        if (isEdit) listViewModel.checkedGift(gift.id)
-                                        else onDetail(gift.id)
-                                    }
-                                )
                             }
 
-                            when (swipeState.currentValue) {
-                                SwipeToDismissBoxValue.EndToStart -> {
-                                    LaunchedEffect(swipeState) {
-                                        listViewModel.usedGift(gift) { result ->
-                                            scope.launch {
-                                                if (!result) snackbarHostState.showSnackbar(
-                                                    message = context.getString(
-                                                        R.string.msg_no_use
-                                                    )
+                            // gift item
+                            LazyColumn(
+                                modifier = Modifier
+                                    .fillMaxSize()
+                                    .padding(bottom = 10.dp)
+                            ) {
+                                itemsIndexed(items = listViewModel.copyGiftList.value) { index, gift ->
+                                    val swipeState = rememberSwipeToDismissBoxState()
+
+                                    val text: String
+                                    val alignment: Alignment
+                                    val color: Color
+
+                                    when (swipeState.dismissDirection) {
+                                        SwipeToDismissBoxValue.EndToStart -> {
+                                            text = stringResource(id = R.string.txt_used)
+                                            alignment = Alignment.CenterEnd
+                                            color = colorResource(id = R.color.dark_green)
+                                        }
+
+                                        SwipeToDismissBoxValue.StartToEnd -> {
+                                            text = stringResource(id = R.string.txt_delete)
+                                            alignment = Alignment.CenterStart
+                                            color = Color.Red.copy(alpha = 0.8f)
+                                        }
+
+                                        SwipeToDismissBoxValue.Settled -> {
+                                            text = stringResource(id = R.string.txt_used)
+                                            alignment = Alignment.CenterEnd
+                                            color = Color.Green.copy(alpha = 0.8f)
+                                        }
+                                    }
+
+                                    SwipeToDismissBox(
+                                        modifier = Modifier.animateContentSize(),
+                                        state = swipeState,
+                                        enableDismissFromEndToStart = true,
+                                        enableDismissFromStartToEnd = true,
+                                        backgroundContent = {
+                                            Box(
+                                                contentAlignment = alignment,
+                                                modifier = Modifier
+                                                    .fillMaxSize()
+                                                    .padding(3.dp)
+                                                    .clip(shape = RoundedCornerShape(10.dp))
+                                                    .background(color)
+                                            ) {
+                                                Text(
+                                                    modifier = Modifier.padding(
+                                                        start = 15.dp,
+                                                        end = 15.dp
+                                                    ),
+                                                    text = text,
+                                                    color = MaterialTheme.colorScheme.onPrimary,
+                                                    fontSize = 20.sp
                                                 )
                                             }
                                         }
-                                        swipeState.snapTo(SwipeToDismissBoxValue.Settled)
+                                    ) {
+                                        GiftItem(
+                                            isEdit = isEdit,
+                                            gift = gift,
+                                            formattedEndDate = formatString(gift.endDt),
+                                            dDay = getDday(gift.endDt),
+                                            isCheck = listViewModel.checkedGiftList.value.contains(gift.id),
+                                            onClick = {
+                                                if (isEdit) listViewModel.checkedGift(gift.id)
+                                                else onDetail(gift.id)
+                                            }
+                                        )
                                     }
-                                }
 
-                                SwipeToDismissBoxValue.StartToEnd -> {
-                                    LaunchedEffect(swipeState) {
-                                        listViewModel.setRemoveGift(gift)
-                                        swipeState.snapTo(SwipeToDismissBoxValue.Settled)
-                                        showRemoveDlg = true
+                                    when (swipeState.currentValue) {
+                                        SwipeToDismissBoxValue.EndToStart -> {
+                                            LaunchedEffect(swipeState) {
+                                                listViewModel.usedGift(gift) { result ->
+                                                    scope.launch {
+                                                        if (!result) snackbarHostState.showSnackbar(
+                                                            message = context.getString(
+                                                                R.string.msg_no_use
+                                                            )
+                                                        )
+                                                    }
+                                                }
+                                                swipeState.snapTo(SwipeToDismissBoxValue.Settled)
+                                            }
+                                        }
+
+                                        SwipeToDismissBoxValue.StartToEnd -> {
+                                            LaunchedEffect(swipeState) {
+                                                listViewModel.setRemoveGift(gift)
+                                                swipeState.snapTo(SwipeToDismissBoxValue.Settled)
+                                                showRemoveDlg = true
+                                            }
+                                        }
+
+                                        SwipeToDismissBoxValue.Settled -> {
+
+                                        }
                                     }
-                                }
-
-                                SwipeToDismissBoxValue.Settled -> {
-
                                 }
                             }
                         }
                     }
                 }
             }
-
             PullToRefreshContainer(
                 state = refreshState,
                 containerColor = MaterialTheme.colorScheme.surfaceContainerLowest,
@@ -649,5 +644,33 @@ fun ConfirmDialog(text: Int, onConfirm: () -> Unit, onDismiss: () -> Unit) {
                 }
             }
         }
+    }
+}
+
+@Composable
+fun ListScreenTopBar(title: Int, actionText: Int, onDropDown: (Int) -> Unit, onClick: () -> Unit) {
+    // topbar
+    Box(
+        modifier = Modifier
+            .fillMaxWidth()
+            .background(MaterialTheme.colorScheme.secondaryContainer)
+            .padding(10.dp)
+            .padding(top = 5.dp, bottom = 5.dp)
+    ) {
+        Box(modifier = Modifier.align(Alignment.Center)) {
+            TopAppBarDropDownMenu(title) { title ->
+                onDropDown(title)
+            }
+        }
+        Text(
+            modifier = Modifier
+                .align(Alignment.CenterEnd)
+                .padding(end = 15.dp)
+                .clickable {
+                    onClick()
+                },
+            text = stringResource(id = actionText),
+            fontSize = 14.sp
+        )
     }
 }

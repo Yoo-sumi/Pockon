@@ -62,7 +62,6 @@ import com.example.giftbox.ui.list.ConfirmDialog
 import com.example.giftbox.ui.utils.formatString
 import kotlinx.coroutines.launch
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun UsedScreen(onDetail: (String) -> Unit, onBack: () -> Unit) {
     val usedViewModel = hiltViewModel<UsedViewModel>()
@@ -146,19 +145,17 @@ fun UsedScreen(onDetail: (String) -> Unit, onBack: () -> Unit) {
             // all delete
             if (isEdit) {
                 Row(
-                    modifier = Modifier.padding(top = 5.dp, bottom = 10.dp, start = 10.dp),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    CompositionLocalProvider(LocalMinimumInteractiveComponentEnforcement provides false) {
-                        Checkbox(
-                            modifier = Modifier
-                                .scale(0.8f),
-                            checked = usedViewModel.isAllSelect.value,
-                            onCheckedChange = {
-                                usedViewModel.onClickAllSelect()
-                            }
-                        )
-                    }
+                    Checkbox(
+                        modifier = Modifier
+                            .scale(0.8f)
+                            .padding(0.dp),
+                        checked = usedViewModel.isAllSelect.value,
+                        onCheckedChange = {
+                            usedViewModel.onClickAllSelect()
+                        }
+                    )
                     Text(text = stringResource(id = R.string.txt_all_select))
                 }
             }

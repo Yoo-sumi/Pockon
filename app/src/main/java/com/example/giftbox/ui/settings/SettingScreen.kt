@@ -8,15 +8,12 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.wrapContentSize
-import androidx.compose.material3.CenterAlignedTopAppBar
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -33,12 +30,12 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.giftbox.R
 import com.example.giftbox.ui.list.ConfirmDialog
 import kotlinx.coroutines.launch
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SettingScreen(onUsedGift: () -> Unit, movePinScreen: () -> Unit, moveLogInScreen: () -> Unit, isLoading: (Boolean) -> Unit) {
     val settingViewModel = hiltViewModel<SettingViewModel>()
@@ -56,90 +53,83 @@ fun SettingScreen(onUsedGift: () -> Unit, movePinScreen: () -> Unit, moveLogInSc
     Scaffold(
         snackbarHost = {
             SnackbarHost(hostState = snackbarHostState)
-        },
-        topBar = {
-            CenterAlignedTopAppBar(
-                colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.secondaryContainer,
-                ),
-                title = {
-                    Text(text = stringResource(id = R.string.setting))
-                }
-            )
         }
     ) { innerPadding ->
-        Box(
-            modifier = Modifier
-                .padding(innerPadding)
-                .fillMaxSize()
-                .background(MaterialTheme.colorScheme.background)
-        ) {
-            Column(
-                horizontalAlignment = Alignment.Start
+        Column {
+            SettingScreenTopBar()
+            Box(
+                modifier = Modifier
+                    .padding(innerPadding)
+                    .fillMaxSize()
+                    .background(MaterialTheme.colorScheme.background)
             ) {
-                // 사용내역
-                SettingItem(
-                    text = stringResource(id = R.string.txt_usage_history),
-                    isTitle = true
-                )
-
-                SettingItem(
-                    text = stringResource(id = R.string.txt_usage_history),
-                    onClick = {
-                        onUsedGift()
-                    }
-                )
-
-                // 설정
-                SettingItem(
-                    text = stringResource(id = R.string.setting),
-                    isTitle = true
-                )
-
-                SettingItem(
-                    text = stringResource(id = R.string.txt_noti_of_imminent_use),
-                    isSwitch = true,
-                    checked = checkedAlarm,
-                    onCheck = {
-                        checkedAlarm = !checkedAlarm
-                        settingViewModel.onOffNotiEndDt(checkedAlarm)
-                    }
-                )
-
-                SettingItem(
-                    text = stringResource(id = R.string.txt_use_pwd),
-                    isSwitch = true,
-                    checked = checkedPwd,
-                    onCheck = {
-                        checkedPwd = !checkedPwd
-                        if (checkedPwd) {
-                            movePinScreen()
-                        } else {
-                            settingViewModel.offAuthPin()
-                        }
-                    },
-                )
-
-                // 사용자
-                SettingItem(
-                    text = stringResource(id = R.string.txt_user),
-                    isTitle = true
-                )
-
-                SettingItem(
-                    text = stringResource(id = R.string.txt_logout),
-                    onClick = {
-                        showLogoutDlg = true
-                    }
-                )
-
-                if (!settingViewModel.getIsGuestMode()) {
+                Column(
+                    horizontalAlignment = Alignment.Start
+                ) {
+                    // 사용내역
                     SettingItem(
-                        text = stringResource(id = R.string.txt_remove_account),
+                        text = stringResource(id = R.string.txt_usage_history),
+                        isTitle = true
+                    )
+
+                    SettingItem(
+                        text = stringResource(id = R.string.txt_usage_history),
                         onClick = {
-                            showRemoveDlg = true
+                            onUsedGift()
                         }
                     )
+
+                    // 설정
+                    SettingItem(
+                        text = stringResource(id = R.string.setting),
+                        isTitle = true
+                    )
+
+                    SettingItem(
+                        text = stringResource(id = R.string.txt_noti_of_imminent_use),
+                        isSwitch = true,
+                        checked = checkedAlarm,
+                        onCheck = {
+                            checkedAlarm = !checkedAlarm
+                            settingViewModel.onOffNotiEndDt(checkedAlarm)
+                        }
+                    )
+
+                    SettingItem(
+                        text = stringResource(id = R.string.txt_use_pwd),
+                        isSwitch = true,
+                        checked = checkedPwd,
+                        onCheck = {
+                            checkedPwd = !checkedPwd
+                            if (checkedPwd) {
+                                movePinScreen()
+                            } else {
+                                settingViewModel.offAuthPin()
+                            }
+                        },
+                    )
+
+                    // 사용자
+                    SettingItem(
+                        text = stringResource(id = R.string.txt_user),
+                        isTitle = true
+                    )
+
+                    SettingItem(
+                        text = stringResource(id = R.string.txt_logout),
+                        onClick = {
+                            showLogoutDlg = true
+                        }
+                    )
+
+                    if (!settingViewModel.getIsGuestMode()) {
+                        SettingItem(
+                            text = stringResource(id = R.string.txt_remove_account),
+                            onClick = {
+                                showRemoveDlg = true
+                            }
+                        )
+                    }
                 }
             }
         }
@@ -241,5 +231,23 @@ fun SettingItem(text: String, isTitle: Boolean = false, isSwitch: Boolean = fals
                 )
             }
         }
+    }
+}
+
+@Composable
+fun SettingScreenTopBar() {
+    // topbar
+    Box(
+        modifier = Modifier
+            .fillMaxWidth()
+            .background(MaterialTheme.colorScheme.secondaryContainer)
+            .padding(10.dp)
+            .padding(top = 5.dp, bottom = 5.dp)
+    ) {
+        Text(
+            modifier = Modifier.align(Alignment.Center),
+            text = stringResource(id = R.string.setting),
+            fontSize = 18.sp,
+        )
     }
 }
