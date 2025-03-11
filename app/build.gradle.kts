@@ -76,6 +76,9 @@ android {
 }
 
 dependencies {
+    // Material2
+    implementation(libs.material.v160)
+
     // Jetpack Navigation Kotlin
     implementation ("androidx.navigation:navigation-fragment-ktx:2.8.5")
     implementation ("androidx.navigation:navigation-ui-ktx:2.8.5")

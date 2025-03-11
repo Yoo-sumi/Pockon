@@ -1,5 +1,6 @@
 package com.example.giftbox.ui.add
 
+import android.app.DatePickerDialog
 import android.graphics.Bitmap
 import android.net.Uri
 import androidx.activity.compose.ManagedActivityResultLauncher
@@ -13,7 +14,6 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -21,32 +21,22 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.DateRange
 import androidx.compose.material3.Button
-import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.Checkbox
-import androidx.compose.material3.DatePicker
-import androidx.compose.material3.DatePickerDefaults
-import androidx.compose.material3.DatePickerDialog
-import androidx.compose.material3.DisplayMode
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.LocalMinimumInteractiveComponentEnforcement
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
-import androidx.compose.material3.rememberDatePickerState
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
@@ -68,11 +58,12 @@ import coil.compose.AsyncImage
 import com.example.giftbox.ui.utils.DateTransformation
 import com.example.giftbox.R
 import com.example.giftbox.ui.LoadingScreen
+import com.example.giftbox.ui.utils.formatDateToYYYYMMDD
 import com.example.giftbox.ui.utils.getBitmapFromUri
 import com.example.giftbox.ui.utils.thousandSeparatorTransformation
 import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
-import java.util.Date
+import java.util.Calendar
 import java.util.Locale
 import java.util.TimeZone
 
@@ -203,7 +194,7 @@ fun AddGifticon(onBack: (Boolean) -> Unit) {
         // DatePicker
         if (addViewModel.isShowDatePicker.value) {
             CustomDatePickerDialog(
-                selectedDate = addViewModel.endDate.value,
+                dateString = addViewModel.endDate.value,
                 onCancel = { addViewModel.changeDatePickerState() },
                 onConfirm = {
                     addViewModel.changeDatePickerState()
@@ -223,7 +214,7 @@ fun AddGifticon(onBack: (Boolean) -> Unit) {
 fun InputDataTextField(value: String, label: Int, index: Int, onValueChange: (Int, String) -> Unit, onDatePicker: () -> Unit) {
     var modifier = Modifier
         .fillMaxWidth()
-        .padding(end = 5.dp, start = 5.dp, bottom = 5.dp, top = 0.dp)
+        .padding(end = 0.dp, start = 0.dp, bottom = 5.dp, top = 0.dp)
     if (index == 4) {
         modifier = modifier.height(150.dp)
     }
@@ -299,60 +290,6 @@ fun GiftImage(selectedImage: Bitmap?, galleryLauncher:  ManagedActivityResultLau
     }
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-fun CustomDatePickerDialog(
-    selectedDate: String,
-    onCancel: () -> Unit,
-    onConfirm: (String) -> Unit
-) {
-    DatePickerDialog(
-        onDismissRequest = { },
-        confirmButton = { },
-        colors = DatePickerDefaults.colors(
-            containerColor = Color.White
-        ),
-        shape = RoundedCornerShape(5.dp)
-    ) {
-        val datePickerState = rememberDatePickerState(
-            initialDisplayMode = DisplayMode.Picker,
-            initialSelectedDateMillis = if (selectedDate.isNotEmpty() && selectedDate.length == 8) {
-                val formatter = SimpleDateFormat("yyyyMMdd", Locale.getDefault()).apply {
-                    timeZone = TimeZone.getTimeZone("UTC")
-                }
-                formatter.parse(selectedDate)?.time ?: System.currentTimeMillis()
-            } else System.currentTimeMillis(),
-        )
-
-        DatePicker(state = datePickerState)
-
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.Center,
-        ) {
-            Button(onClick = {
-                onCancel()
-            }) {
-                Text(text = stringResource(id = R.string.btn_cancel))
-            }
-
-            Spacer(modifier = Modifier.width(5.dp))
-
-            Button(onClick = {
-                datePickerState.selectedDateMillis?.let { selectedDateMillis ->
-                    val yyyyMMdd = SimpleDateFormat(
-                        "yyyyMMdd",
-                        Locale.getDefault()
-                    ).format(Date(selectedDateMillis))
-                    onConfirm(yyyyMMdd)
-                }
-            }) {
-                Text(text = stringResource(id = R.string.btn_confirm))
-            }
-        }
-    }
-}
-
 @Composable
 fun AddGiftScreenTopBar(onBack: () -> Unit) {
     // topbar
@@ -378,4 +315,46 @@ fun AddGiftScreenTopBar(onBack: () -> Unit) {
             fontSize = 16.sp,
         )
     }
+}
+
+@Composable
+fun CustomDatePickerDialog(
+    dateString: String,
+    onCancel: () -> Unit,
+    onConfirm: (String) -> Unit
+) {
+    // 문자열을 Date 객체로 변환
+    val dateFormat = SimpleDateFormat("yyyyMMdd", Locale.getDefault())
+    dateFormat.timeZone = TimeZone.getTimeZone("UTC") // UTC로 시간대 설정
+    val dateObj = if (dateString.isNotEmpty()) dateFormat.parse(dateString) else null
+
+    val calendar = Calendar.getInstance()
+    if (dateObj != null) {
+        calendar.time = dateObj
+    }
+
+    val year = calendar.get(Calendar.YEAR)
+    val month = calendar.get(Calendar.MONTH)
+    val day = calendar.get(Calendar.DAY_OF_MONTH)
+
+    val datePickerDialog = DatePickerDialog(
+        LocalContext.current,
+        { _, selectedYear, selectedMonth, selectedDayOfMonth ->
+            val selectedDate = formatDateToYYYYMMDD(selectedYear, selectedMonth, selectedDayOfMonth)
+            onConfirm(selectedDate)
+        },
+        year,
+        month,
+        day
+    )
+
+    // 취소 버튼 리스너
+    datePickerDialog.setButton(
+        DatePickerDialog.BUTTON_NEGATIVE, "취소"
+    ) { _, _ ->
+        onCancel()
+    }
+
+    // 다이얼로그 표시
+    datePickerDialog.show()
 }

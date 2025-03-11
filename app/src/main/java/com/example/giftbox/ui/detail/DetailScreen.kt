@@ -152,7 +152,6 @@ fun DetailScreen(id: String, onBack: () -> Unit) {
                 .fillMaxSize()
                 .padding(innerPadding)
                 .background(MaterialTheme.colorScheme.background)
-                .padding(5.dp)
         ) {
             // topbar
             Box(
@@ -375,7 +374,7 @@ fun DetailScreen(id: String, onBack: () -> Unit) {
         // DatePicker
         if (detailViewModel.isShowDatePicker.value) {
             CustomDatePickerDialog(
-                selectedDate = detailViewModel.endDate.value,
+                dateString = detailViewModel.endDate.value,
                 onCancel = { detailViewModel.changeDatePickerState() },
                 onConfirm = {
                     detailViewModel.changeDatePickerState()
@@ -395,7 +394,7 @@ fun InputDataTextField(value: String, label: Int, index: Int, isEdit: Boolean, o
 {
     var modifier = Modifier
         .fillMaxWidth()
-        .padding(end = 5.dp, start = 5.dp, bottom = 5.dp, top = 0.dp)
+        .padding(end = 0.dp, start = 0.dp, bottom = 5.dp, top = 0.dp)
     if (index == 4) {
         modifier = modifier.height(150.dp)
     }

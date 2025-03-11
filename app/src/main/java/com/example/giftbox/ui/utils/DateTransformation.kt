@@ -81,3 +81,11 @@ fun formatString(endDate: String): String {
         if (index == 3 || index == 5) "${c}." else c
     }.joinToString("")
 }
+
+// 날짜를 yyyyMMdd 형식으로 변환하는 함수
+fun formatDateToYYYYMMDD(year: Int, month: Int, dayOfMonth: Int): String {
+    // 월은 0부터 시작하므로, 실제 월 번호를 +1 해야 함
+    val formattedMonth = String.format(Locale.US, "%02d", month + 1) // 월은 1부터 시작
+    val formattedDay = String.format(Locale.US, "%02d", dayOfMonth) // 일은 두 자릿수로 표현
+    return "$year$formattedMonth$formattedDay"
+}

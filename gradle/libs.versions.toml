@@ -5,6 +5,7 @@ converterGson = "2.6.2"
 design = "28.0.0"
 firebaseStorage = "21.0.1"
 fragmentKtx = "1.8.5"
+googleMaterial = "1.6.0"
 kotlin = "1.9.22"
 coreKtx = "1.13.1"
 junit = "4.13.2"
@@ -54,6 +55,7 @@ androidx-ui-viewbinding = { group = "androidx.compose.ui", name = "ui-viewbindin
 androidx-appcompat = { group = "androidx.appcompat", name = "appcompat", version.ref = "appcompat" }
 androidx-constraintlayout = { group = "androidx.constraintlayout", name = "constraintlayout", version.ref = "constraintlayout" }
 map-sdk = { module = "com.naver.maps:map-sdk", version.ref = "mapSdk" }
+material-v160 = { module = "com.google.android.material:material", version.ref = "googleMaterial" }
 play-services-location = { module = "com.google.android.gms:play-services-location", version.ref = "playServicesLocation" }
 retrofit = { module = "com.squareup.retrofit2:retrofit", version.ref = "retrofit" }
 material = { group = "com.google.android.material", name = "material", version.ref = "materialVersion" }
