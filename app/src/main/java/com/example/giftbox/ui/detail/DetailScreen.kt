@@ -97,7 +97,6 @@ import com.example.giftbox.ui.utils.getBitmapFromUri
 import com.example.giftbox.ui.utils.thousandSeparatorTransformation
 import kotlinx.coroutines.launch
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun DetailScreen(id: String, onBack: () -> Unit) {
     val detailViewModel = hiltViewModel<DetailViewModel>()
@@ -119,9 +118,6 @@ fun DetailScreen(id: String, onBack: () -> Unit) {
         detailViewModel.memo.value
     )
 
-    val sheetState = rememberModalBottomSheetState(
-        skipPartiallyExpanded = true
-    )
     // snackbar
     val snackbarHostState = remember { SnackbarHostState() }
     val scope = rememberCoroutineScope()

@@ -76,6 +76,9 @@ android {
 }
 
 dependencies {
+    // swiperefresh
+    implementation(libs.accompanist.swiperefresh)
+
     // Material2
     implementation(libs.material.v160)
 
