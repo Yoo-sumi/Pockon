@@ -5,10 +5,14 @@ import androidx.activity.compose.BackHandler
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.animation.core.Animatable
+import androidx.compose.animation.core.Spring
+import androidx.compose.animation.core.spring
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.gestures.detectVerticalDragGestures
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -19,8 +23,7 @@ import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.heightIn
-import androidx.compose.foundation.layout.navigationBarsPadding
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -45,19 +48,15 @@ import androidx.compose.material3.FilterChip
 import androidx.compose.material3.FilterChipDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.LocalMinimumInteractiveComponentEnforcement
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.SheetState
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -71,6 +70,7 @@ import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.RectangleShape
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
@@ -81,6 +81,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
@@ -94,7 +95,6 @@ import com.example.giftbox.ui.list.ConfirmDialog
 import com.example.giftbox.ui.utils.decimalFormat
 import com.example.giftbox.ui.utils.getBitmapFromUri
 import com.example.giftbox.ui.utils.thousandSeparatorTransformation
-import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -137,7 +137,11 @@ fun DetailScreen(id: String, onBack: () -> Unit) {
     }
 
     BackHandler {
-        onBack()
+        if (detailViewModel.isShowBottomSheet.value) {
+            detailViewModel.setIsShowBottomSheet(false)
+        } else {
+            onBack()
+        }
     }
 
     Scaffold(
@@ -310,7 +314,7 @@ fun DetailScreen(id: String, onBack: () -> Unit) {
         }
 
         if (detailViewModel.isShowBottomSheet.value) {
-            GiftBottomSheet(detailViewModel.photo.value, scope, sheetState) { isUsed ->
+            GiftBottomSheet(image = detailViewModel.photo.value, isVisible = detailViewModel.isShowBottomSheet.value) { isUsed ->
                 if (isUsed) {
                     if (detailViewModel.cash.value.isNotEmpty()) {
                         detailViewModel.setIsShowUseCashDialog(true)
@@ -471,69 +475,6 @@ fun GiftImage(isEdit: Boolean, selectedImage: Bitmap?, usedDt: String, onClick: 
         }
     }
 }
-
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-fun GiftBottomSheet(image: Bitmap?, scope: CoroutineScope, sheetState: SheetState, onDismiss: (Boolean) -> Unit) {
-    val screenHeight = LocalConfiguration.current.screenHeightDp.dp
-
-    ModalBottomSheet(
-        modifier = Modifier
-            .heightIn(max = screenHeight - 10.dp)
-            .fillMaxSize(),
-        onDismissRequest = {
-            onDismiss(false)
-        },
-        sheetState = sheetState
-    ) {
-
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(top = 20.dp, start = 25.dp, end = 25.dp)
-                .navigationBarsPadding()
-        ) {
-            Box(
-                modifier = Modifier
-                    .weight(8f)
-                    .padding(bottom = 10.dp),
-                contentAlignment = Alignment.Center
-            ) {
-                if (image == null) {
-                    Image(
-                        modifier = Modifier.fillMaxWidth(),
-                        painter = painterResource(id = R.drawable.icon_add_photo),
-                        contentDescription = "use photo",
-                        contentScale = ContentScale.Crop
-                    )
-                } else {
-                    AsyncImage(
-                        modifier = Modifier.fillMaxSize(),
-                        model = image,
-                        contentDescription = "use photo",
-                        contentScale = ContentScale.Fit
-                    )
-                }
-            }
-
-            Button(
-                modifier = Modifier
-                    .fillMaxWidth(),
-                shape = RectangleShape,
-                onClick = {
-                    scope.launch { sheetState.hide() }.invokeOnCompletion {
-                        if (!sheetState.isVisible) {
-                            onDismiss(true)
-                        }
-                    }
-                }
-            ) {
-                Text(text = stringResource(id = R.string.btn_use_complete))
-            }
-        }
-    }
-}
-
 
 @Composable
 fun UsedStamp(usedDate: String) {
@@ -752,6 +693,130 @@ fun UseCashDialog(remainCash: String, onCancel: () -> Unit, onConfirm: (Int) -> 
                         fontWeight = FontWeight.Normal
                     )
                 )
+            }
+        }
+    }
+}
+
+@Composable
+fun GiftBottomSheet(image: Bitmap?, isVisible: Boolean, onDismiss: (Boolean) -> Unit) {
+    val screenHeight = LocalConfiguration.current.screenHeightDp.dp
+    val sheetHeight = screenHeight * 0.95f // BottomSheet 높이 (화면의 50%)
+    val sheetOffsetY = remember { Animatable(screenHeight.value) } // 초기 위치: 화면 아래
+    val coroutineScope = rememberCoroutineScope()
+
+    // isVisible 변경 시 애니메이션 적용
+    LaunchedEffect(isVisible) {
+        if (isVisible) {
+            sheetOffsetY.animateTo(
+                screenHeight.value - sheetHeight.value,
+                animationSpec = spring(dampingRatio = Spring.DampingRatioMediumBouncy)
+            ) // 탄성 효과로 부드럽게 올라옴
+        } else {
+            sheetOffsetY.animateTo(
+                screenHeight.value,
+                animationSpec = spring(dampingRatio = Spring.DampingRatioMediumBouncy)
+            ) // 탄성 효과로 부드럽게 내려감
+        }
+    }
+
+    Box(
+        Modifier
+            .fillMaxSize()
+            .background(Color.Black.copy(alpha = 0.2f)) // 반투명 배경
+    ) {
+        Box(
+            Modifier
+                .fillMaxWidth()
+                .height(sheetHeight)
+                .offset { IntOffset(0, sheetOffsetY.value.toInt()) }
+                .background(
+                    Color.White,
+                    shape = RoundedCornerShape(topStart = 20.dp, topEnd = 20.dp)
+                )
+                .align(Alignment.BottomCenter)
+                .pointerInput(Unit) {
+                    detectVerticalDragGestures(
+                        onDragEnd = {
+                            // 일정 거리 이상 드래그하면 닫힘
+                            if (sheetOffsetY.value > screenHeight.value - sheetHeight.value * 0.5f) {
+                                coroutineScope.launch {
+                                    sheetOffsetY.animateTo(
+                                        screenHeight.value,
+                                        animationSpec = spring()
+                                    )
+                                    onDismiss(false)
+                                }
+                            } else {
+                                coroutineScope.launch {
+                                    sheetOffsetY.animateTo(
+                                        screenHeight.value - sheetHeight.value,
+                                        animationSpec = spring(dampingRatio = Spring.DampingRatioMediumBouncy)
+                                    )
+                                }
+                            }
+                        },
+                        onVerticalDrag = { change, dragAmount ->
+                            change.consume() // 이벤트 소비
+                            coroutineScope.launch {
+                                sheetOffsetY.snapTo(
+                                    (sheetOffsetY.value + dragAmount).coerceAtMost(
+                                        screenHeight.value
+                                    )
+                                )
+                            }
+                        }
+                    )
+                }
+        ) {
+            Column(
+                Modifier
+                    .fillMaxSize()
+                    .padding(top = 20.dp, start = 25.dp, end = 25.dp, bottom = 20.dp)
+            ) {
+                // 드래그 핸들
+                Box(
+                    Modifier
+                        .align(Alignment.CenterHorizontally)
+                        .width(40.dp)
+                        .height(4.dp)
+                        .background(Color.Gray, RoundedCornerShape(50))
+                )
+                Spacer(Modifier.height(16.dp))
+
+                Box(
+                    modifier = Modifier
+                        .weight(8f)
+                        .padding(bottom = 10.dp),
+                    contentAlignment = Alignment.Center
+                ) {
+                    if (image == null) {
+                        Image(
+                            modifier = Modifier.fillMaxWidth(),
+                            painter = painterResource(id = R.drawable.icon_add_photo),
+                            contentDescription = "use photo",
+                            contentScale = ContentScale.Crop
+                        )
+                    } else {
+                        AsyncImage(
+                            modifier = Modifier.fillMaxSize(),
+                            model = image,
+                            contentDescription = "use photo",
+                            contentScale = ContentScale.Fit
+                        )
+                    }
+                }
+
+                Button(
+                    modifier = Modifier
+                        .fillMaxWidth(),
+                    shape = RectangleShape,
+                    onClick = {
+                        onDismiss(true)
+                    }
+                ) {
+                    Text(text = stringResource(id = R.string.btn_use_complete))
+                }
             }
         }
     }
