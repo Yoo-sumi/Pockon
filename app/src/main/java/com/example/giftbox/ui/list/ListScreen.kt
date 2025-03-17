@@ -1,9 +1,13 @@
 package com.example.giftbox.ui.list
 
 import androidx.compose.animation.animateContentSize
+import androidx.compose.animation.core.Animatable
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.tween
 import com.example.giftbox.R
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.gestures.detectHorizontalDragGestures
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.IntrinsicSize
@@ -13,6 +17,7 @@ import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -65,13 +70,18 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.RectangleShape
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
@@ -247,7 +257,9 @@ fun ListScreen(onDetail: (String) -> Unit, onAdd: () -> Unit, isLoading: (Boolea
                                 // all delete
                                 if (isEdit) {
                                     Row(
-                                        modifier = Modifier.padding(8.dp).padding(bottom = 3.dp),
+                                        modifier = Modifier
+                                            .padding(8.dp)
+                                            .padding(bottom = 3.dp),
                                         verticalAlignment = Alignment.CenterVertically
                                     ) {
                                         Box(modifier = Modifier.size(5.dp)) {
@@ -300,31 +312,8 @@ fun ListScreen(onDetail: (String) -> Unit, onAdd: () -> Unit, isLoading: (Boolea
                                             }
                                         }
 
-                                        SwipeToDismissBox(
-                                            modifier = Modifier.animateContentSize(),
-                                            state = swipeState,
-                                            enableDismissFromEndToStart = true,
-                                            enableDismissFromStartToEnd = true,
-                                            backgroundContent = {
-                                                Box(
-                                                    contentAlignment = alignment,
-                                                    modifier = Modifier
-                                                        .fillMaxSize()
-                                                        .padding(3.dp)
-                                                        .clip(shape = RoundedCornerShape(10.dp))
-                                                        .background(color)
-                                                ) {
-                                                    Text(
-                                                        modifier = Modifier.padding(
-                                                            start = 15.dp,
-                                                            end = 15.dp
-                                                        ),
-                                                        text = text,
-                                                        color = MaterialTheme.colorScheme.onPrimary,
-                                                        fontSize = 20.sp
-                                                    )
-                                                }
-                                            }
+                                        SwipeToDismissItem(
+                                            onDismiss = {}
                                         ) {
                                             GiftItem(
                                                 isEdit = isEdit,
@@ -340,6 +329,46 @@ fun ListScreen(onDetail: (String) -> Unit, onAdd: () -> Unit, isLoading: (Boolea
                                                 }
                                             )
                                         }
+//                                        SwipeToDismissBox(
+//                                            modifier = Modifier.animateContentSize(),
+//                                            state = swipeState,
+//                                            enableDismissFromEndToStart = true,
+//                                            enableDismissFromStartToEnd = true,
+//                                            backgroundContent = {
+//                                                Box(
+//                                                    contentAlignment = alignment,
+//                                                    modifier = Modifier
+//                                                        .fillMaxSize()
+//                                                        .padding(3.dp)
+//                                                        .clip(shape = RoundedCornerShape(10.dp))
+//                                                        .background(color)
+//                                                ) {
+//                                                    Text(
+//                                                        modifier = Modifier.padding(
+//                                                            start = 15.dp,
+//                                                            end = 15.dp
+//                                                        ),
+//                                                        text = text,
+//                                                        color = MaterialTheme.colorScheme.onPrimary,
+//                                                        fontSize = 20.sp
+//                                                    )
+//                                                }
+//                                            }
+//                                        ) {
+//                                            GiftItem(
+//                                                isEdit = isEdit,
+//                                                gift = gift,
+//                                                formattedEndDate = formatString(gift.endDt),
+//                                                dDay = getDday(gift.endDt),
+//                                                isCheck = listViewModel.checkedGiftList.value.contains(
+//                                                    gift.id
+//                                                ),
+//                                                onClick = {
+//                                                    if (isEdit) listViewModel.checkedGift(gift.id)
+//                                                    else onDetail(gift.id)
+//                                                }
+//                                            )
+//                                        }
 
                                         when (swipeState.currentValue) {
                                             SwipeToDismissBoxValue.EndToStart -> {
@@ -398,9 +427,7 @@ fun ListScreen(onDetail: (String) -> Unit, onAdd: () -> Unit, isLoading: (Boolea
 fun GiftItem(isEdit: Boolean, gift: Gift, formattedEndDate: String, dDay: Pair<String, Boolean>, isCheck: Boolean, onClick: () -> Unit) {
     Box(
         modifier = Modifier
-            .height(120.dp)
-            .fillMaxWidth()
-            .padding(top = 3.dp, bottom = 3.dp)
+            .fillMaxSize()
             .clip(shape = RoundedCornerShape(10.dp))
             .clickable {
                 onClick()
@@ -678,5 +705,59 @@ fun ListScreenTopBar(title: Int, actionText: Int, onDropDown: (Int) -> Unit, onC
             text = stringResource(id = actionText),
             fontSize = 14.sp
         )
+    }
+}
+
+@Composable
+fun SwipeToDismissItem(onDismiss: () -> Unit, content: @Composable () -> Unit) {
+    val animatableOffsetX = remember { Animatable(0f) } // 애니메이션을 위한 Animatable
+    val screenWidth = LocalDensity.current.run { LocalConfiguration.current.screenWidthDp.dp.toPx() } // 화면의 너비 계산
+
+    val scope = rememberCoroutineScope()
+
+    Box(
+        modifier = Modifier
+            .height(120.dp)
+            .fillMaxWidth()
+            .padding(top = 3.dp, bottom = 3.dp)
+            .clip(shape = RoundedCornerShape(10.dp))
+            .background(
+                color = if (animatableOffsetX.value < 0) Color.Green.copy(alpha = 0.8f) else Color.Red.copy(
+                    alpha = 0.8f
+                ),
+                shape = RoundedCornerShape(10.dp)
+            )
+    ) {
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .offset { IntOffset(animatableOffsetX.value.toInt(), 0) } // 애니메이션을 적용하여 스와이프 효과
+                .pointerInput(Unit) {
+                    // 드래그 종료 시점 감지
+                    detectHorizontalDragGestures(
+                        onDragEnd = {
+                            // 원위치로 돌아가기
+                            // 손을 떴을 때 원위치로 돌아가게
+                            scope.launch {
+                                animatableOffsetX.animateTo(
+                                    targetValue = 0f, // 원위치로 돌아가기
+                                    animationSpec = tween(durationMillis = 300)
+                                )
+                            }
+                            if (animatableOffsetX.value < -screenWidth / 2 || animatableOffsetX.value > screenWidth / 2) {
+                                // 화면 너비의 반 이상 밀었으면 삭제
+                                onDismiss() // 삭제 처리
+                            }
+                        },
+                        onHorizontalDrag = { change, dragAmount ->
+                            scope.launch {
+                                animatableOffsetX.snapTo(animatableOffsetX.value + dragAmount) // 드래그 양만큼 offsetX 업데이트
+                            }
+                        }
+                    )
+                }
+        ) {
+            content()
+        }
     }
 }
