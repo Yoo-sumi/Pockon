@@ -196,6 +196,7 @@ fun DetailScreen(id: String, onBack: () -> Unit) {
             }
             Column(
                 modifier = Modifier
+                    .weight(1f)
                     .padding(top = 5.dp, bottom = 5.dp, start = 25.dp, end = 25.dp)
                     .verticalScroll(scrollSate)
             ) {
@@ -262,48 +263,47 @@ fun DetailScreen(id: String, onBack: () -> Unit) {
                         }
                     )
                 }
-
-                // use or cancel button
-                Button(
-                    onClick = {
-                        if (detailViewModel.isEdit.value) {
-                            val msg = detailViewModel.isValid()
-                            if (msg != null) {
-                                scope.launch {
-                                    snackbarHostState.showSnackbar(message = context.getString(msg))
-                                }
-                            } else {
-                                detailViewModel.updateGift { result ->
-                                    scope.launch {
-                                        if (result) snackbarHostState.showSnackbar(message = context.getString(R.string.msg_ok_update))
-                                        else snackbarHostState.showSnackbar(message = context.getString(R.string.msg_no_update))
-                                    }
-                                }
-
-                            }
-                        } else if (detailViewModel.usedDt.value.isEmpty()) {
-                            detailViewModel.setIsShowBottomSheet(true)
-                        } else {
-                            detailViewModel.setIsShowCancelDialog(true)
-                        }
-                    },
-                    shape = RectangleShape,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(top = 20.dp),
-                    colors = if (detailViewModel.usedDt.value.isNotEmpty()) ButtonDefaults.buttonColors(containerColor = Color.LightGray) else ButtonDefaults.buttonColors()
-                ) {
+            }
+            // use or cancel button
+            Button(
+                onClick = {
                     if (detailViewModel.isEdit.value) {
-                        Text(text = stringResource(id = R.string.btn_save))
+                        val msg = detailViewModel.isValid()
+                        if (msg != null) {
+                            scope.launch {
+                                snackbarHostState.showSnackbar(message = context.getString(msg))
+                            }
+                        } else {
+                            detailViewModel.updateGift { result ->
+                                scope.launch {
+                                    if (result) snackbarHostState.showSnackbar(message = context.getString(R.string.msg_ok_update))
+                                    else snackbarHostState.showSnackbar(message = context.getString(R.string.msg_no_update))
+                                }
+                            }
+
+                        }
                     } else if (detailViewModel.usedDt.value.isEmpty()) {
-                        Text(text = stringResource(id = R.string.btn_use))
+                        detailViewModel.setIsShowBottomSheet(true)
                     } else {
-                        Text(
-                            text = stringResource(id = R.string.btn_use_cancel),
-                            color = Color.White,
-                            fontWeight = FontWeight.Bold
-                        )
+                        detailViewModel.setIsShowCancelDialog(true)
                     }
+                },
+                shape = RectangleShape,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(25.dp),
+                colors = if (detailViewModel.usedDt.value.isNotEmpty()) ButtonDefaults.buttonColors(containerColor = Color.LightGray) else ButtonDefaults.buttonColors()
+            ) {
+                if (detailViewModel.isEdit.value) {
+                    Text(text = stringResource(id = R.string.btn_save))
+                } else if (detailViewModel.usedDt.value.isEmpty()) {
+                    Text(text = stringResource(id = R.string.btn_use))
+                } else {
+                    Text(
+                        text = stringResource(id = R.string.btn_use_cancel),
+                        color = Color.White,
+                        fontWeight = FontWeight.Bold
+                    )
                 }
             }
         }

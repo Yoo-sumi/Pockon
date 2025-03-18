@@ -43,6 +43,7 @@ private fun dateFilter(text: AnnotatedString): TransformedText {
 }
 
 fun getDday(endDate: String): Pair<String, Boolean> {
+    if (endDate.isEmpty()) return Pair("", false)
     val formatter = DateTimeFormatter.BASIC_ISO_DATE
     val current = LocalDateTime.now().format(formatter)
 

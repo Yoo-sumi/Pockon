@@ -109,7 +109,7 @@ fun AddGifticon(onBack: (Boolean) -> Unit) {
             }
             Column(
                 modifier = Modifier
-                    .fillMaxSize()
+                    .weight(1f)
                     .background(MaterialTheme.colorScheme.background)
                     .padding(innerPadding)
                     .verticalScroll(scrollSate)
@@ -160,34 +160,33 @@ fun AddGifticon(onBack: (Boolean) -> Unit) {
                         }
                     )
                 }
-
-                // add button
-                Button(
-                    onClick = {
-                        val msg = addViewModel.isValid()
-                        if (msg != null) {
-                            scope.launch {
-                                snackbarHostState.showSnackbar(message = context.getString(msg))
-                            }
-                        } else {
-                            addViewModel.addGift { result ->
-                                if (result) {
-                                    onBack(true)
-                                } else {
-                                    scope.launch {
-                                        snackbarHostState.showSnackbar(message = context.getString(R.string.msg_no_register))
-                                    }
+            }
+            // add button
+            Button(
+                onClick = {
+                    val msg = addViewModel.isValid()
+                    if (msg != null) {
+                        scope.launch {
+                            snackbarHostState.showSnackbar(message = context.getString(msg))
+                        }
+                    } else {
+                        addViewModel.addGift { result ->
+                            if (result) {
+                                onBack(true)
+                            } else {
+                                scope.launch {
+                                    snackbarHostState.showSnackbar(message = context.getString(R.string.msg_no_register))
                                 }
                             }
                         }
-                    },
-                    shape = RectangleShape,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(top = 20.dp)
-                ) {
-                    Text(text = stringResource(id = R.string.btn_add))
-                }
+                    }
+                },
+                shape = RectangleShape,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(25.dp)
+            ) {
+                Text(text = stringResource(id = R.string.btn_add))
             }
         }
 
