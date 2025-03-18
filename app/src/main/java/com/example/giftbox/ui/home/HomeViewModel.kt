@@ -112,6 +112,13 @@ class HomeViewModel @Inject constructor(
         this.longitude = longitude
         this.latitude = latitude
 
-        if (giftList.isNotEmpty()) { getBrandInfoList() }
+        if (giftList.isNotEmpty()) {
+            val dateFormat = SimpleDateFormat("yyyyMMdd", Locale.KOREA)
+            _closeToGiftList.value = giftList.sortedBy { gift -> dateFormat.parse(gift.endDt)?.time }.filterIndexed { index, gift -> index < 30 }
+            getBrandInfoList()
+        } else {
+            _closeToGiftList.value = listOf()
+            _displayGiftList.value = listOf()
+        }
     }
 }

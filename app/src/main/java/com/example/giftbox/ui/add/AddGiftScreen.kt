@@ -184,8 +184,8 @@ fun AddGifticon(onBack: (Boolean) -> Unit) {
                 shape = RectangleShape,
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(25.dp)
-            ) {
+                    .padding(start = 25.dp, end = 25.dp, bottom = 15.dp),
+                ) {
                 Text(text = stringResource(id = R.string.btn_add))
             }
         }

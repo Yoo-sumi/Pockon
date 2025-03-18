@@ -102,7 +102,8 @@ fun HomeScreen(onAdd: () -> Unit, showMap: () -> Unit, onDetail: (String) -> Uni
             ) {
                 Row(
                     modifier = Modifier
-                        .fillMaxWidth(),
+                        .fillMaxWidth()
+                        .padding(bottom = 5.dp),
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.SpaceBetween
                 ) {
@@ -114,19 +115,24 @@ fun HomeScreen(onAdd: () -> Unit, showMap: () -> Unit, onDetail: (String) -> Uni
                             fontSize = 18.sp,
                             softWrap = true
                         )
-                        IconButton(
-                            onClick = {
-                                getLocation(context, fusedLocationClient) { // 위치 동기화
-                                    longitude = it?.longitude
-                                    latitude = it?.latitude
-                                }
-                            },
-                            modifier = Modifier.padding(0.dp)
-                        ) {
-                            Icon(
-                                imageVector = Icons.Filled.Refresh,
-                                contentDescription = "refresh button",
-                            )
+                        Box(modifier = Modifier.size(28.dp)) {
+                            IconButton(
+                                onClick = {
+                                    getLocation(context, fusedLocationClient) { // 위치 동기화
+                                        longitude = it?.longitude
+                                        latitude = it?.latitude
+                                    }
+                                },
+                                modifier = Modifier
+                                    .padding(0.dp)
+                                    .padding(start = 5.dp)
+                            ) {
+                                Icon(
+                                    modifier = Modifier.padding(0.dp),
+                                    imageVector = Icons.Filled.Refresh,
+                                    contentDescription = "refresh button",
+                                )
+                            }
                         }
                     }
 
@@ -163,6 +169,8 @@ fun HomeScreen(onAdd: () -> Unit, showMap: () -> Unit, onDetail: (String) -> Uni
                         }
                     }
                 }
+
+                Box(modifier = Modifier.height(10.dp))
 
                 // 기한 만료
                 Row(
@@ -313,20 +321,44 @@ fun HomeGiftItem(gift: Gift, formattedEndDate: String, dDay: Pair<String, Boolea
 
 @Composable
 fun EmptyNear() {
-    Column(
+    Box(
         modifier = Modifier
-            .padding(top = 5.dp)
+            .padding(8.dp)
             .fillMaxWidth()
-            .height(230.dp)
             .border(
                 width = 2.dp,
                 color = Color.LightGray,
                 shape = RoundedCornerShape(10.dp)
             ),
-        verticalArrangement = Arrangement.Center,
-        horizontalAlignment = Alignment.CenterHorizontally
     ) {
+        Column(
+            modifier = Modifier
+                .width(160.dp)
+        ) {
+            Box(modifier = Modifier.size(160.dp))
+
+            Column(
+                modifier = Modifier.padding(5.dp)
+            ) {
+                Text(
+                    text = "",
+                    style = MaterialTheme.typography.bodyMedium,
+                    modifier = Modifier.fillMaxWidth()
+                )
+                Text(
+                    text = "",
+                    style = MaterialTheme.typography.bodyLarge,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                )
+                Text(
+                    text = "",
+                    style = MaterialTheme.typography.bodyMedium,
+                )
+            }
+        }
         Text(
+            modifier = Modifier.fillMaxWidth().align(Alignment.Center),
             text = stringResource(id = R.string.txt_no_gift),
             textAlign = TextAlign.Center,
             color = Color.LightGray,
@@ -365,7 +397,8 @@ private fun getLocation(
 fun HomeScreenTopBar() {
     // topbar
     Box(
-        modifier = Modifier.fillMaxWidth()
+        modifier = Modifier
+            .fillMaxWidth()
             .background(MaterialTheme.colorScheme.secondaryContainer)
             .padding(10.dp)
             .padding(top = 10.dp, bottom = 10.dp)

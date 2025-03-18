@@ -291,7 +291,7 @@ fun DetailScreen(id: String, onBack: () -> Unit) {
                 shape = RectangleShape,
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(25.dp),
+                    .padding(start = 25.dp, end = 25.dp, bottom = 15.dp),
                 colors = if (detailViewModel.usedDt.value.isNotEmpty()) ButtonDefaults.buttonColors(containerColor = Color.LightGray) else ButtonDefaults.buttonColors()
             ) {
                 if (detailViewModel.isEdit.value) {
@@ -735,7 +735,7 @@ fun GiftBottomSheet(image: Bitmap?, isVisible: Boolean, onDismiss: (Boolean) -> 
                     detectVerticalDragGestures(
                         onDragEnd = {
                             // 일정 거리 이상 드래그하면 닫힘
-                            if (sheetOffsetY.value > screenHeightToPx / 2) {
+                            if (sheetOffsetY.value > screenHeightToPx * 0.2f) {
                                 coroutineScope.launch {
                                     sheetOffsetY.snapTo(
                                         screenHeight.value,

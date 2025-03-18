@@ -4,6 +4,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -209,26 +210,30 @@ fun SettingItem(text: String, isTitle: Boolean = false, isSwitch: Boolean = fals
                 .padding(start = 15.dp, end = 15.dp, top = 10.dp, bottom = 10.dp)
         }
 
-        Text(
-            modifier = modifier,
-            text = text,
-        )
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            Text(
+                modifier = modifier,
+                text = text,
+            )
 
-        if (isSwitch) {
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-            ) {
-                Switch(
+            if (isSwitch) {
+                Box(
                     modifier = Modifier
-                        .padding(end = 5.dp)
-                        .scale(0.6f)
-                        .align(Alignment.CenterEnd),
-                    checked = checked,
-                    onCheckedChange = {
-                        onCheck()
-                    }
-                )
+                        .fillMaxWidth()
+                ) {
+                    Switch(
+                        modifier = Modifier
+                            .padding(end = 5.dp)
+                            .scale(0.6f)
+                            .align(Alignment.CenterEnd),
+                        checked = checked,
+                        onCheckedChange = {
+                            onCheck()
+                        }
+                    )
+                }
             }
         }
     }
