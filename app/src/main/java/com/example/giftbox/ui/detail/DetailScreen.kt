@@ -39,11 +39,9 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.DateRange
 import androidx.compose.material.icons.filled.Edit
-import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Checkbox
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.FilterChipDefaults
 import androidx.compose.material3.Icon
@@ -74,6 +72,7 @@ import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
@@ -155,7 +154,7 @@ fun DetailScreen(id: String, onBack: () -> Unit) {
         ) {
             // topbar
             Box(
-                modifier = Modifier.fillMaxWidth()
+                modifier = Modifier.fillMaxWidth().padding(top = 10.dp, bottom = 10.dp)
             ) {
                 IconButton(
                     modifier = Modifier.align(Alignment.CenterStart),
@@ -697,7 +696,8 @@ fun UseCashDialog(remainCash: String, onCancel: () -> Unit, onConfirm: (Int) -> 
 @Composable
 fun GiftBottomSheet(image: Bitmap?, isVisible: Boolean, onDismiss: (Boolean) -> Unit) {
     val screenHeight = LocalConfiguration.current.screenHeightDp.dp
-    val sheetHeight = screenHeight * 0.95f // BottomSheet 높이 (화면의 50%)
+    val screenHeightToPx = LocalDensity.current.run { LocalConfiguration.current.screenHeightDp.dp.toPx() }
+    val sheetHeight = screenHeight * 0.95f // BottomSheet 높이 (화면의 95%)
     val sheetOffsetY = remember { Animatable(screenHeight.value) } // 초기 위치: 화면 아래
     val coroutineScope = rememberCoroutineScope()
 
@@ -735,11 +735,10 @@ fun GiftBottomSheet(image: Bitmap?, isVisible: Boolean, onDismiss: (Boolean) -> 
                     detectVerticalDragGestures(
                         onDragEnd = {
                             // 일정 거리 이상 드래그하면 닫힘
-                            if (sheetOffsetY.value > screenHeight.value - sheetHeight.value * 0.5f) {
+                            if (sheetOffsetY.value > screenHeightToPx / 2) {
                                 coroutineScope.launch {
-                                    sheetOffsetY.animateTo(
+                                    sheetOffsetY.snapTo(
                                         screenHeight.value,
-                                        animationSpec = spring()
                                     )
                                     onDismiss(false)
                                 }
@@ -753,13 +752,10 @@ fun GiftBottomSheet(image: Bitmap?, isVisible: Boolean, onDismiss: (Boolean) -> 
                             }
                         },
                         onVerticalDrag = { change, dragAmount ->
+                            if (dragAmount < 0) return@detectVerticalDragGestures
                             change.consume() // 이벤트 소비
                             coroutineScope.launch {
-                                sheetOffsetY.snapTo(
-                                    (sheetOffsetY.value + dragAmount).coerceAtMost(
-                                        screenHeight.value
-                                    )
-                                )
+                                sheetOffsetY.snapTo(sheetOffsetY.value + dragAmount)
                             }
                         }
                     )

@@ -1,8 +1,6 @@
 package com.example.giftbox.ui.list
 
-import androidx.compose.animation.animateContentSize
 import androidx.compose.animation.core.Animatable
-import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
 import com.example.giftbox.R
 import androidx.compose.foundation.background
@@ -39,7 +37,6 @@ import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.FilterChipDefaults
 import androidx.compose.material3.HorizontalDivider
@@ -94,7 +91,6 @@ import com.google.accompanist.swiperefresh.SwipeRefresh
 import com.google.accompanist.swiperefresh.rememberSwipeRefreshState
 import kotlinx.coroutines.launch
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ListScreen(onDetail: (String) -> Unit, onAdd: () -> Unit, isLoading: (Boolean) -> Unit) {
     val listViewModel = hiltViewModel<ListViewModel>()
@@ -286,34 +282,23 @@ fun ListScreen(onDetail: (String) -> Unit, onAdd: () -> Unit, isLoading: (Boolea
                                         .padding(bottom = 10.dp)
                                 ) {
                                     itemsIndexed(items = listViewModel.copyGiftList.value) { index, gift ->
-                                        val swipeState = rememberSwipeToDismissBoxState()
-
-                                        val text: String
-                                        val alignment: Alignment
-                                        val color: Color
-
-                                        when (swipeState.dismissDirection) {
-                                            SwipeToDismissBoxValue.EndToStart -> {
-                                                text = stringResource(id = R.string.txt_used)
-                                                alignment = Alignment.CenterEnd
-                                                color = colorResource(id = R.color.dark_green)
-                                            }
-
-                                            SwipeToDismissBoxValue.StartToEnd -> {
-                                                text = stringResource(id = R.string.txt_delete)
-                                                alignment = Alignment.CenterStart
-                                                color = Color.Red.copy(alpha = 0.8f)
-                                            }
-
-                                            SwipeToDismissBoxValue.Settled -> {
-                                                text = stringResource(id = R.string.txt_used)
-                                                alignment = Alignment.CenterEnd
-                                                color = Color.Green.copy(alpha = 0.8f)
-                                            }
-                                        }
-
                                         SwipeToDismissItem(
-                                            onDismiss = {}
+                                            onDismiss = { offsetX ->
+                                                if (offsetX < 0) { // 사용완료
+                                                    listViewModel.usedGift(gift) { result ->
+                                                        scope.launch {
+                                                            if (!result) snackbarHostState.showSnackbar(
+                                                                message = context.getString(
+                                                                    R.string.msg_no_use
+                                                                )
+                                                            )
+                                                        }
+                                                    }
+                                                } else { // 삭제
+                                                    listViewModel.setRemoveGift(gift)
+                                                    showRemoveDlg = true
+                                                }
+                                            }
                                         ) {
                                             GiftItem(
                                                 isEdit = isEdit,
@@ -328,75 +313,6 @@ fun ListScreen(onDetail: (String) -> Unit, onAdd: () -> Unit, isLoading: (Boolea
                                                     else onDetail(gift.id)
                                                 }
                                             )
-                                        }
-//                                        SwipeToDismissBox(
-//                                            modifier = Modifier.animateContentSize(),
-//                                            state = swipeState,
-//                                            enableDismissFromEndToStart = true,
-//                                            enableDismissFromStartToEnd = true,
-//                                            backgroundContent = {
-//                                                Box(
-//                                                    contentAlignment = alignment,
-//                                                    modifier = Modifier
-//                                                        .fillMaxSize()
-//                                                        .padding(3.dp)
-//                                                        .clip(shape = RoundedCornerShape(10.dp))
-//                                                        .background(color)
-//                                                ) {
-//                                                    Text(
-//                                                        modifier = Modifier.padding(
-//                                                            start = 15.dp,
-//                                                            end = 15.dp
-//                                                        ),
-//                                                        text = text,
-//                                                        color = MaterialTheme.colorScheme.onPrimary,
-//                                                        fontSize = 20.sp
-//                                                    )
-//                                                }
-//                                            }
-//                                        ) {
-//                                            GiftItem(
-//                                                isEdit = isEdit,
-//                                                gift = gift,
-//                                                formattedEndDate = formatString(gift.endDt),
-//                                                dDay = getDday(gift.endDt),
-//                                                isCheck = listViewModel.checkedGiftList.value.contains(
-//                                                    gift.id
-//                                                ),
-//                                                onClick = {
-//                                                    if (isEdit) listViewModel.checkedGift(gift.id)
-//                                                    else onDetail(gift.id)
-//                                                }
-//                                            )
-//                                        }
-
-                                        when (swipeState.currentValue) {
-                                            SwipeToDismissBoxValue.EndToStart -> {
-                                                LaunchedEffect(swipeState) {
-                                                    listViewModel.usedGift(gift) { result ->
-                                                        scope.launch {
-                                                            if (!result) snackbarHostState.showSnackbar(
-                                                                message = context.getString(
-                                                                    R.string.msg_no_use
-                                                                )
-                                                            )
-                                                        }
-                                                    }
-                                                    swipeState.snapTo(SwipeToDismissBoxValue.Settled)
-                                                }
-                                            }
-
-                                            SwipeToDismissBoxValue.StartToEnd -> {
-                                                LaunchedEffect(swipeState) {
-                                                    listViewModel.setRemoveGift(gift)
-                                                    swipeState.snapTo(SwipeToDismissBoxValue.Settled)
-                                                    showRemoveDlg = true
-                                                }
-                                            }
-
-                                            SwipeToDismissBoxValue.Settled -> {
-
-                                            }
                                         }
                                     }
                                 }
@@ -688,7 +604,7 @@ fun ListScreenTopBar(title: Int, actionText: Int, onDropDown: (Int) -> Unit, onC
             .fillMaxWidth()
             .background(MaterialTheme.colorScheme.secondaryContainer)
             .padding(10.dp)
-            .padding(top = 5.dp, bottom = 5.dp)
+            .padding(top = 10.dp, bottom = 10.dp)
     ) {
         Box(modifier = Modifier.align(Alignment.Center)) {
             TopAppBarDropDownMenu(title) { title ->
@@ -709,10 +625,9 @@ fun ListScreenTopBar(title: Int, actionText: Int, onDropDown: (Int) -> Unit, onC
 }
 
 @Composable
-fun SwipeToDismissItem(onDismiss: () -> Unit, content: @Composable () -> Unit) {
+fun SwipeToDismissItem(onDismiss: (Float) -> Unit, content: @Composable () -> Unit) {
     val animatableOffsetX = remember { Animatable(0f) } // 애니메이션을 위한 Animatable
     val screenWidth = LocalDensity.current.run { LocalConfiguration.current.screenWidthDp.dp.toPx() } // 화면의 너비 계산
-
     val scope = rememberCoroutineScope()
 
     Box(
@@ -722,12 +637,31 @@ fun SwipeToDismissItem(onDismiss: () -> Unit, content: @Composable () -> Unit) {
             .padding(top = 3.dp, bottom = 3.dp)
             .clip(shape = RoundedCornerShape(10.dp))
             .background(
-                color = if (animatableOffsetX.value < 0) Color.Green.copy(alpha = 0.8f) else Color.Red.copy(
+                color = if (animatableOffsetX.value < 0) colorResource(id = R.color.dark_green) else Color.Red.copy(
                     alpha = 0.8f
                 ),
                 shape = RoundedCornerShape(10.dp)
             )
     ) {
+        if (animatableOffsetX.value < 0) {
+            Text(
+                modifier = Modifier
+                    .align(Alignment.CenterEnd)
+                    .padding(start = 15.dp, end = 15.dp),
+                color = Color.White,
+                text = stringResource(id = R.string.txt_used),
+                fontSize = 18.sp
+            )
+        } else {
+            Text(
+                modifier = Modifier
+                    .align(Alignment.CenterStart)
+                    .padding(start = 15.dp, end = 15.dp),
+                color = Color.White,
+                text = stringResource(id = R.string.txt_delete),
+                fontSize = 18.sp
+            )
+        }
         Box(
             modifier = Modifier
                 .fillMaxSize()
@@ -746,7 +680,7 @@ fun SwipeToDismissItem(onDismiss: () -> Unit, content: @Composable () -> Unit) {
                             }
                             if (animatableOffsetX.value < -screenWidth / 2 || animatableOffsetX.value > screenWidth / 2) {
                                 // 화면 너비의 반 이상 밀었으면 삭제
-                                onDismiss() // 삭제 처리
+                                onDismiss(animatableOffsetX.value) // 삭제 처리
                             }
                         },
                         onHorizontalDrag = { change, dragAmount ->

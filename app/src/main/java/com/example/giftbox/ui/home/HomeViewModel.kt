@@ -74,9 +74,23 @@ class HomeViewModel @Inject constructor(
                 giftList.forEach { gift ->
                     // 가장 가까운 첫번째 위치만 보여준다(여러개의 스타벅스 중 가장 가까이 있는 한 곳)
                     if (brandInfoList[gift.brand]?.isEmpty() == true) return@forEach // 검색 결과가 없는 경우 스킵
-                    brandInfoList[gift.brand]?.sortedBy { Integer.parseInt(it.distance) }?.get(0).let { doc ->
-                        // gift, doc
-                        if (doc != null) allList.add(Pair(gift, doc))
+                    val filterList = brandInfoList[gift.brand]
+                        ?.filter { doc ->
+                            try {
+                                Integer.parseInt(doc.distance) // 변환이 가능하면 true
+                                true
+                            } catch (e: NumberFormatException) {
+                                false // 변환 불가능한 경우 false
+                            }
+                        }
+                    if (filterList?.isNotEmpty() == true) {
+                        filterList
+                            .sortedBy { Integer.parseInt(it.distance) }[0]
+                            .let { doc ->
+                                // gift, doc
+                                allList.add(Pair(gift, doc))
+                            }
+
                     }
                 }
                 // 거리순으로 정렬(스타벅스, 투썸..)
