@@ -81,7 +81,10 @@ fun AddGifticon(onBack: (Boolean) -> Unit) {
         contract = ActivityResultContracts.PickVisualMedia()
     ) { uri ->
         uri?.let {
-            addViewModel.setPhoto(getBitmapFromUri(context.contentResolver, it))
+            val resizedBitmap = getBitmapFromUri(context.contentResolver, it, 1024, 1024)
+            resizedBitmap?.let { bitmap ->
+                addViewModel.setPhoto(bitmap) // 리사이징된 비트맵 전달
+            }
         }
     }
     // scroll

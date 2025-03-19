@@ -90,6 +90,8 @@ import com.example.giftbox.ui.utils.getDday
 import com.google.accompanist.swiperefresh.SwipeRefresh
 import com.google.accompanist.swiperefresh.rememberSwipeRefreshState
 import kotlinx.coroutines.launch
+import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.rememberLazyListState
 
 @Composable
 fun ListScreen(onDetail: (String) -> Unit, onAdd: () -> Unit, isLoading: (Boolean) -> Unit) {
@@ -105,6 +107,8 @@ fun ListScreen(onDetail: (String) -> Unit, onAdd: () -> Unit, isLoading: (Boolea
 
     var isRefreshing by remember { mutableStateOf(false) }
     val swipeRefreshState = rememberSwipeRefreshState(isRefreshing)
+
+    val listState = rememberLazyListState()
 
     // LaunchedEffect를 사용하여 새로 고침 처리
     LaunchedEffect(isRefreshing) {
@@ -173,6 +177,9 @@ fun ListScreen(onDetail: (String) -> Unit, onAdd: () -> Unit, isLoading: (Boolea
                     onDropDown = {
                         listViewModel.setTopTitle(it)
                         listViewModel.orderBy()
+                        scope.launch {
+                            listState.scrollToItem(listState.firstVisibleItemIndex)
+                        }
                     },
                     onClick = {
                         if (listViewModel.giftList.value.isEmpty()) return@ListScreenTopBar
@@ -194,7 +201,8 @@ fun ListScreen(onDetail: (String) -> Unit, onAdd: () -> Unit, isLoading: (Boolea
                 SwipeRefresh(
                     state = swipeRefreshState,
                     onRefresh = { isRefreshing = true }, // 새로 고침 시작
-                    modifier = Modifier.fillMaxSize()
+                    modifier = Modifier.fillMaxSize(),
+                    refreshTriggerDistance = 100.dp
                 ) {
                     Box(
                         modifier = Modifier
@@ -277,11 +285,15 @@ fun ListScreen(onDetail: (String) -> Unit, onAdd: () -> Unit, isLoading: (Boolea
 
                                 // gift item
                                 LazyColumn(
+                                    state = listState,
                                     modifier = Modifier
                                         .fillMaxSize()
                                         .padding(bottom = 10.dp)
                                 ) {
-                                    itemsIndexed(items = listViewModel.copyGiftList.value) { index, gift ->
+                                    items(
+                                        items = listViewModel.copyGiftList.value,
+                                        key = { gift -> gift.id }
+                                    ) { gift ->
                                         SwipeToDismissItem(
                                             onDismiss = { offsetX ->
                                                 if (offsetX < 0) { // 사용완료

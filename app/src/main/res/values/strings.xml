@@ -66,8 +66,8 @@
     <string name="txt_check_pin">입력한 PIN 번호를 확인합니다.</string>
     <string name="txt_input_pin">PIN 번호를 입력해주세요.</string>
     <string name="txt_no_pin_auth">보안 설정 사용 안 함</string>
-    <string name="txt_use_near">근처에서 사용할 수 있어요</string>
-    <string name="txt_use_end">사용 기한이 임박했어요!</string>
+    <string name="txt_use_near">근처 사용 가능 기프티콘</string>
+    <string name="txt_use_end">사용 기한 임박 기프티콘</string>
     <string name="txt_use_cash_inpur">사용금액 입력</string>
     <string name="txt_all_select">전체 선택</string>
     <string name="msg_pin_auth_fail">PIN 번호가 일치하지 않습니다.</string>

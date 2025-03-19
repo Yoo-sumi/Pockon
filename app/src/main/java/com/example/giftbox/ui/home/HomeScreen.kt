@@ -155,7 +155,8 @@ fun HomeScreen(onAdd: () -> Unit, showMap: () -> Unit, onDetail: (String) -> Uni
                     LazyRow(
                         modifier = Modifier
                             .padding(top = 5.dp)
-                            .wrapContentHeight(Alignment.CenterVertically)
+                            .wrapContentHeight(Alignment.CenterVertically),
+                        horizontalArrangement = Arrangement.spacedBy(5.dp)
                     ) {
                         itemsIndexed(items = homeViewModel.displayGiftList.value) { index, gift ->
                             HomeGiftItem(
@@ -196,9 +197,9 @@ fun HomeScreen(onAdd: () -> Unit, showMap: () -> Unit, onDetail: (String) -> Uni
                     LazyRow(
                         modifier = Modifier
                             .padding(top = 5.dp)
-                            .wrapContentHeight(Alignment.CenterVertically)
+                            .wrapContentHeight(Alignment.CenterVertically),
+                        horizontalArrangement = Arrangement.spacedBy(5.dp),
                     ) {
-
                         items(items = homeViewModel.closeToGiftList.value) { gift ->
                             HomeGiftItem(gift, formatString(gift.endDt), getDday(gift.endDt)) {
                                 onDetail(gift.id)
@@ -231,7 +232,6 @@ fun HomeScreen(onAdd: () -> Unit, showMap: () -> Unit, onDetail: (String) -> Uni
 fun HomeGiftItem(gift: Gift, formattedEndDate: String, dDay: Pair<String, Boolean>, document: Document? = null, onClick: () -> Unit) {
     Box(
         modifier = Modifier
-            .padding(3.dp)
             .clip(shape = RoundedCornerShape(10.dp))
             .clickable {
                 onClick()
@@ -323,7 +323,7 @@ fun HomeGiftItem(gift: Gift, formattedEndDate: String, dDay: Pair<String, Boolea
 fun EmptyNear() {
     Box(
         modifier = Modifier
-            .padding(8.dp)
+            .padding(top = 5.dp)
             .fillMaxWidth()
             .border(
                 width = 2.dp,
