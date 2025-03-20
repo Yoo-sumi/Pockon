@@ -67,9 +67,6 @@ class MapViewModel @Inject constructor(
         val mappingList = mutableMapOf<Document, MutableSet<String>>()
         nearestDoc = null
 
-        // keyword, documents
-        brandInfoList = brandSearchRepository.getAllBrands()
-
         brandInfoList.forEach { (keyword, documents) ->
             documents.forEach { document ->
                 // 가장 가까운곳 뽑아내기

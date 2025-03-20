@@ -23,7 +23,7 @@ class HomeViewModel @Inject constructor(
     private val brandSearchRepository: BrandSearchRepository,
 ) : ViewModel() {
 
-    private var giftList:List<Gift> = listOf()
+    private var giftList: List<Gift> = listOf()
 
     private val _displayGiftList = mutableStateOf<List<Pair<Gift, Document>>>(listOf())
     val displayGiftList: State<List<Pair<Gift, Document>>> = _displayGiftList
