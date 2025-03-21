@@ -25,7 +25,7 @@ import com.naver.maps.map.util.MarkerIcons
 
 class MapFragment(
     private val mapViewModel: MapViewModel,
-    val onClick: (Gift) -> Unit
+    val onClick: (List<Gift>) -> Unit
 ) : Fragment(), OnMapReadyCallback {
 
     private val LOCATION_PERMISSION_REQUEST_CODE = 1000
@@ -77,10 +77,7 @@ class MapFragment(
                 markerList.forEach { (id, marker) ->
                     if (id == document.id) {
                         // 뷰페이저 셋팅
-                        val adapter = GiftItemAdapter(it.second, requireActivity()) { gift ->
-                            onClick(gift)
-                        }
-                        binding.viewPager.adapter = adapter
+                        onClick(it.second)
 
                         marker.iconTintColor = Color.RED
                         marker.width = 90
@@ -103,11 +100,7 @@ class MapFragment(
                 if (nearestDoc.x == it.first.x && nearestDoc.y == it.first.y) {
                     // 초기엔 가장 가까운곳으로
                     // 뷰페이저 셋팅
-                    initViewPager()
-                    val adapter = GiftItemAdapter(it.second, requireActivity()) { gift ->
-                        onClick(gift)
-                    }
-                    binding.viewPager.adapter = adapter
+                    onClick(it.second)
 
                     // 카메라 이동
                     val cameraUpdate = CameraUpdate.scrollTo(LatLng(nearestDoc.y.toDouble(), nearestDoc.x.toDouble()))
