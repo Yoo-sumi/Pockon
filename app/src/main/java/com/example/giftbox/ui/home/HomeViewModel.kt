@@ -1,9 +1,11 @@
 package com.example.giftbox.ui.home
 
+import android.content.SharedPreferences
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.giftbox.GiftEntity
 import com.example.giftbox.data.BrandSearchRepository
 import com.example.giftbox.data.GiftRepository
 import com.example.giftbox.model.Document
@@ -21,44 +23,82 @@ import javax.inject.Inject
 class HomeViewModel @Inject constructor(
     private val giftRepository: GiftRepository,
     private val brandSearchRepository: BrandSearchRepository,
+    private val sharedPref: SharedPreferences
 ) : ViewModel() {
-
-    private var giftList: List<Gift> = listOf()
-
-    private val _displayGiftList = mutableStateOf<List<Pair<Gift, Document>>>(listOf())
-    val displayGiftList: State<List<Pair<Gift, Document>>> = _displayGiftList
-
-    private val _closeToGiftList = mutableStateOf<List<Gift>>(listOf())
-    val closeToGiftList: State<List<Gift>> = _closeToGiftList
 
     private var longitude: Double? = null
     private var latitude: Double? = null
 
+    private var uid = sharedPref.getString("uid", "") ?: ""
+    private var isGuestMode = sharedPref.getBoolean("guest_mode", false)
+
+    private var giftList: List<Gift> = listOf()
+
+    private val _nearGiftList = mutableStateOf<List<Pair<Gift, Document>>>(listOf())
+    val nearGiftList: State<List<Pair<Gift, Document>>> = _nearGiftList
+
+    private val _closeToGiftList = mutableStateOf<List<Gift>>(listOf())
+    val closeToGiftList: State<List<Gift>> = _closeToGiftList
+
+    private val _isShowIndicator = mutableStateOf(false)
+    val isShowIndicator: State<Boolean> = _isShowIndicator
+
     init {
-        observeGiftList()
+        _isShowIndicator.value = true
+        getGiftList()
+    }
+
+    // 서버에서 기프티콘 리스트 가져오기
+    private fun getGiftList() {
+        if (isGuestMode) {
+            _isShowIndicator.value = false
+            observeGiftList()
+            return
+        } // 게스트 모드 또는 최초 로그인이 아니면 서버 안탐
+
+        giftRepository.getAllGift(uid) { giftList ->
+            if (giftList.isNotEmpty()) {
+                // 로컬 저장(기프티콘)
+                viewModelScope.launch(Dispatchers.IO) {
+                    giftRepository.deleteAllAndInsertGifts(giftList)
+                    observeGiftList()
+                }
+            } else {
+                this.giftList = listOf()
+                _nearGiftList.value = listOf()
+                _closeToGiftList.value = listOf()
+                _isShowIndicator.value = false
+            }
+        }
     }
 
     // 로컬 기프티콘 목록 변화 감지해서 가져오기
     private fun observeGiftList() {
         viewModelScope.launch(Dispatchers.IO) {
             giftRepository.getAllGift().collectLatest { allGift ->
-                if (allGift.isNotEmpty()) {
-                    giftList = allGift.map { gift ->
-                        Gift(id = gift.id, uid = gift.uid, photo = loadImageFromPath(gift.photoPath), name = gift.name, brand = gift.brand, endDt = gift.endDt, addDt = gift.addDt, memo = gift.memo, usedDt = gift.usedDt, cash = gift.cash)
-                    }
-
-                    // 기한 임박 기프티콘 목록(TOP 30)
-                    val dateFormat = SimpleDateFormat("yyyyMMdd", Locale.KOREA)
-                    _closeToGiftList.value = giftList.sortedBy { gift -> dateFormat.parse(gift.endDt)?.time }.filterIndexed { index, gift -> index < 30 }
-
-                    getBrandInfoList() // 브랜드 검색
-                } else {
-                    _closeToGiftList.value = listOf()
-                    _displayGiftList.value = listOf()
-                    giftList = listOf()
-                }
+                showGiftList(allGift)
             }
         }
+    }
+
+    private fun showGiftList(allGift: List<GiftEntity>) {
+        if (allGift.isNotEmpty()) {
+            giftList = allGift.map { gift ->
+                Gift(id = gift.id, uid = gift.uid, photo = loadImageFromPath(gift.photoPath), name = gift.name, brand = gift.brand, endDt = gift.endDt, addDt = gift.addDt, memo = gift.memo, usedDt = gift.usedDt, cash = gift.cash)
+            }
+
+            // 기한 임박 기프티콘 목록(TOP 30)
+            val dateFormat = SimpleDateFormat("yyyyMMdd", Locale.KOREA)
+            _closeToGiftList.value = giftList.sortedBy { gift -> dateFormat.parse(gift.endDt)?.time }.filterIndexed { index, gift -> index < 30 }
+
+            getBrandInfoList() // 브랜드 검색
+        } else {
+            _closeToGiftList.value = listOf()
+            _nearGiftList.value = listOf()
+            giftList = listOf()
+        }
+
+        _isShowIndicator.value = false
     }
 
     // 브랜드 검색 후 로컬에 저장
@@ -95,7 +135,7 @@ class HomeViewModel @Inject constructor(
                 }
                 // 거리순으로 정렬(스타벅스, 투썸..)
                 allList.sortBy { it.second.distance.toDouble() }
-                _displayGiftList.value = allList
+                _nearGiftList.value = allList
 
                 // 로컬 저장
                 viewModelScope.launch(Dispatchers.IO) {
@@ -118,7 +158,7 @@ class HomeViewModel @Inject constructor(
             getBrandInfoList()
         } else {
             _closeToGiftList.value = listOf()
-            _displayGiftList.value = listOf()
+            _nearGiftList.value = listOf()
         }
     }
 }

@@ -153,6 +153,9 @@ fun BottomNavigationBar(isGuestMode: Boolean, movePinScreen: () -> Unit, moveLog
                     },
                     onDetail = { id ->
                         navController.navigate(route = "${Screen.Detail.route}/${id}")
+                    },
+                    isLoading = {
+                        isShowIndicator = it
                     }
                 )
             }

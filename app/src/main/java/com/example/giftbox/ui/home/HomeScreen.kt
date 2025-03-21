@@ -66,7 +66,7 @@ import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationServices
 
 @Composable
-fun HomeScreen(onAdd: () -> Unit, showMap: () -> Unit, onDetail: (String) -> Unit) {
+fun HomeScreen(onAdd: () -> Unit, showMap: () -> Unit, onDetail: (String) -> Unit, isLoading: (Boolean) -> Unit) {
     val homeViewModel = hiltViewModel<HomeViewModel>()
     val context = LocalContext.current
     val fusedLocationClient = remember {
@@ -142,13 +142,13 @@ fun HomeScreen(onAdd: () -> Unit, showMap: () -> Unit, onDetail: (String) -> Uni
                         color = MaterialTheme.colorScheme.secondary,
                         modifier = Modifier
                             .clickable {
-                                if (homeViewModel.displayGiftList.value.isNotEmpty()) showMap()
+                                if (homeViewModel.nearGiftList.value.isNotEmpty()) showMap()
                             },
                         softWrap = true
                     )
                 }
 
-                if (homeViewModel.displayGiftList.value.isEmpty()) {
+                if (homeViewModel.nearGiftList.value.isEmpty()) {
                     EmptyNear()
                 } else {
                     // gift item
@@ -158,7 +158,7 @@ fun HomeScreen(onAdd: () -> Unit, showMap: () -> Unit, onDetail: (String) -> Uni
                             .wrapContentHeight(Alignment.CenterVertically),
                         horizontalArrangement = Arrangement.spacedBy(5.dp)
                     ) {
-                        itemsIndexed(items = homeViewModel.displayGiftList.value) { index, gift ->
+                        itemsIndexed(items = homeViewModel.nearGiftList.value) { index, gift ->
                             HomeGiftItem(
                                 gift.first,
                                 formatString(gift.first.endDt),
@@ -225,6 +225,8 @@ fun HomeScreen(onAdd: () -> Unit, showMap: () -> Unit, onDetail: (String) -> Uni
             }
         }
     }
+
+    isLoading(homeViewModel.isShowIndicator.value)
 }
 
 /** 기프티콘 각각의 카드*/

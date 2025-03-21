@@ -10,7 +10,8 @@ class LoginDataSource @Inject constructor(
     fun login(firebaseCredential: AuthCredential, onComplete: (String) -> Unit) {
         auth.signInWithCredential(firebaseCredential)
             .addOnCompleteListener { task ->
-                onComplete(task.result.user?.uid ?: "")
+                if (task.isSuccessful) onComplete(task.result.user?.uid ?: "")
+                else onComplete("")
             }
     }
 

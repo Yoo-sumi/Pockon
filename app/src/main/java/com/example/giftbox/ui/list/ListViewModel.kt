@@ -55,7 +55,6 @@ class ListViewModel @Inject constructor(
     val isAllSelect: State<Boolean> = _isAllSelect
 
     init {
-        getGiftList()
         observeGiftList() // 관찰자 등록
     }
 

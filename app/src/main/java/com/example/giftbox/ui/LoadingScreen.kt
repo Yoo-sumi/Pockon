@@ -75,9 +75,3 @@ fun LoadingScreen() {
         }
     }
 }
-
-@Preview
-@Composable
-fun PreviewCircularProgress() {
-    LoadingScreen()
-}
