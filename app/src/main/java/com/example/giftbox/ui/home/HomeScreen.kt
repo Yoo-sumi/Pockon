@@ -368,7 +368,7 @@ fun EmptyNear() {
     }
 }
 
-private fun getLocation(
+fun getLocation(
     context: Context,
     fusedLocationClient: FusedLocationProviderClient,
     onComplete: (Location?) -> Unit
