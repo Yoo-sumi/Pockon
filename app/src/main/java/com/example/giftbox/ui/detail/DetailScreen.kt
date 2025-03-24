@@ -12,6 +12,8 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.gestures.detectTapGestures
+import androidx.compose.foundation.gestures.detectTransformGestures
 import androidx.compose.foundation.gestures.detectVerticalDragGestures
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -37,6 +39,7 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.DateRange
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material3.Button
@@ -68,6 +71,7 @@ import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.RectangleShape
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalConfiguration
@@ -86,6 +90,7 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import androidx.hilt.navigation.compose.hiltViewModel
 import coil.compose.AsyncImage
+import coil.compose.rememberAsyncImagePainter
 import com.example.giftbox.ui.utils.DateTransformation
 import com.example.giftbox.R
 import com.example.giftbox.ui.LoadingScreen
@@ -154,7 +159,9 @@ fun DetailScreen(id: String, onBack: () -> Unit) {
         ) {
             // topbar
             Box(
-                modifier = Modifier.fillMaxWidth().padding(top = 10.dp, bottom = 10.dp)
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(top = 10.dp, bottom = 10.dp)
             ) {
                 IconButton(
                     modifier = Modifier.align(Alignment.CenterStart),
@@ -700,6 +707,12 @@ fun GiftBottomSheet(image: Bitmap?, isVisible: Boolean, onDismiss: (Boolean) -> 
     val sheetHeight = screenHeight * 0.95f // BottomSheet 높이 (화면의 95%)
     val sheetOffsetY = remember { Animatable(screenHeight.value) } // 초기 위치: 화면 아래
     val coroutineScope = rememberCoroutineScope()
+    var isFullScreen by rememberSaveable { mutableStateOf(false) }
+
+    BackHandler {
+        if (isFullScreen) isFullScreen = false
+        else onDismiss(false)
+    }
 
     // isVisible 변경 시 애니메이션 적용
     LaunchedEffect(isVisible) {
@@ -791,7 +804,14 @@ fun GiftBottomSheet(image: Bitmap?, isVisible: Boolean, onDismiss: (Boolean) -> 
                         )
                     } else {
                         AsyncImage(
-                            modifier = Modifier.fillMaxSize(),
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .pointerInput(Unit) {
+                                    // 클릭 이벤트만 처리
+                                    detectTapGestures {
+                                        isFullScreen = true
+                                    }
+                                },
                             model = image,
                             contentDescription = "use photo",
                             contentScale = ContentScale.Fit
@@ -810,6 +830,58 @@ fun GiftBottomSheet(image: Bitmap?, isVisible: Boolean, onDismiss: (Boolean) -> 
                     Text(text = stringResource(id = R.string.btn_use_complete))
                 }
             }
+        }
+
+        // 전체화면(확대/축소)
+        if (isFullScreen) {
+            ImageFullScreenDialog(
+                image = image,
+                onDismiss = { isFullScreen = false },
+            )
+        }
+    }
+}
+
+@Composable
+fun ImageFullScreenDialog(image: Bitmap?, onDismiss: () -> Unit) {
+    var scale by remember { mutableStateOf(1f) }
+
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(Color.Black)
+    ) {
+        var currentScale by remember { mutableStateOf(scale) }
+
+        Image(
+            painter = rememberAsyncImagePainter(image),
+            contentDescription = "Full Screen Gifticon",
+            modifier = Modifier
+                .align(Alignment.Center)
+                .fillMaxSize()
+                .pointerInput(Unit) {
+                    detectTransformGestures { _, pan, zoom, _ ->
+                        currentScale *= zoom
+                        currentScale = currentScale.coerceIn(0.5f, 3f) // 제한된 확대/축소
+                        scale = currentScale
+                    }
+                }
+                .graphicsLayer(
+                    scaleX = currentScale,
+                    scaleY = currentScale,
+                    alpha = 1f
+                )
+        )
+
+        IconButton(
+            onClick = onDismiss,
+            modifier = Modifier.align(Alignment.TopEnd)
+        ) {
+            Icon(
+                imageVector = Icons.Default.Close,
+                contentDescription = "Close",
+                tint = Color.White
+            )
         }
     }
 }

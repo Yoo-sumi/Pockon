@@ -31,6 +31,7 @@ class HomeViewModel @Inject constructor(
 
     private var uid = sharedPref.getString("uid", "") ?: ""
     private var isGuestMode = sharedPref.getBoolean("guest_mode", false)
+    private var isFirstLogin = sharedPref.getBoolean("first_login", true)
 
     private var giftList: List<Gift> = listOf()
 
@@ -44,13 +45,14 @@ class HomeViewModel @Inject constructor(
     val isShowIndicator: State<Boolean> = _isShowIndicator
 
     init {
-        _isShowIndicator.value = true
         getGiftList()
     }
 
     // 서버에서 기프티콘 리스트 가져오기
     private fun getGiftList() {
-        if (isGuestMode) {
+        _isShowIndicator.value = true
+
+        if (isGuestMode || !isFirstLogin) {
             _isShowIndicator.value = false
             observeGiftList()
             return
@@ -62,13 +64,14 @@ class HomeViewModel @Inject constructor(
                 viewModelScope.launch(Dispatchers.IO) {
                     giftRepository.deleteAllAndInsertGifts(giftList)
                     observeGiftList()
+                    if (isFirstLogin) sharedPref.edit().putBoolean("first_login", false).apply()
                 }
             } else {
                 this.giftList = listOf()
                 _nearGiftList.value = listOf()
                 _closeToGiftList.value = listOf()
-                _isShowIndicator.value = false
             }
+            _isShowIndicator.value = false
         }
     }
 
@@ -97,8 +100,6 @@ class HomeViewModel @Inject constructor(
             _nearGiftList.value = listOf()
             giftList = listOf()
         }
-
-        _isShowIndicator.value = false
     }
 
     // 브랜드 검색 후 로컬에 저장

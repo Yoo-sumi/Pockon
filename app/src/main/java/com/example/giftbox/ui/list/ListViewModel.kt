@@ -102,8 +102,11 @@ class ListViewModel @Inject constructor(
     }
 
     // 서버에서 기프티콘 리스트 가져오기
-    fun getGiftList() {
-        if (isGuestMode) return // 게스트 모드는 서버 안탐
+    fun getGiftList(onComplete: () -> Unit) {
+        if (isGuestMode) {
+            onComplete()
+            return
+        } // 게스트 모드는 서버 안탐
         giftRepository.getAllGift(uid) { giftList ->
             if (giftList.isNotEmpty()) {
                 // 로컬 저장(기프티콘)
@@ -115,6 +118,7 @@ class ListViewModel @Inject constructor(
                 _copyGiftList.value = listOf()
                 filterList = listOf()
             }
+            onComplete()
         }
     }
 

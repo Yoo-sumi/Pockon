@@ -113,11 +113,12 @@ fun ListScreen(onDetail: (String) -> Unit, onAdd: () -> Unit, isLoading: (Boolea
     // LaunchedEffect를 사용하여 새로 고침 처리
     LaunchedEffect(isRefreshing) {
         if (isRefreshing) {
-            listViewModel.getGiftList()
-            listViewModel.setTopTitle(R.string.top_app_bar_recent)
-            isRefreshing = false // 새로 고침 완료
-            isEdit = false
-            listViewModel.clearCheckedGiftList()
+            listViewModel.getGiftList {
+                listViewModel.setTopTitle(R.string.top_app_bar_recent)
+                isRefreshing = false // 새로 고침 완료
+                isEdit = false
+                listViewModel.clearCheckedGiftList()
+            }
         }
     }
 
