@@ -1,5 +1,6 @@
 package com.example.giftbox.ui.used
 
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -7,6 +8,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -19,7 +21,9 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.CheckCircle
+import androidx.compose.material3.Card
 import androidx.compose.material3.Checkbox
+import androidx.compose.material3.CheckboxDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.LocalContentColor
@@ -78,13 +82,14 @@ fun UsedScreen(onDetail: (String) -> Unit, onBack: () -> Unit) {
         }
     ) { innerPadding ->
         Column(
-            modifier = Modifier.padding(innerPadding)
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(innerPadding),
         ) {
             // topbar
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(top = 10.dp, bottom = 10.dp)
                     .drawWithContent {
                         drawContent()
                         drawLine(
@@ -94,6 +99,7 @@ fun UsedScreen(onDetail: (String) -> Unit, onBack: () -> Unit) {
                             strokeWidth = 2f
                         )
                     }
+                    .padding(top = 10.dp, bottom = 10.dp),
             ) {
                 IconButton(
                     modifier = Modifier.align(Alignment.CenterStart),
@@ -120,41 +126,55 @@ fun UsedScreen(onDetail: (String) -> Unit, onBack: () -> Unit) {
                         R.string.btn_edit
                     }
                     Text(
-                        modifier = Modifier.align(Alignment.CenterEnd)
+                        modifier = Modifier
+                            .align(Alignment.CenterEnd)
                             .padding(end = 15.dp)
                             .clickable {
-                            // 삭제
-                            if (isEdit) {
-                                if (usedViewModel.checkedGiftList.value.isEmpty()) isEdit = false
-                                else showRemoveDlg = true
-                            } else { // 편집
-                                isEdit = true
-                                usedViewModel.setIsAllSelect(false)
-                                usedViewModel.clearCheckedGiftList()
-                            }
-                        },
+                                // 삭제
+                                if (isEdit) {
+                                    if (usedViewModel.checkedGiftList.value.isEmpty()) isEdit =
+                                        false
+                                    else showRemoveDlg = true
+                                } else { // 편집
+                                    isEdit = true
+                                    usedViewModel.setIsAllSelect(false)
+                                    usedViewModel.clearCheckedGiftList()
+                                }
+                            },
                         text = stringResource(id = title),
                         fontSize = 14.sp,
                         textAlign = TextAlign.Center
                     )
-                    }
+                }
             }
 
             // all delete
             if (isEdit) {
-                Row(
+                Row(modifier = Modifier
+                    .padding(start = 10.dp, top = 8.dp)
+                    .padding(8.dp),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Checkbox(
-                        modifier = Modifier
-                            .scale(0.8f)
-                            .padding(0.dp),
-                        checked = usedViewModel.isAllSelect.value,
-                        onCheckedChange = {
-                            usedViewModel.onClickAllSelect()
-                        }
+                    Box(
+                        modifier = Modifier.size(5.dp)
+                    ) {
+                        Checkbox(
+                            modifier = Modifier
+                                .scale(0.8f),
+                            checked = usedViewModel.isAllSelect.value,
+                            onCheckedChange = {
+                                usedViewModel.onClickAllSelect()
+                            },
+                            colors = CheckboxDefaults.colors(
+                                checkedColor = MaterialTheme.colorScheme.tertiary,  // 체크된 상태에서 배경 색상 (체크박스 색상)
+                                checkmarkColor = MaterialTheme.colorScheme.onPrimary,  // 체크 표시 색상
+                            )
+                        )
+                    }
+                    Text(
+                        modifier = Modifier.padding(start = 10.dp),
+                        text = stringResource(id = R.string.txt_all_select)
                     )
-                    Text(text = stringResource(id = R.string.txt_all_select))
                 }
             }
 
@@ -225,52 +245,59 @@ fun UsedGiftItem(
             .wrapContentHeight()
             .clickable { onClick() }
     ) {
-        // 카드 콘텐츠
-        Column(
+        Card(
             modifier = Modifier
-                .background(MaterialTheme.colorScheme.surfaceContainerLowest)
                 .fillMaxWidth()
+                .background(MaterialTheme.colorScheme.onPrimary),
+            shape = RoundedCornerShape(10.dp), // 모서리 둥글기
+            border = BorderStroke(0.5.dp, MaterialTheme.colorScheme.outline) // 테두리 색상과 두께 지정
         ) {
-            Box {
-                AsyncImage(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(200.dp),
-                    model = gift.photo,
-                    contentDescription = "add photo",
-                    contentScale = ContentScale.Crop
-                )
-                if (gift.usedDt.isNotEmpty()) {
-                    UsedStamp(gift.usedDt)
-                }
-            }
+            // 카드 콘텐츠
             Column(
-                modifier = Modifier.padding(5.dp)
+                modifier = Modifier
+                    .background(MaterialTheme.colorScheme.background)
+                    .fillMaxWidth()
             ) {
-                Text(
-                    text = gift.brand,
-                    style = MaterialTheme.typography.bodyMedium,
-                    textAlign = TextAlign.Start,
-                    color = MaterialTheme.colorScheme.secondary,
-                    modifier = Modifier.fillMaxWidth()
-                )
-                Text(
-                    text = gift.name,
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis,
-                    style = MaterialTheme.typography.bodyLarge,
-                    textAlign = TextAlign.Start,
-                    modifier = Modifier.fillMaxWidth()
-                )
-                Box(
-                    modifier = Modifier.fillMaxWidth()
+                Box {
+                    AsyncImage(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(200.dp),
+                        model = gift.photo,
+                        contentDescription = "add photo",
+                        contentScale = ContentScale.Crop
+                    )
+                    if (gift.usedDt.isNotEmpty()) {
+                        UsedStamp(gift.usedDt)
+                    }
+                }
+                Column(
+                    modifier = Modifier.padding(5.dp)
                 ) {
                     Text(
-                        text = "~ $formattedEndDate",
+                        text = gift.brand,
                         style = MaterialTheme.typography.bodyMedium,
-                        textAlign = TextAlign.End,
-                        color = MaterialTheme.colorScheme.secondary
+                        textAlign = TextAlign.Start,
+                        modifier = Modifier.fillMaxWidth()
                     )
+                    Text(
+                        text = gift.name,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis,
+                        style = MaterialTheme.typography.bodyLarge,
+                        textAlign = TextAlign.Start,
+                        modifier = Modifier.fillMaxWidth()
+                    )
+                    Box(
+                        modifier = Modifier.fillMaxWidth(),
+                    ) {
+                        Text(
+                            modifier = Modifier.fillMaxWidth(),
+                            text = "~ $formattedEndDate",
+                            style = MaterialTheme.typography.bodyMedium,
+                            textAlign = TextAlign.End
+                        )
+                    }
                 }
             }
         }

@@ -28,6 +28,7 @@ import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.DateRange
 import androidx.compose.material3.Button
 import androidx.compose.material3.Checkbox
+import androidx.compose.material3.CheckboxDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -142,7 +143,12 @@ fun AddGifticon(onBack: (Boolean) -> Unit) {
                             checked = addViewModel.isCheckedCash.value,
                             onCheckedChange = {
                                 addViewModel.chgCheckedCash()
-                            }
+                            },
+                            colors = CheckboxDefaults.colors(
+                                checkedColor = MaterialTheme.colorScheme.tertiary,  // 체크된 상태에서 배경 색상 (체크박스 색상)
+                                uncheckedColor = MaterialTheme.colorScheme.tertiary,  // 체크되지 않은 상태에서 배경 색상
+                                checkmarkColor = MaterialTheme.colorScheme.onPrimary,  // 체크 표시 색상
+                            )
                         )
                     }
                 }
@@ -187,9 +193,13 @@ fun AddGifticon(onBack: (Boolean) -> Unit) {
                 shape = RectangleShape,
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(start = 25.dp, end = 25.dp, bottom = 15.dp),
+                    .padding(start = 25.dp, end = 25.dp, bottom = 15.dp)
+                    .background(MaterialTheme.colorScheme.primary),
                 ) {
-                Text(text = stringResource(id = R.string.btn_add))
+                Text(
+                    color = MaterialTheme.colorScheme.onPrimaryContainer,
+                    text = stringResource(id = R.string.btn_add)
+                )
             }
         }
 

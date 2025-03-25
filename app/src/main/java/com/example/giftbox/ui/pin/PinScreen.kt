@@ -16,31 +16,22 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.shape.CornerBasedShape
-import androidx.compose.foundation.shape.CornerSize
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.outlined.ArrowBack
 import androidx.compose.material.icons.filled.Check
-import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.MaterialTheme.typography
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
-import androidx.compose.material3.contentColorFor
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.giftbox.R
 
@@ -56,7 +47,7 @@ fun PinScreen(onSuccess: () -> Unit) {
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .background(Color.White),
+            .background(colorResource(id = R.color.background)),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Box(
@@ -81,7 +72,8 @@ fun PinScreen(onSuccess: () -> Unit) {
                                 .padding(15.dp)
                                 .clickable {
                                     pinViewModel.setMode(0)
-                                }
+                                },
+                            tint = colorResource(id = R.color.onPrimary)
                         )
                     }
                 }
@@ -90,7 +82,7 @@ fun PinScreen(onSuccess: () -> Unit) {
                     text = stringResource(id = pinViewModel.getTitle()),
                     style = typography.titleMedium,
                     modifier = Modifier.padding(16.dp),
-                    color = Color.Black
+                    color = colorResource(id = R.color.onPrimary)
                 )
 
                 Spacer(modifier = Modifier.height(30.dp))
@@ -108,7 +100,7 @@ fun PinScreen(onSuccess: () -> Unit) {
                 } else { // pin circle shape
                     Row {
                         (0 until pinViewModel.getPinSize()).forEach {
-                            val bgColor = if (pinViewModel.inputPin.size > it) MaterialTheme.colorScheme.onSurface else MaterialTheme.colorScheme.surfaceContainerLowest
+                            val bgColor = if (pinViewModel.inputPin.size > it) R.color.onPrimary else R.color.background
                             Box(
                                 modifier = Modifier
                                     .padding(8.dp)
@@ -116,10 +108,10 @@ fun PinScreen(onSuccess: () -> Unit) {
                                     .clip(shape = CircleShape)
                                     .border(
                                         width = 2.dp,
-                                        color = MaterialTheme.colorScheme.onSurface,
+                                        color = colorResource(id = R.color.onPrimary),
                                         shape = CircleShape
                                     )
-                                    .background(bgColor)
+                                    .background(colorResource(bgColor))
                             )
                         }
                     }
@@ -147,10 +139,12 @@ fun PinScreen(onSuccess: () -> Unit) {
                     Text(
                         text = stringResource(id = R.string.txt_no_pin_auth),
                         modifier = Modifier
+                            .padding(bottom = 5.dp)
                             .clickable {
                                 pinViewModel.setMode(4)
                             },
-                        textAlign = TextAlign.Center
+                        textAlign = TextAlign.Center,
+                        color = colorResource(id = R.color.onPrimary)
                     )
                 }
                 // 1~3
@@ -164,7 +158,8 @@ fun PinScreen(onSuccess: () -> Unit) {
                         ) {
                             Text(
                                 text = it.toString(),
-                                style = typography.bodyLarge
+                                style = typography.bodyLarge,
+                                color = colorResource(id = R.color.onPrimary)
                             )
                         }
                     }
@@ -180,7 +175,8 @@ fun PinScreen(onSuccess: () -> Unit) {
                         ) {
                             Text(
                                 text = it.toString(),
-                                style = typography.bodyLarge
+                                style = typography.bodyLarge,
+                                color = colorResource(id = R.color.onPrimary)
                             )
                         }
                     }
@@ -197,7 +193,8 @@ fun PinScreen(onSuccess: () -> Unit) {
                             Text(
                                 text = it.toString(),
                                 style = typography.bodyLarge,
-                                modifier = Modifier.padding(4.dp)
+                                modifier = Modifier.padding(4.dp),
+                                color = colorResource(id = R.color.onPrimary)
                             )
                         }
                     }
@@ -221,7 +218,8 @@ fun PinScreen(onSuccess: () -> Unit) {
                         Text(
                             text = "0",
                             style = typography.bodyLarge,
-                            modifier = Modifier.padding(4.dp)
+                            modifier = Modifier.padding(4.dp),
+                            color = colorResource(id = R.color.onPrimary)
                         )
                     }
 
@@ -236,7 +234,8 @@ fun PinScreen(onSuccess: () -> Unit) {
                             imageVector = Icons.AutoMirrored.Outlined.ArrowBack,
                             contentDescription = "Clear",
                             modifier = Modifier
-                                .size(20.dp)
+                                .size(20.dp),
+                            tint = colorResource(id = R.color.onPrimary)
                         )
                     }
                 }
@@ -248,65 +247,17 @@ fun PinScreen(onSuccess: () -> Unit) {
 @Composable
 fun PinKeyItem(
     onClick: () -> Unit,
-    modifier: Modifier = Modifier,
-    shape: CornerBasedShape = MaterialTheme.shapes.small.copy(CornerSize(percent = 50)),
-    backgroundColor: Color = MaterialTheme.colorScheme.onPrimary,
-    contentColor: Color = contentColorFor(backgroundColor = backgroundColor),
-    elevation: Dp = 4.dp,
     content: @Composable () -> Unit
 ) {
-    Surface(
-        modifier = modifier.padding(8.dp),
-        shape = shape,
-        color = backgroundColor,
-        contentColor = contentColor,
-        tonalElevation = elevation,
-        onClick = {
-            onClick()
-        }
+    Box(
+        modifier = Modifier
+            .defaultMinSize(minWidth = 80.dp, minHeight = 80.dp)
+            .padding(10.dp)
+            .clickable {
+                onClick()
+            },
+        contentAlignment = Alignment.Center
     ) {
-        Box(
-            modifier = Modifier.defaultMinSize(minWidth = 64.dp, minHeight = 64.dp),
-            contentAlignment = Alignment.Center
-        ) {
-            content()
-        }
+        content()
     }
-}
-
-@Composable
-fun PinSettingDialog(onConfirm: () -> Unit, onDismiss: () -> Unit) {
-    AlertDialog(
-        onDismissRequest = {},
-        title = {
-            Text(
-                textAlign = TextAlign.Start,
-                text = stringResource(id = R.string.title_msg_use_pin),
-                fontSize = 18.sp
-            )
-        },
-        text = {
-            Text(
-                textAlign = TextAlign.Start,
-                text = stringResource(id = R.string.dlg_msg_use_pin),
-                fontSize = 18.sp
-            )
-        },
-        confirmButton = {
-            TextButton(
-                onClick = { onConfirm() }
-            ) {
-                Text(text = stringResource(id = R.string.btn_pin_setting))
-            }
-        },
-        dismissButton = {
-            TextButton(
-                onClick = { onDismiss() }
-            ) {
-                Text(text = stringResource(id = R.string.btn_pin_not_use))
-            }
-        },
-//        shape = RectangleShape
-        shape = RoundedCornerShape(10.dp)
-    )
 }

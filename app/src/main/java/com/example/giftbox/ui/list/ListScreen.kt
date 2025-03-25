@@ -2,6 +2,7 @@ package com.example.giftbox.ui.list
 
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.tween
+import androidx.compose.foundation.BorderStroke
 import com.example.giftbox.R
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -92,6 +93,8 @@ import com.google.accompanist.swiperefresh.rememberSwipeRefreshState
 import kotlinx.coroutines.launch
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.material3.Card
+import androidx.compose.material3.CheckboxDefaults
 
 @Composable
 fun ListScreen(onDetail: (String) -> Unit, onAdd: () -> Unit, isLoading: (Boolean) -> Unit) {
@@ -250,7 +253,7 @@ fun ListScreen(onDetail: (String) -> Unit, onAdd: () -> Unit, isLoading: (Boolea
                                                 shape = RoundedCornerShape(50.dp),
                                                 colors = FilterChipDefaults.filterChipColors().copy(
                                                     containerColor = MaterialTheme.colorScheme.surfaceContainerHighest,
-                                                    selectedContainerColor = MaterialTheme.colorScheme.primary
+                                                    selectedContainerColor = MaterialTheme.colorScheme.tertiary
                                                 ),
                                                 border = null
                                             )
@@ -267,14 +270,20 @@ fun ListScreen(onDetail: (String) -> Unit, onAdd: () -> Unit, isLoading: (Boolea
                                             .padding(bottom = 3.dp),
                                         verticalAlignment = Alignment.CenterVertically
                                     ) {
-                                        Box(modifier = Modifier.size(5.dp)) {
+                                        Box(
+                                            modifier = Modifier.size(5.dp)
+                                        ) {
                                             Checkbox(
                                                 modifier = Modifier
                                                     .scale(0.8f),
                                                 checked = listViewModel.isAllSelect.value,
                                                 onCheckedChange = {
                                                     listViewModel.onClickAllSelect()
-                                                }
+                                                },
+                                                colors = CheckboxDefaults.colors(
+                                                    checkedColor = MaterialTheme.colorScheme.tertiary,  // 체크된 상태에서 배경 색상 (체크박스 색상)
+                                                    checkmarkColor = MaterialTheme.colorScheme.onPrimary,  // 체크 표시 색상
+                                                )
                                             )
                                         }
                                         Text(
@@ -339,8 +348,8 @@ fun ListScreen(onDetail: (String) -> Unit, onAdd: () -> Unit, isLoading: (Boolea
                 onClick = {
                     onAdd()
                 },
-                containerColor = MaterialTheme.colorScheme.secondaryContainer,
-                contentColor = MaterialTheme.colorScheme.secondary,
+                containerColor = MaterialTheme.colorScheme.primary,
+                contentColor = MaterialTheme.colorScheme.onPrimaryContainer,
                 shape = CircleShape,
                 modifier = Modifier
                     .align(Alignment.BottomEnd)
@@ -362,50 +371,59 @@ fun GiftItem(isEdit: Boolean, gift: Gift, formattedEndDate: String, dDay: Pair<S
                 onClick()
             }
     ) {
-        Row(
+        Card(
             modifier = Modifier
-                .background(MaterialTheme.colorScheme.surfaceContainerLowest)
-                .fillMaxHeight()
+                .background(MaterialTheme.colorScheme.onPrimary),
+            shape = RoundedCornerShape(10.dp), // 모서리 둥글기
+            border = BorderStroke(0.5.dp, MaterialTheme.colorScheme.outline) // 테두리 색상과 두께 지정
         ) {
-            Box(modifier = Modifier
-                .size(120.dp)
-                .background(MaterialTheme.colorScheme.onSurfaceVariant)) {
-                AsyncImage(
-                    modifier = Modifier.fillMaxSize(),
-                    model = gift.photo,
-                    contentDescription = "photo",
-                    contentScale = ContentScale.Crop
-                )
-            }
-
-            Column(
+            Row(
                 modifier = Modifier
-                    .fillMaxSize()
-                    .padding(20.dp)
-                    .align(Alignment.Bottom)
+                    .background(MaterialTheme.colorScheme.surfaceContainerLowest)
+                    .fillMaxHeight()
             ) {
-                Text(
-                    modifier = Modifier.fillMaxWidth(),
-                    text = gift.brand
-                )
-                Text(
-                    modifier = Modifier.fillMaxWidth(),
-                    fontWeight = FontWeight.Bold,
-                    fontSize = 20.sp,
-                    text = gift.name
-                )
-                Text(
-                    modifier = Modifier.fillMaxWidth(),
-                    textAlign = TextAlign.Right,
-                    text = "~ $formattedEndDate"
-                )
+                Box(
+                    modifier = Modifier
+                        .size(120.dp)
+                        .background(MaterialTheme.colorScheme.background)
+                ) {
+                    AsyncImage(
+                        modifier = Modifier.fillMaxSize(),
+                        model = gift.photo,
+                        contentDescription = "photo",
+                        contentScale = ContentScale.Crop
+                    )
+                }
+
+                Column(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(20.dp)
+                        .align(Alignment.Bottom)
+                ) {
+                    Text(
+                        modifier = Modifier.fillMaxWidth(),
+                        text = gift.brand
+                    )
+                    Text(
+                        modifier = Modifier.fillMaxWidth(),
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 20.sp,
+                        text = gift.name
+                    )
+                    Text(
+                        modifier = Modifier.fillMaxWidth(),
+                        textAlign = TextAlign.Right,
+                        text = "~ $formattedEndDate"
+                    )
+                }
             }
         }
 
         val color = if (dDay.second) {
             MaterialTheme.colorScheme.outline
         } else {
-            MaterialTheme.colorScheme.primary
+            MaterialTheme.colorScheme.tertiary
         }
         Text(
             text = dDay.first,
@@ -418,7 +436,7 @@ fun GiftItem(isEdit: Boolean, gift: Gift, formattedEndDate: String, dDay: Pair<S
                     shape = CardDefaults.shape
                 )
                 .padding(start = 15.dp, end = 15.dp, top = 5.dp, bottom = 5.dp),
-            color = MaterialTheme.colorScheme.surfaceContainerLowest
+            color = MaterialTheme.colorScheme.onPrimary
         )
 
         // selected color
@@ -466,6 +484,7 @@ fun TopAppBarDropDownMenu(topTitle: Int, setTopTitle: (Int) -> Unit) {
     DropdownMenu(
         expanded = expanded.value,
         onDismissRequest = { expanded.value = false },
+        modifier = Modifier.background(MaterialTheme.colorScheme.secondary),
     ) {
         val recentTitle = R.string.top_app_bar_recent
         DropdownMenuItem(
@@ -615,7 +634,7 @@ fun ListScreenTopBar(title: Int, actionText: Int, onDropDown: (Int) -> Unit, onC
     Box(
         modifier = Modifier
             .fillMaxWidth()
-            .background(MaterialTheme.colorScheme.secondaryContainer)
+            .background(MaterialTheme.colorScheme.primary)
             .padding(10.dp)
             .padding(top = 10.dp, bottom = 10.dp)
     ) {

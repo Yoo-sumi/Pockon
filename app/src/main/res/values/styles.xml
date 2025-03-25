@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- 버튼 스타일 -->
+    <style name="CustomButtonStyle">
+        <item name="android:backgroundTint">@color/white</item> <!-- 버튼 배경색 -->
+        <item name="android:textColor">@color/black</item> <!-- 버튼 텍스트 색상 -->
+    </style>
+</resources>

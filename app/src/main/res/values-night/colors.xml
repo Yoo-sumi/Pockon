@@ -13,10 +13,10 @@
     <color name="light_gray">#FFBDBDBD</color>
     <color name="my_blue">#178FEB</color>
 
-    <color name="primary">#FFBFE5F9</color>
-    <color name="onPrimary">#000000</color>
-    <color name="primaryContainer">#FF8AC3E1</color>
-    <color name="secondary">#FFEDF9FF</color>
-    <color name="tertiary">#FF106D9D</color>
-    <color name="background">#FFFFFF</color>
+    <color name="primary">#000000</color>
+    <color name="onPrimary">#FFFFFF</color>
+    <color name="primaryContainer">#C7C7C7</color>
+    <color name="secondary">#777777</color>
+    <color name="tertiary">#000000</color>
+    <color name="background">#000000</color>
 </resources>

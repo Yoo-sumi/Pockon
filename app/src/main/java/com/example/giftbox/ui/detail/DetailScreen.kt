@@ -45,6 +45,7 @@ import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Checkbox
+import androidx.compose.material3.CheckboxDefaults
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.FilterChipDefaults
 import androidx.compose.material3.Icon
@@ -245,7 +246,12 @@ fun DetailScreen(id: String, onBack: () -> Unit) {
                                 checked = detailViewModel.isCheckedCash.value,
                                 onCheckedChange = {
                                     detailViewModel.chgCheckedCash()
-                                }
+                                },
+                                colors = CheckboxDefaults.colors(
+                                    checkedColor = MaterialTheme.colorScheme.tertiary,  // 체크된 상태에서 배경 색상 (체크박스 색상)
+                                    uncheckedColor = MaterialTheme.colorScheme.tertiary,  // 체크되지 않은 상태에서 배경 색상
+                                    checkmarkColor = MaterialTheme.colorScheme.onPrimary,  // 체크 표시 색상
+                                )
                             )
                         }
                     }
@@ -298,13 +304,26 @@ fun DetailScreen(id: String, onBack: () -> Unit) {
                 shape = RectangleShape,
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(start = 25.dp, end = 25.dp, bottom = 15.dp),
-                colors = if (detailViewModel.usedDt.value.isNotEmpty()) ButtonDefaults.buttonColors(containerColor = Color.LightGray) else ButtonDefaults.buttonColors()
+                    .padding(start = 25.dp, end = 25.dp, bottom = 15.dp)
+                    .background(
+                        if (!detailViewModel.isEdit.value && detailViewModel.usedDt.value.isNotEmpty()) {
+                            MaterialTheme.colorScheme.errorContainer
+                        } else {
+                            MaterialTheme.colorScheme.primary
+                        }
+                    ),
+                colors = if (detailViewModel.usedDt.value.isNotEmpty()) ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.errorContainer) else ButtonDefaults.buttonColors()
             ) {
                 if (detailViewModel.isEdit.value) {
-                    Text(text = stringResource(id = R.string.btn_save))
+                    Text(
+                        color = MaterialTheme.colorScheme.onPrimaryContainer,
+                        text = stringResource(id = R.string.btn_save)
+                    )
                 } else if (detailViewModel.usedDt.value.isEmpty()) {
-                    Text(text = stringResource(id = R.string.btn_use))
+                    Text(
+                        color = MaterialTheme.colorScheme.onPrimaryContainer,
+                        text = stringResource(id = R.string.btn_use)
+                    )
                 } else {
                     Text(
                         text = stringResource(id = R.string.btn_use_cancel),
@@ -821,13 +840,17 @@ fun GiftBottomSheet(image: Bitmap?, isVisible: Boolean, onDismiss: (Boolean) -> 
 
                 Button(
                     modifier = Modifier
+                        .background(MaterialTheme.colorScheme.primary)
                         .fillMaxWidth(),
                     shape = RectangleShape,
                     onClick = {
                         onDismiss(true)
                     }
                 ) {
-                    Text(text = stringResource(id = R.string.btn_use_complete))
+                    Text(
+                        color = MaterialTheme.colorScheme.onPrimaryContainer,
+                        text = stringResource(id = R.string.btn_use_complete)
+                    )
                 }
             }
         }

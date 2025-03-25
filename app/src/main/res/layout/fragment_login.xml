@@ -3,6 +3,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:background="@color/primary"
     android:name="com.example.giftbox.LoginFragment">
 
     <LinearLayout
@@ -25,7 +26,7 @@
             android:layout_height="wrap_content"
             android:textSize="30sp"
             android:layout_marginTop="10dp"
-            android:textColor="@color/black"
+            android:textColor="@color/onPrimary"
             android:textAlignment="center"
             android:text="@string/app_name"/>
     </LinearLayout>
@@ -56,13 +57,11 @@
             android:layout_height="wrap_content"
             android:text="@string/btn_guest_login"
             android:textSize="14sp"
-            android:background="@drawable/rounded_button"
             android:drawableStart="@drawable/icon_guest"
-            android:drawableTint="@color/white"
-            android:textColor="@color/white"
-            android:padding="16dp"
+            android:drawableTint="@color/primary"
             android:textAllCaps="false"
-            android:layout_margin="5dp" />
+            style="@style/CustomButtonStyle"
+            android:layout_marginTop="5dp" />
     </LinearLayout>
 
     <androidx.compose.ui.platform.ComposeView

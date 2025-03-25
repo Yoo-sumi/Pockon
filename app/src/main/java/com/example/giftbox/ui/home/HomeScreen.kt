@@ -4,6 +4,7 @@ import android.Manifest
 import android.content.Context
 import android.content.pm.PackageManager
 import android.location.Location
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -29,6 +30,7 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Refresh
+import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -48,6 +50,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -139,7 +142,7 @@ fun HomeScreen(onAdd: () -> Unit, showMap: () -> Unit, onDetail: (String) -> Uni
                     Text(
                         text = stringResource(id = R.string.btn_open_map),
                         fontSize = 14.sp,
-                        color = MaterialTheme.colorScheme.secondary,
+                        color = MaterialTheme.colorScheme.onPrimary,
                         modifier = Modifier
                             .clickable {
                                 if (homeViewModel.nearGiftList.value.isNotEmpty()) showMap()
@@ -158,7 +161,10 @@ fun HomeScreen(onAdd: () -> Unit, showMap: () -> Unit, onDetail: (String) -> Uni
                             .wrapContentHeight(Alignment.CenterVertically),
                         horizontalArrangement = Arrangement.spacedBy(5.dp)
                     ) {
-                        itemsIndexed(items = homeViewModel.nearGiftList.value) { index, gift ->
+                        items(
+                            items = homeViewModel.nearGiftList.value,
+                            key = { gift -> gift.first.id }
+                        ) { gift ->
                             HomeGiftItem(
                                 gift.first,
                                 formatString(gift.first.endDt),
@@ -200,7 +206,10 @@ fun HomeScreen(onAdd: () -> Unit, showMap: () -> Unit, onDetail: (String) -> Uni
                             .wrapContentHeight(Alignment.CenterVertically),
                         horizontalArrangement = Arrangement.spacedBy(5.dp),
                     ) {
-                        items(items = homeViewModel.closeToGiftList.value) { gift ->
+                        items(
+                            items = homeViewModel.closeToGiftList.value,
+                            key = { gift -> gift.id }
+                        ) { gift ->
                             HomeGiftItem(gift, formatString(gift.endDt), getDday(gift.endDt)) {
                                 onDetail(gift.id)
                             }
@@ -214,8 +223,8 @@ fun HomeScreen(onAdd: () -> Unit, showMap: () -> Unit, onDetail: (String) -> Uni
                 onClick = {
                     onAdd()
                 },
-                containerColor = MaterialTheme.colorScheme.secondaryContainer,
-                contentColor = MaterialTheme.colorScheme.secondary,
+                containerColor = MaterialTheme.colorScheme.primary,
+                contentColor = MaterialTheme.colorScheme.onPrimary,
                 shape = CircleShape,
                 modifier = Modifier
                     .align(Alignment.BottomEnd)
@@ -239,70 +248,78 @@ fun HomeGiftItem(gift: Gift, formattedEndDate: String, dDay: Pair<String, Boolea
                 onClick()
             }
     ) {
-        Column(
+        Card(
             modifier = Modifier
-                .background(MaterialTheme.colorScheme.surfaceContainerLowest)
-                .width(160.dp)
+                .width(160.dp),
+            shape = RoundedCornerShape(10.dp), // 모서리 둥글기
+            border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline) // 테두리 색상과 두께 지정
         ) {
-            AsyncImage(
-                modifier = Modifier.size(160.dp),
-                model = gift.photo,
-                contentDescription = "add photo",
-                contentScale = ContentScale.Crop
-            )
-
             Column(
-                modifier = Modifier.padding(5.dp)
+                modifier = Modifier
+                    .background(MaterialTheme.colorScheme.background)
+                    .width(160.dp)
             ) {
-                Text(
-                    text = gift.brand,
-                    style = MaterialTheme.typography.bodyMedium,
-                    textAlign = TextAlign.Start,
-                    color = MaterialTheme.colorScheme.secondary,
-                    modifier = Modifier
-                        .fillMaxWidth(),
-                    softWrap = true
+                AsyncImage(
+                    modifier = Modifier.size(160.dp),
+                    model = gift.photo,
+                    contentDescription = "add photo",
+                    contentScale = ContentScale.Crop
                 )
-                Text(
-                    text = gift.name,
-                    overflow = TextOverflow.Ellipsis,
-                    style = MaterialTheme.typography.bodyLarge,
-                    textAlign = TextAlign.Start,
-                    modifier = Modifier
-                        .fillMaxWidth(),
-                    softWrap = true
-                )
-                Row(
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    modifier = Modifier.fillMaxWidth()
+
+                Column(
+                    modifier = Modifier.padding(5.dp)
                 ) {
-                    val distance = if (document == null) {
-                        ""
-                    } else {
-                        "${document.distance}m"
-                    }
                     Text(
-                        text = distance,
+                        text = gift.brand,
                         style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onPrimary,
                         textAlign = TextAlign.Start,
-                        color = MaterialTheme.colorScheme.error,
+                        modifier = Modifier
+                            .fillMaxWidth(),
                         softWrap = true
                     )
                     Text(
-                        text = "~ $formattedEndDate",
-                        style = MaterialTheme.typography.bodyMedium,
-                        textAlign = TextAlign.End,
-                        color = MaterialTheme.colorScheme.secondary,
+                        text = gift.name,
+                        overflow = TextOverflow.Ellipsis,
+                        style = MaterialTheme.typography.bodyLarge,
+                        color = MaterialTheme.colorScheme.onPrimary,
+                        textAlign = TextAlign.Start,
+                        modifier = Modifier
+                            .fillMaxWidth(),
                         softWrap = true
                     )
+                    Row(
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        val distance = if (document == null) {
+                            ""
+                        } else {
+                            "${document.distance}m"
+                        }
+                        Text(
+                            text = distance,
+                            style = MaterialTheme.typography.bodyMedium,
+                            textAlign = TextAlign.Start,
+                            color = MaterialTheme.colorScheme.error,
+                            softWrap = true
+                        )
+                        Text(
+                            text = "~ $formattedEndDate",
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = MaterialTheme.colorScheme.onPrimary,
+                            textAlign = TextAlign.End,
+                            softWrap = true
+                        )
+                    }
                 }
             }
         }
 
         val color = if (dDay.second) {
-            MaterialTheme.colorScheme.outline
+            MaterialTheme.colorScheme.errorContainer
         } else {
-            MaterialTheme.colorScheme.primary
+            MaterialTheme.colorScheme.tertiary
         }
         Text(
             text = dDay.first,
@@ -315,7 +332,7 @@ fun HomeGiftItem(gift: Gift, formattedEndDate: String, dDay: Pair<String, Boolea
                     shape = CardDefaults.shape
                 )
                 .padding(start = 15.dp, end = 15.dp, top = 5.dp, bottom = 5.dp),
-            color = MaterialTheme.colorScheme.surfaceContainerLowest,
+            color = colorResource(id = R.color.white),
             softWrap = true
         )
     }
@@ -329,7 +346,7 @@ fun EmptyNear() {
             .fillMaxWidth()
             .border(
                 width = 2.dp,
-                color = Color.LightGray,
+                color = MaterialTheme.colorScheme.outline,
                 shape = RoundedCornerShape(10.dp)
             ),
     ) {
@@ -360,10 +377,12 @@ fun EmptyNear() {
             }
         }
         Text(
-            modifier = Modifier.fillMaxWidth().align(Alignment.Center),
+            modifier = Modifier
+                .fillMaxWidth()
+                .align(Alignment.Center),
             text = stringResource(id = R.string.txt_no_gift),
             textAlign = TextAlign.Center,
-            color = Color.LightGray,
+            color = MaterialTheme.colorScheme.outline,
             fontWeight = FontWeight.Bold,
             softWrap = true
         )
@@ -401,7 +420,7 @@ fun HomeScreenTopBar() {
     Box(
         modifier = Modifier
             .fillMaxWidth()
-            .background(MaterialTheme.colorScheme.secondaryContainer)
+            .background(MaterialTheme.colorScheme.primary)
             .padding(10.dp)
             .padding(top = 10.dp, bottom = 10.dp)
     ) {
