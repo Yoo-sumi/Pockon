@@ -30,6 +30,7 @@ class MainFragment : Fragment() {
                 onPrimaryContainer = colorResource(id = R.color.onPrimary),  // Primary 컨테이너의 텍스트 색상
                 secondary = colorResource(id = R.color.secondary),  // Secondary 색상 Color(0xFF8AC3E1)
                 tertiary = colorResource(id = R.color.tertiary),  // Tertiary 색상
+                tertiaryContainer = colorResource(id = R.color.tertiaryContainer),  // Tertiary 색상
                 outline = colorResource(id = R.color.light_gray),  // Tertiary 색상
                 error = colorResource(id = R.color.red),  // Error 색상에 맞춘 컨테이너 색상
                 errorContainer = colorResource(id = R.color.gray),  // Error 색상에 맞춘 컨테이너 색상

@@ -231,9 +231,9 @@ fun SettingItem(text: String, isTitle: Boolean = false, isSwitch: Boolean = fals
                             onCheck()
                         },
                         colors = SwitchDefaults.colors(
-                            checkedTrackColor = MaterialTheme.colorScheme.tertiary,
+                            checkedTrackColor = MaterialTheme.colorScheme.primaryContainer,
                             checkedThumbColor = MaterialTheme.colorScheme.background,
-                            checkedBorderColor = MaterialTheme.colorScheme.tertiary,
+                            checkedBorderColor = MaterialTheme.colorScheme.primaryContainer,
                             uncheckedTrackColor = MaterialTheme.colorScheme.errorContainer,
                             uncheckedThumbColor = MaterialTheme.colorScheme.background,
                             uncheckedBorderColor = MaterialTheme.colorScheme.errorContainer,

@@ -166,8 +166,9 @@ fun UsedScreen(onDetail: (String) -> Unit, onBack: () -> Unit) {
                                 usedViewModel.onClickAllSelect()
                             },
                             colors = CheckboxDefaults.colors(
-                                checkedColor = MaterialTheme.colorScheme.tertiary,  // 체크된 상태에서 배경 색상 (체크박스 색상)
-                                checkmarkColor = MaterialTheme.colorScheme.onPrimary,  // 체크 표시 색상
+                                uncheckedColor = MaterialTheme.colorScheme.onPrimary,
+                                checkedColor = MaterialTheme.colorScheme.primaryContainer,  // 체크된 상태에서 배경 색상 (체크박스 색상)
+                                checkmarkColor = MaterialTheme.colorScheme.background,  // 체크 표시 색상
                             )
                         )
                     }
@@ -278,7 +279,8 @@ fun UsedGiftItem(
                         text = gift.brand,
                         style = MaterialTheme.typography.bodyMedium,
                         textAlign = TextAlign.Start,
-                        modifier = Modifier.fillMaxWidth()
+                        modifier = Modifier.fillMaxWidth(),
+                        color = MaterialTheme.colorScheme.onPrimary
                     )
                     Text(
                         text = gift.name,
@@ -286,7 +288,8 @@ fun UsedGiftItem(
                         overflow = TextOverflow.Ellipsis,
                         style = MaterialTheme.typography.bodyLarge,
                         textAlign = TextAlign.Start,
-                        modifier = Modifier.fillMaxWidth()
+                        modifier = Modifier.fillMaxWidth(),
+                        color = MaterialTheme.colorScheme.onPrimary
                     )
                     Box(
                         modifier = Modifier.fillMaxWidth(),
@@ -295,7 +298,8 @@ fun UsedGiftItem(
                             modifier = Modifier.fillMaxWidth(),
                             text = "~ $formattedEndDate",
                             style = MaterialTheme.typography.bodyMedium,
-                            textAlign = TextAlign.End
+                            textAlign = TextAlign.End,
+                            color = MaterialTheme.colorScheme.onPrimary
                         )
                     }
                 }

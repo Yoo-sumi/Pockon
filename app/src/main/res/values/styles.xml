@@ -5,4 +5,8 @@
         <item name="android:backgroundTint">@color/white</item> <!-- 버튼 배경색 -->
         <item name="android:textColor">@color/black</item> <!-- 버튼 텍스트 색상 -->
     </style>
+
+    <style name="CustomDialogTheme" parent="Theme.AppCompat.Light.Dialog">
+        <item name="colorAccent">@color/tertiary</item>
+    </style>
 </resources>

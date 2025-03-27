@@ -15,8 +15,9 @@
 
     <color name="primary">#000000</color>
     <color name="onPrimary">#FFFFFF</color>
-    <color name="primaryContainer">#C7C7C7</color>
+    <color name="primaryContainer">#FFBDBDBD</color>
     <color name="secondary">#777777</color>
     <color name="tertiary">#000000</color>
+    <color name="tertiaryContainer">#777777</color>
     <color name="background">#000000</color>
 </resources>

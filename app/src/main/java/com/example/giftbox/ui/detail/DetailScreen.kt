@@ -304,30 +304,29 @@ fun DetailScreen(id: String, onBack: () -> Unit) {
                 shape = RectangleShape,
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(start = 25.dp, end = 25.dp, bottom = 15.dp)
-                    .background(
-                        if (!detailViewModel.isEdit.value && detailViewModel.usedDt.value.isNotEmpty()) {
-                            MaterialTheme.colorScheme.errorContainer
-                        } else {
-                            MaterialTheme.colorScheme.primary
-                        }
-                    ),
-                colors = if (detailViewModel.usedDt.value.isNotEmpty()) ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.errorContainer) else ButtonDefaults.buttonColors()
+                    .padding(start = 25.dp, end = 25.dp, bottom = 15.dp),
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = if (!detailViewModel.isEdit.value && detailViewModel.usedDt.value.isNotEmpty()) {
+                        MaterialTheme.colorScheme.errorContainer
+                    } else {
+                        MaterialTheme.colorScheme.primaryContainer
+                    }
+                )
             ) {
                 if (detailViewModel.isEdit.value) {
                     Text(
-                        color = MaterialTheme.colorScheme.onPrimaryContainer,
+                        color = MaterialTheme.colorScheme.onPrimary,
                         text = stringResource(id = R.string.btn_save)
                     )
                 } else if (detailViewModel.usedDt.value.isEmpty()) {
                     Text(
-                        color = MaterialTheme.colorScheme.onPrimaryContainer,
+                        color = MaterialTheme.colorScheme.onPrimary,
                         text = stringResource(id = R.string.btn_use)
                     )
                 } else {
                     Text(
                         text = stringResource(id = R.string.btn_use_cancel),
-                        color = Color.White,
+                        color = MaterialTheme.colorScheme.onPrimary,
                         fontWeight = FontWeight.Bold
                     )
                 }
@@ -428,12 +427,13 @@ fun InputDataTextField(value: String, label: Int, index: Int, isEdit: Boolean, o
         readOnly = !isEdit,
         modifier = modifier,
         value = value,
+        textStyle = TextStyle(MaterialTheme.colorScheme.onPrimary),
         onValueChange = { 
             if (it.length > 8 && index == 3) return@OutlinedTextField
             onValueChange(index, it)
         },
         maxLines = if (index == 4) 50 else 1,
-        label = { Text(stringResource(id = label)) },
+        label = { Text(text = stringResource(id = label), color = MaterialTheme.colorScheme.onPrimary) },
         visualTransformation = when(index) {
             2 -> thousandSeparatorTransformation(true)
             3 -> DateTransformation()
@@ -551,7 +551,10 @@ fun UseCashDialog(remainCash: String, onCancel: () -> Unit, onConfirm: (Int) -> 
     var inputCash by rememberSaveable { mutableStateOf("") }
 
     Column(
-        modifier = Modifier.fillMaxWidth()
+        modifier = Modifier
+            .fillMaxWidth()
+            .background(MaterialTheme.colorScheme.background)
+            .border(0.5.dp, MaterialTheme.colorScheme.outline) // 테두리 색상과 두께 지정
     ) {
         // title
         Text(
@@ -560,13 +563,14 @@ fun UseCashDialog(remainCash: String, onCancel: () -> Unit, onConfirm: (Int) -> 
                 .padding(10.dp),
             text = stringResource(id = R.string.txt_use_cash_inpur),
             textAlign = TextAlign.Center,
-            fontSize = 16.sp
+            fontSize = 16.sp,
+            color = MaterialTheme.colorScheme.onPrimary
         )
         Box(
             modifier = Modifier
                 .fillMaxWidth()
                 .height(1.dp)
-                .background(color = Color.LightGray)
+                .background(color = MaterialTheme.colorScheme.outline)
         )
 
         // cash button
@@ -593,13 +597,13 @@ fun UseCashDialog(remainCash: String, onCancel: () -> Unit, onConfirm: (Int) -> 
                             },
                             fontWeight = FontWeight.Bold,
                             fontSize = 10.sp,
+                            color = MaterialTheme.colorScheme.onPrimary
                         )
                     },
                     selected = false,
                     shape = RoundedCornerShape(50.dp),
                     colors = FilterChipDefaults.filterChipColors().copy(
-                        containerColor = MaterialTheme.colorScheme.surfaceContainerHighest,
-                        selectedContainerColor = MaterialTheme.colorScheme.primary
+                        containerColor = MaterialTheme.colorScheme.tertiaryContainer
                     ),
                     border = null
                 )
@@ -627,7 +631,8 @@ fun UseCashDialog(remainCash: String, onCancel: () -> Unit, onConfirm: (Int) -> 
                 visualTransformation = thousandSeparatorTransformation(false),
                 textStyle = TextStyle(
                     fontSize = 24.sp,
-                    textAlign = TextAlign.End
+                    textAlign = TextAlign.End,
+                    color = MaterialTheme.colorScheme.onPrimary
                 ),
                 keyboardOptions = KeyboardOptions.Default.copy(keyboardType = KeyboardType.Number)
             )
@@ -637,7 +642,8 @@ fun UseCashDialog(remainCash: String, onCancel: () -> Unit, onConfirm: (Int) -> 
                     .alignByBaseline(),
                 text = stringResource(id = R.string.format_cash, ""),
                 fontSize = 24.sp,
-                textAlign = TextAlign.End
+                textAlign = TextAlign.End,
+                color = MaterialTheme.colorScheme.onPrimary
             )
         }
 
@@ -648,7 +654,8 @@ fun UseCashDialog(remainCash: String, onCancel: () -> Unit, onConfirm: (Int) -> 
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(end = 20.dp, bottom = 10.dp),
-            fontSize = 10.sp
+            fontSize = 10.sp,
+            color = MaterialTheme.colorScheme.onPrimary
         )
 
         // bottom button
@@ -656,7 +663,7 @@ fun UseCashDialog(remainCash: String, onCancel: () -> Unit, onConfirm: (Int) -> 
             modifier = Modifier
                 .fillMaxWidth()
                 .height(1.dp)
-                .background(color = Color.LightGray)
+                .background(color = MaterialTheme.colorScheme.outline)
         )
         Row(
             modifier = Modifier
@@ -670,10 +677,10 @@ fun UseCashDialog(remainCash: String, onCancel: () -> Unit, onConfirm: (Int) -> 
                     .weight(1f)
                     .fillMaxHeight(),
                 colors = ButtonDefaults.buttonColors(
-                    containerColor = Color.White,
-                    contentColor = Color.Black,
-                    disabledContainerColor = Color.Gray,
-                    disabledContentColor = Color.White
+                    containerColor = MaterialTheme.colorScheme.background,
+                    contentColor = MaterialTheme.colorScheme.onPrimary,
+                    disabledContainerColor = MaterialTheme.colorScheme.outline,
+                    disabledContentColor = MaterialTheme.colorScheme.background
                 ),
             ) {
                 Text(
@@ -682,7 +689,8 @@ fun UseCashDialog(remainCash: String, onCancel: () -> Unit, onConfirm: (Int) -> 
                     style = TextStyle(
                         fontSize = 14.sp,
                         fontWeight = FontWeight.Normal
-                    )
+                    ),
+                    color = MaterialTheme.colorScheme.onPrimary
                 )
             }
 
@@ -690,7 +698,7 @@ fun UseCashDialog(remainCash: String, onCancel: () -> Unit, onConfirm: (Int) -> 
                 modifier = Modifier
                     .fillMaxHeight()
                     .width(1.dp)
-                    .background(color = Color.LightGray)
+                    .background(color = MaterialTheme.colorScheme.outline)
             )
 
             Button(
@@ -700,10 +708,10 @@ fun UseCashDialog(remainCash: String, onCancel: () -> Unit, onConfirm: (Int) -> 
                     .weight(1f)
                     .fillMaxHeight(),
                 colors = ButtonDefaults.buttonColors(
-                    containerColor = Color.White,
-                    contentColor = Color.Red,
-                    disabledContainerColor = Color.Gray,
-                    disabledContentColor = Color.White
+                    containerColor = MaterialTheme.colorScheme.background,
+                    contentColor = MaterialTheme.colorScheme.error,
+                    disabledContainerColor = MaterialTheme.colorScheme.outline,
+                    disabledContentColor = MaterialTheme.colorScheme.background
                 )
             ) {
                 Text(
@@ -712,7 +720,8 @@ fun UseCashDialog(remainCash: String, onCancel: () -> Unit, onConfirm: (Int) -> 
                     style = TextStyle(
                         fontSize = 14.sp,
                         fontWeight = FontWeight.Normal
-                    )
+                    ),
+                    color = MaterialTheme.colorScheme.onPrimary
                 )
             }
         }
@@ -759,7 +768,7 @@ fun GiftBottomSheet(image: Bitmap?, isVisible: Boolean, onDismiss: (Boolean) -> 
                 .height(sheetHeight)
                 .offset { IntOffset(0, sheetOffsetY.value.toInt()) }
                 .background(
-                    Color.White,
+                    color = MaterialTheme.colorScheme.background,
                     shape = RoundedCornerShape(topStart = 20.dp, topEnd = 20.dp)
                 )
                 .align(Alignment.BottomCenter)

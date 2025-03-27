@@ -237,13 +237,13 @@ fun ListScreen(onDetail: (String) -> Unit, onAdd: () -> Unit, isLoading: (Boolea
                                                 label = {
                                                     if (idx == 0) {
                                                         Text(
-                                                            color = if (chips[key] == true) MaterialTheme.colorScheme.onPrimary else Color.Unspecified,
+                                                            color = Color.White,
                                                             text = stringResource(id = R.string.chip_all),
                                                             fontWeight = FontWeight.Bold
                                                         )
                                                     } else {
                                                         Text(
-                                                            color = if (chips[key] == true) MaterialTheme.colorScheme.onPrimary else Color.Unspecified,
+                                                            color = Color.White,
                                                             text = keys[idx],
                                                             fontWeight = FontWeight.Bold
                                                         )
@@ -252,8 +252,8 @@ fun ListScreen(onDetail: (String) -> Unit, onAdd: () -> Unit, isLoading: (Boolea
                                                 selected = chips[key] ?: false,
                                                 shape = RoundedCornerShape(50.dp),
                                                 colors = FilterChipDefaults.filterChipColors().copy(
-                                                    containerColor = MaterialTheme.colorScheme.surfaceContainerHighest,
-                                                    selectedContainerColor = MaterialTheme.colorScheme.tertiary
+                                                    containerColor = MaterialTheme.colorScheme.primaryContainer,
+                                                    selectedContainerColor = MaterialTheme.colorScheme.tertiaryContainer,
                                                 ),
                                                 border = null
                                             )
@@ -281,8 +281,9 @@ fun ListScreen(onDetail: (String) -> Unit, onAdd: () -> Unit, isLoading: (Boolea
                                                     listViewModel.onClickAllSelect()
                                                 },
                                                 colors = CheckboxDefaults.colors(
-                                                    checkedColor = MaterialTheme.colorScheme.tertiary,  // 체크된 상태에서 배경 색상 (체크박스 색상)
-                                                    checkmarkColor = MaterialTheme.colorScheme.onPrimary,  // 체크 표시 색상
+                                                    uncheckedColor = MaterialTheme.colorScheme.onPrimary,
+                                                    checkedColor = MaterialTheme.colorScheme.primaryContainer,  // 체크된 상태에서 배경 색상 (체크박스 색상)
+                                                    checkmarkColor = MaterialTheme.colorScheme.background,  // 체크 표시 색상
                                                 )
                                             )
                                         }
@@ -528,7 +529,8 @@ fun ConfirmDialog(text: Int, onConfirm: () -> Unit, onDismiss: () -> Unit) {
                 .wrapContentWidth()
                 .wrapContentHeight(),
             shape = RoundedCornerShape(12.dp),
-            color = Color.White
+            color = MaterialTheme.colorScheme.background,
+            border = BorderStroke(0.5.dp, MaterialTheme.colorScheme.outline) // 테두리 색상과 두께 지정
         ) {
             Column(
                 modifier = Modifier.fillMaxWidth()
@@ -546,7 +548,7 @@ fun ConfirmDialog(text: Int, onConfirm: () -> Unit, onDismiss: () -> Unit) {
                     modifier = Modifier
                         .fillMaxWidth()
                         .height(1.dp)
-                        .background(color = Color.LightGray)
+                        .background(color = MaterialTheme.colorScheme.outline)
                 )
 
                 // text
@@ -563,7 +565,7 @@ fun ConfirmDialog(text: Int, onConfirm: () -> Unit, onDismiss: () -> Unit) {
                     modifier = Modifier
                         .fillMaxWidth()
                         .height(1.dp)
-                        .background(color = Color.LightGray)
+                        .background(color = MaterialTheme.colorScheme.outline)
                 )
                 Row(
                     modifier = Modifier
@@ -577,10 +579,10 @@ fun ConfirmDialog(text: Int, onConfirm: () -> Unit, onDismiss: () -> Unit) {
                             .weight(1f)
                             .fillMaxHeight(),
                         colors = ButtonDefaults.buttonColors(
-                            containerColor = Color.White,
-                            contentColor = Color.Black,
-                            disabledContainerColor = Color.Gray,
-                            disabledContentColor = Color.White
+                            containerColor = MaterialTheme.colorScheme.background,
+                            contentColor = MaterialTheme.colorScheme.onPrimary,
+                            disabledContainerColor = MaterialTheme.colorScheme.outline,
+                            disabledContentColor = MaterialTheme.colorScheme.background
                         ),
                     ) {
                         Text(
@@ -597,7 +599,7 @@ fun ConfirmDialog(text: Int, onConfirm: () -> Unit, onDismiss: () -> Unit) {
                         modifier = Modifier
                             .fillMaxHeight()
                             .width(1.dp)
-                            .background(color = Color.LightGray)
+                            .background(color = MaterialTheme.colorScheme.outline)
                     )
 
                     Button(
@@ -607,10 +609,10 @@ fun ConfirmDialog(text: Int, onConfirm: () -> Unit, onDismiss: () -> Unit) {
                             .weight(1f)
                             .fillMaxHeight(),
                         colors = ButtonDefaults.buttonColors(
-                            containerColor = Color.White,
-                            contentColor = Color.Red,
-                            disabledContainerColor = Color.Gray,
-                            disabledContentColor = Color.White
+                            containerColor = MaterialTheme.colorScheme.background,
+                            contentColor = MaterialTheme.colorScheme.error,
+                            disabledContainerColor = MaterialTheme.colorScheme.outline,
+                            disabledContentColor = MaterialTheme.colorScheme.background
                         )
                     ) {
                         Text(

@@ -19,6 +19,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.KeyboardOptions
@@ -27,6 +28,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.DateRange
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.CheckboxDefaults
 import androidx.compose.material3.Icon
@@ -43,12 +45,12 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.scale
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.text.style.TextAlign
@@ -127,29 +129,33 @@ fun AddGifticon(onBack: (Boolean) -> Unit) {
                 ) {
                     Row(
                         modifier = Modifier
-                            .align(Alignment.CenterEnd),
-                        verticalAlignment = Alignment.CenterVertically
+                            .align(Alignment.CenterEnd)
+                            .padding(10.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.Center
                     ) {
                         Text(
                             modifier = Modifier
-                                .fillMaxHeight(),
+                                .fillMaxHeight()
+                                .padding(end = 15.dp),
                             text = stringResource(R.string.txt_cash_certificate),
                             textAlign = TextAlign.Center
                         )
-                        Checkbox(
-                            modifier = Modifier
-                                .padding(0.dp)
-                                .scale(0.8f),
-                            checked = addViewModel.isCheckedCash.value,
-                            onCheckedChange = {
-                                addViewModel.chgCheckedCash()
-                            },
-                            colors = CheckboxDefaults.colors(
-                                checkedColor = MaterialTheme.colorScheme.tertiary,  // 체크된 상태에서 배경 색상 (체크박스 색상)
-                                uncheckedColor = MaterialTheme.colorScheme.tertiary,  // 체크되지 않은 상태에서 배경 색상
-                                checkmarkColor = MaterialTheme.colorScheme.onPrimary,  // 체크 표시 색상
+                        Box(modifier = Modifier.size(1.dp)) {
+                            Checkbox(
+                                modifier = Modifier
+                                    .scale(0.8f),
+                                checked = addViewModel.isCheckedCash.value,
+                                onCheckedChange = {
+                                    addViewModel.chgCheckedCash()
+                                },
+                                colors = CheckboxDefaults.colors(
+                                    uncheckedColor = MaterialTheme.colorScheme.onPrimary,
+                                    checkedColor = MaterialTheme.colorScheme.primaryContainer,  // 체크된 상태에서 배경 색상 (체크박스 색상)
+                                    checkmarkColor = MaterialTheme.colorScheme.background,  // 체크 표시 색상
+                                )
                             )
-                        )
+                        }
                     }
                 }
                 // text field
@@ -191,14 +197,16 @@ fun AddGifticon(onBack: (Boolean) -> Unit) {
                     }
                 },
                 shape = RectangleShape,
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = MaterialTheme.colorScheme.primaryContainer
+                ),
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(start = 25.dp, end = 25.dp, bottom = 15.dp)
-                    .background(MaterialTheme.colorScheme.primary),
                 ) {
                 Text(
-                    color = MaterialTheme.colorScheme.onPrimaryContainer,
-                    text = stringResource(id = R.string.btn_add)
+                    color = MaterialTheme.colorScheme.onPrimary,
+                    text = stringResource(id = R.string.btn_add),
                 )
             }
         }
@@ -234,12 +242,13 @@ fun InputDataTextField(value: String, label: Int, index: Int, onValueChange: (In
     OutlinedTextField(
         modifier = modifier,
         value = value,
+        textStyle = TextStyle(MaterialTheme.colorScheme.onPrimary),
         onValueChange = {
             if (it.length > 8 && index == 3) return@OutlinedTextField
             onValueChange(index, it)
         },
         maxLines = if (index == 4) 50 else 1,
-        label = { Text(stringResource(id = label)) },
+        label = { Text(text = stringResource(id = label), color = MaterialTheme.colorScheme.onPrimary) },
         visualTransformation = when(index) {
             2 -> thousandSeparatorTransformation(true)
             3 -> DateTransformation()
@@ -250,7 +259,8 @@ fun InputDataTextField(value: String, label: Int, index: Int, onValueChange: (In
                 IconButton(onClick = { onDatePicker() }) {
                     Icon(
                         imageVector = Icons.Filled.DateRange,
-                        contentDescription = "DateRange"
+                        contentDescription = "DateRange",
+                        tint = MaterialTheme.colorScheme.onPrimary
                     )
                 }
             }
@@ -272,7 +282,7 @@ fun GiftImage(selectedImage: Bitmap?, galleryLauncher:  ManagedActivityResultLau
             modifier = Modifier
                 .width(200.dp)
                 .height(200.dp)
-                .background(Color.LightGray)
+                .background(MaterialTheme.colorScheme.outline)
                 .clickable {
                     galleryLauncher.launch(
                         PickVisualMediaRequest(
@@ -351,6 +361,7 @@ fun CustomDatePickerDialog(
 
     val datePickerDialog = DatePickerDialog(
         LocalContext.current,
+        R.style.CustomDialogTheme,
         { _, selectedYear, selectedMonth, selectedDayOfMonth ->
             val selectedDate = formatDateToYYYYMMDD(selectedYear, selectedMonth, selectedDayOfMonth)
             onConfirm(selectedDate)
