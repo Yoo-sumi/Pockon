@@ -892,19 +892,32 @@ fun GiftBottomSheet(image: Bitmap?, isVisible: Boolean, onDismiss: (Boolean) -> 
 fun ImageFullScreenDialog(image: Bitmap?, onDismiss: () -> Unit) {
     var scale by remember { mutableFloatStateOf(1f) }
 
-    Box(
+    Column(
         modifier = Modifier
             .fillMaxSize()
             .background(Color.Black)
     ) {
         var currentScale by remember { mutableFloatStateOf(scale) }
 
+        Box(modifier = Modifier.fillMaxWidth().height(50.dp)) {
+            IconButton(
+                onClick = onDismiss,
+                modifier = Modifier.align(Alignment.CenterEnd)
+            ) {
+                Icon(
+                    imageVector = Icons.Default.Close,
+                    contentDescription = "Close",
+                    tint = Color.White
+                )
+            }
+        }
+
         Image(
             painter = rememberAsyncImagePainter(image),
             contentDescription = "Full Screen Gifticon",
             modifier = Modifier
-                .align(Alignment.Center)
                 .fillMaxSize()
+                .weight(1f)
                 .pointerInput(Unit) {
                     detectTransformGestures { _, pan, zoom, _ ->
                         currentScale *= zoom
@@ -919,15 +932,6 @@ fun ImageFullScreenDialog(image: Bitmap?, onDismiss: () -> Unit) {
                 )
         )
 
-        IconButton(
-            onClick = onDismiss,
-            modifier = Modifier.align(Alignment.TopEnd)
-        ) {
-            Icon(
-                imageVector = Icons.Default.Close,
-                contentDescription = "Close",
-                tint = Color.White
-            )
-        }
+        Box(modifier = Modifier.fillMaxWidth().height(50.dp))
     }
 }
