@@ -8,6 +8,7 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.spring
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -57,10 +58,10 @@ import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -78,6 +79,7 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
@@ -248,9 +250,9 @@ fun DetailScreen(id: String, onBack: () -> Unit) {
                                     detailViewModel.chgCheckedCash()
                                 },
                                 colors = CheckboxDefaults.colors(
-                                    checkedColor = MaterialTheme.colorScheme.tertiary,  // 체크된 상태에서 배경 색상 (체크박스 색상)
-                                    uncheckedColor = MaterialTheme.colorScheme.tertiary,  // 체크되지 않은 상태에서 배경 색상
-                                    checkmarkColor = MaterialTheme.colorScheme.onPrimary,  // 체크 표시 색상
+                                    uncheckedColor = MaterialTheme.colorScheme.onPrimary,
+                                    checkedColor = MaterialTheme.colorScheme.primaryContainer,
+                                    checkmarkColor = MaterialTheme.colorScheme.background
                                 )
                             )
                         }
@@ -309,7 +311,7 @@ fun DetailScreen(id: String, onBack: () -> Unit) {
                     containerColor = if (!detailViewModel.isEdit.value && detailViewModel.usedDt.value.isNotEmpty()) {
                         MaterialTheme.colorScheme.errorContainer
                     } else {
-                        MaterialTheme.colorScheme.primaryContainer
+                        MaterialTheme.colorScheme.primary
                     }
                 )
             ) {
@@ -326,7 +328,7 @@ fun DetailScreen(id: String, onBack: () -> Unit) {
                 } else {
                     Text(
                         text = stringResource(id = R.string.btn_use_cancel),
-                        color = MaterialTheme.colorScheme.onPrimary,
+                        color = colorResource(id = R.color.white),
                         fontWeight = FontWeight.Bold
                     )
                 }
@@ -428,8 +430,8 @@ fun InputDataTextField(value: String, label: Int, index: Int, isEdit: Boolean, o
         modifier = modifier,
         value = value,
         textStyle = TextStyle(MaterialTheme.colorScheme.onPrimary),
-        onValueChange = { 
-            if (it.length > 8 && index == 3) return@OutlinedTextField
+        onValueChange = {
+            if (((it.length > 9 || it == "00") && index == 2) || (it.length > 8 && index == 3)) return@OutlinedTextField
             onValueChange(index, it)
         },
         maxLines = if (index == 4) 50 else 1,
@@ -444,7 +446,8 @@ fun InputDataTextField(value: String, label: Int, index: Int, isEdit: Boolean, o
                 IconButton(onClick = { onDatePicker() }) {
                     Icon(
                         imageVector = Icons.Filled.DateRange,
-                        contentDescription = "DateRange"
+                        contentDescription = "DateRange",
+                        tint = MaterialTheme.colorScheme.onPrimary
                     )
                 }
             }
@@ -549,180 +552,191 @@ fun UsedStamp(usedDate: String) {
 @Composable
 fun UseCashDialog(remainCash: String, onCancel: () -> Unit, onConfirm: (Int) -> Unit){
     var inputCash by rememberSaveable { mutableStateOf("") }
-
-    Column(
+    Surface(
         modifier = Modifier
-            .fillMaxWidth()
-            .background(MaterialTheme.colorScheme.background)
-            .border(0.5.dp, MaterialTheme.colorScheme.outline) // 테두리 색상과 두께 지정
+            .wrapContentWidth()
+            .wrapContentHeight(),
+        shape = RoundedCornerShape(12.dp),
+        color = MaterialTheme.colorScheme.background,
+        border = BorderStroke(0.5.dp, MaterialTheme.colorScheme.outline)
     ) {
-        // title
-        Text(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(10.dp),
-            text = stringResource(id = R.string.txt_use_cash_inpur),
-            textAlign = TextAlign.Center,
-            fontSize = 16.sp,
-            color = MaterialTheme.colorScheme.onPrimary
-        )
-        Box(
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(1.dp)
-                .background(color = MaterialTheme.colorScheme.outline)
-        )
-
-        // cash button
-        LazyRow(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(top = 10.dp),
-            horizontalArrangement = Arrangement.Center
+        Column(
+            modifier = Modifier.fillMaxWidth()
         ) {
-            val useCashList = listOf(1000, 5000, 10000, remainCash.toInt())
-            items(useCashList.size) { idx ->
-                Spacer(modifier = Modifier.width(4.dp))
-                FilterChip(
-                    onClick = {
-                        val total = ((if (inputCash.isEmpty()) 0 else inputCash.toInt()) + useCashList[idx]).toString()
-                        inputCash = if (total.toInt() >= remainCash.toInt()) remainCash else total
-                    },
-                    label = {
-                        Text(
-                            text = if (idx == useCashList.lastIndex) {
-                                stringResource(id = R.string.btn_all_cash)
-                            } else {
-                                stringResource(id = R.string.format_cash, decimalFormat(useCashList[idx]))
-                            },
-                            fontWeight = FontWeight.Bold,
-                            fontSize = 10.sp,
-                            color = MaterialTheme.colorScheme.onPrimary
-                        )
-                    },
-                    selected = false,
-                    shape = RoundedCornerShape(50.dp),
-                    colors = FilterChipDefaults.filterChipColors().copy(
-                        containerColor = MaterialTheme.colorScheme.tertiaryContainer
-                    ),
-                    border = null
-                )
-                Spacer(modifier = Modifier.width(4.dp))
-            }
-        }
-
-        // input cash
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(end = 20.dp),
-            horizontalArrangement = Arrangement.End,
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            BasicTextField(
-                modifier = Modifier
-                    .wrapContentWidth()
-                    .alignByBaseline(),
-                value = inputCash,
-                onValueChange = {
-                    val input = if (it.isEmpty()) 0 else it.toInt()
-                    inputCash = if (input >= remainCash.toInt()) remainCash else it
-                },
-                visualTransformation = thousandSeparatorTransformation(false),
-                textStyle = TextStyle(
-                    fontSize = 24.sp,
-                    textAlign = TextAlign.End,
-                    color = MaterialTheme.colorScheme.onPrimary
-                ),
-                keyboardOptions = KeyboardOptions.Default.copy(keyboardType = KeyboardType.Number)
-            )
+            // title
             Text(
                 modifier = Modifier
-                    .wrapContentWidth()
-                    .alignByBaseline(),
-                text = stringResource(id = R.string.format_cash, ""),
-                fontSize = 24.sp,
-                textAlign = TextAlign.End,
+                    .fillMaxWidth()
+                    .padding(10.dp),
+                text = stringResource(id = R.string.txt_use_cash_inpur),
+                textAlign = TextAlign.Center,
+                fontSize = 16.sp,
                 color = MaterialTheme.colorScheme.onPrimary
             )
-        }
-
-        // remain cash
-        Text(
-            text = stringResource(id = R.string.format_remain_cash, decimalFormat(remainCash.toInt() - (if (inputCash.isEmpty()) 0 else inputCash.toInt()))),
-            textAlign = TextAlign.End,
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(end = 20.dp, bottom = 10.dp),
-            fontSize = 10.sp,
-            color = MaterialTheme.colorScheme.onPrimary
-        )
-
-        // bottom button
-        Box(
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(1.dp)
-                .background(color = MaterialTheme.colorScheme.outline)
-        )
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(IntrinsicSize.Min)
-        ) {
-            Button(
-                onClick = { onConfirm(remainCash.toInt() - (if (inputCash.isEmpty()) 0 else inputCash.toInt())) },
-                shape = RectangleShape,
-                modifier = Modifier
-                    .weight(1f)
-                    .fillMaxHeight(),
-                colors = ButtonDefaults.buttonColors(
-                    containerColor = MaterialTheme.colorScheme.background,
-                    contentColor = MaterialTheme.colorScheme.onPrimary,
-                    disabledContainerColor = MaterialTheme.colorScheme.outline,
-                    disabledContentColor = MaterialTheme.colorScheme.background
-                ),
-            ) {
-                Text(
-                    text = stringResource(id = R.string.btn_confirm),
-                    textAlign = TextAlign.Center,
-                    style = TextStyle(
-                        fontSize = 14.sp,
-                        fontWeight = FontWeight.Normal
-                    ),
-                    color = MaterialTheme.colorScheme.onPrimary
-                )
-            }
-
             Box(
                 modifier = Modifier
-                    .fillMaxHeight()
-                    .width(1.dp)
+                    .fillMaxWidth()
+                    .height(1.dp)
                     .background(color = MaterialTheme.colorScheme.outline)
             )
 
-            Button(
-                onClick = { onCancel() },
-                shape = RectangleShape,
+            // cash button
+            LazyRow(
                 modifier = Modifier
-                    .weight(1f)
-                    .fillMaxHeight(),
-                colors = ButtonDefaults.buttonColors(
-                    containerColor = MaterialTheme.colorScheme.background,
-                    contentColor = MaterialTheme.colorScheme.error,
-                    disabledContainerColor = MaterialTheme.colorScheme.outline,
-                    disabledContentColor = MaterialTheme.colorScheme.background
-                )
+                    .fillMaxWidth()
+                    .padding(top = 10.dp),
+                horizontalArrangement = Arrangement.Center
             ) {
-                Text(
-                    text = stringResource(id = R.string.btn_cancel),
-                    textAlign = TextAlign.Center,
-                    style = TextStyle(
-                        fontSize = 14.sp,
-                        fontWeight = FontWeight.Normal
+                val useCashList = listOf(1000, 5000, 10000, remainCash.toInt())
+                items(useCashList.size) { idx ->
+                    Spacer(modifier = Modifier.width(4.dp))
+                    FilterChip(
+                        onClick = {
+                            val total =
+                                ((if (inputCash.isEmpty()) 0 else inputCash.toInt()) + useCashList[idx]).toString()
+                            inputCash =
+                                if (total.toInt() >= remainCash.toInt()) remainCash else total
+                        },
+                        label = {
+                            Text(
+                                text = if (idx == useCashList.lastIndex) {
+                                    stringResource(id = R.string.btn_all_cash)
+                                } else {
+                                    stringResource(
+                                        id = R.string.format_cash,
+                                        decimalFormat(useCashList[idx])
+                                    )
+                                },
+                                fontWeight = FontWeight.Bold,
+                                fontSize = 10.sp,
+                                color = MaterialTheme.colorScheme.onPrimary
+                            )
+                        },
+                        selected = false,
+                        shape = RoundedCornerShape(50.dp),
+                        colors = FilterChipDefaults.filterChipColors().copy(
+                            containerColor = MaterialTheme.colorScheme.primary
+                        ),
+                        border = null
+                    )
+                    Spacer(modifier = Modifier.width(4.dp))
+                }
+            }
+
+            // input cash
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(end = 20.dp),
+                horizontalArrangement = Arrangement.End,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                BasicTextField(
+                    modifier = Modifier
+                        .wrapContentWidth()
+                        .alignByBaseline(),
+                    value = inputCash,
+                    onValueChange = {
+                        val input = if (it.isEmpty()) 0 else it.toInt()
+                        inputCash = if (input >= remainCash.toInt()) remainCash else it
+                    },
+                    visualTransformation = thousandSeparatorTransformation(false),
+                    textStyle = TextStyle(
+                        fontSize = 24.sp,
+                        textAlign = TextAlign.End,
+                        color = MaterialTheme.colorScheme.onPrimary
                     ),
+                    keyboardOptions = KeyboardOptions.Default.copy(keyboardType = KeyboardType.Number)
+                )
+                Text(
+                    modifier = Modifier
+                        .wrapContentWidth()
+                        .alignByBaseline(),
+                    text = stringResource(id = R.string.format_cash, ""),
+                    fontSize = 24.sp,
+                    textAlign = TextAlign.End,
                     color = MaterialTheme.colorScheme.onPrimary
                 )
+            }
+
+            // remain cash
+            Text(
+                text = stringResource(
+                    id = R.string.format_remain_cash,
+                    decimalFormat(remainCash.toInt() - (if (inputCash.isEmpty()) 0 else inputCash.toInt()))
+                ),
+                textAlign = TextAlign.End,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(end = 20.dp, bottom = 10.dp),
+                fontSize = 10.sp,
+                color = MaterialTheme.colorScheme.onPrimary
+            )
+
+            // bottom button
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(1.dp)
+                    .background(color = MaterialTheme.colorScheme.outline)
+            )
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(IntrinsicSize.Min)
+            ) {
+                Button(
+                    onClick = { onConfirm(remainCash.toInt() - (if (inputCash.isEmpty()) 0 else inputCash.toInt())) },
+                    shape = RectangleShape,
+                    modifier = Modifier
+                        .weight(1f)
+                        .fillMaxHeight(),
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = MaterialTheme.colorScheme.background,
+                        contentColor = MaterialTheme.colorScheme.onPrimary,
+                        disabledContainerColor = MaterialTheme.colorScheme.outline,
+                        disabledContentColor = MaterialTheme.colorScheme.background
+                    )
+                ) {
+                    Text(
+                        text = stringResource(id = R.string.btn_confirm),
+                        textAlign = TextAlign.Center,
+                        style = TextStyle(
+                            fontSize = 14.sp,
+                            fontWeight = FontWeight.Normal
+                        )
+                    )
+                }
+
+                Box(
+                    modifier = Modifier
+                        .fillMaxHeight()
+                        .width(1.dp)
+                        .background(color = MaterialTheme.colorScheme.outline)
+                )
+
+                Button(
+                    onClick = { onCancel() },
+                    shape = RectangleShape,
+                    modifier = Modifier
+                        .weight(1f)
+                        .fillMaxHeight(),
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = MaterialTheme.colorScheme.background,
+                        contentColor = MaterialTheme.colorScheme.error,
+                        disabledContainerColor = MaterialTheme.colorScheme.outline,
+                        disabledContentColor = MaterialTheme.colorScheme.background
+                    )
+                ) {
+                    Text(
+                        text = stringResource(id = R.string.btn_cancel),
+                        textAlign = TextAlign.Center,
+                        style = TextStyle(
+                            fontSize = 14.sp,
+                            fontWeight = FontWeight.Normal
+                        )
+                    )
+                }
             }
         }
     }
@@ -760,7 +774,7 @@ fun GiftBottomSheet(image: Bitmap?, isVisible: Boolean, onDismiss: (Boolean) -> 
     Box(
         Modifier
             .fillMaxSize()
-            .background(Color.Black.copy(alpha = 0.2f)) // 반투명 배경
+            .background(MaterialTheme.colorScheme.onPrimary.copy(alpha = 0.2f)) // 반투명 배경
     ) {
         Box(
             Modifier
@@ -849,8 +863,8 @@ fun GiftBottomSheet(image: Bitmap?, isVisible: Boolean, onDismiss: (Boolean) -> 
 
                 Button(
                     modifier = Modifier
-                        .background(MaterialTheme.colorScheme.primary)
-                        .fillMaxWidth(),
+                        .fillMaxWidth()
+                        .background(MaterialTheme.colorScheme.primary),
                     shape = RectangleShape,
                     onClick = {
                         onDismiss(true)
@@ -876,14 +890,14 @@ fun GiftBottomSheet(image: Bitmap?, isVisible: Boolean, onDismiss: (Boolean) -> 
 
 @Composable
 fun ImageFullScreenDialog(image: Bitmap?, onDismiss: () -> Unit) {
-    var scale by remember { mutableStateOf(1f) }
+    var scale by remember { mutableFloatStateOf(1f) }
 
     Box(
         modifier = Modifier
             .fillMaxSize()
             .background(Color.Black)
     ) {
-        var currentScale by remember { mutableStateOf(scale) }
+        var currentScale by remember { mutableFloatStateOf(scale) }
 
         Image(
             painter = rememberAsyncImagePainter(image),

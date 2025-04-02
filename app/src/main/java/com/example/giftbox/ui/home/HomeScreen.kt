@@ -256,7 +256,7 @@ fun HomeGiftItem(gift: Gift, formattedEndDate: String, dDay: Pair<String, Boolea
         ) {
             Column(
                 modifier = Modifier
-                    .background(MaterialTheme.colorScheme.background)
+                    .background(MaterialTheme.colorScheme.secondaryContainer)
                     .width(160.dp)
             ) {
                 AsyncImage(

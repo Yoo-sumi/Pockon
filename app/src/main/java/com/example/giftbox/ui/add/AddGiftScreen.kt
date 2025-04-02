@@ -198,7 +198,7 @@ fun AddGifticon(onBack: (Boolean) -> Unit) {
                 },
                 shape = RectangleShape,
                 colors = ButtonDefaults.buttonColors(
-                    containerColor = MaterialTheme.colorScheme.primaryContainer
+                    containerColor = MaterialTheme.colorScheme.primary
                 ),
                 modifier = Modifier
                     .fillMaxWidth()
@@ -244,7 +244,7 @@ fun InputDataTextField(value: String, label: Int, index: Int, onValueChange: (In
         value = value,
         textStyle = TextStyle(MaterialTheme.colorScheme.onPrimary),
         onValueChange = {
-            if (it.length > 8 && index == 3) return@OutlinedTextField
+            if (((it.length > 9 || it == "00") && index == 2) || (it.length > 8 && index == 3)) return@OutlinedTextField
             onValueChange(index, it)
         },
         maxLines = if (index == 4) 50 else 1,

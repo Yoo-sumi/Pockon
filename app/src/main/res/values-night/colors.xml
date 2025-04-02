@@ -13,10 +13,11 @@
     <color name="light_gray">#FFBDBDBD</color>
     <color name="my_blue">#178FEB</color>
 
-    <color name="primary">#000000</color>
+    <color name="primary">#171719</color>
     <color name="onPrimary">#FFFFFF</color>
-    <color name="primaryContainer">#FFBDBDBD</color>
+    <color name="primaryContainer">#535353</color>
     <color name="secondary">#777777</color>
+    <color name="secondaryContainer">#171719</color>
     <color name="tertiary">#000000</color>
     <color name="tertiaryContainer">#777777</color>
     <color name="background">#000000</color>

@@ -252,8 +252,8 @@ fun ListScreen(onDetail: (String) -> Unit, onAdd: () -> Unit, isLoading: (Boolea
                                                 selected = chips[key] ?: false,
                                                 shape = RoundedCornerShape(50.dp),
                                                 colors = FilterChipDefaults.filterChipColors().copy(
-                                                    containerColor = MaterialTheme.colorScheme.primaryContainer,
-                                                    selectedContainerColor = MaterialTheme.colorScheme.tertiaryContainer,
+                                                    containerColor = MaterialTheme.colorScheme.primary,
+                                                    selectedContainerColor = MaterialTheme.colorScheme.tertiaryContainer
                                                 ),
                                                 border = null
                                             )
@@ -374,13 +374,13 @@ fun GiftItem(isEdit: Boolean, gift: Gift, formattedEndDate: String, dDay: Pair<S
     ) {
         Card(
             modifier = Modifier
-                .background(MaterialTheme.colorScheme.onPrimary),
+                .background(MaterialTheme.colorScheme.secondaryContainer),
             shape = RoundedCornerShape(10.dp), // 모서리 둥글기
             border = BorderStroke(0.5.dp, MaterialTheme.colorScheme.outline) // 테두리 색상과 두께 지정
         ) {
             Row(
                 modifier = Modifier
-                    .background(MaterialTheme.colorScheme.surfaceContainerLowest)
+                    .background(MaterialTheme.colorScheme.secondaryContainer)
                     .fillMaxHeight()
             ) {
                 Box(
@@ -404,18 +404,21 @@ fun GiftItem(isEdit: Boolean, gift: Gift, formattedEndDate: String, dDay: Pair<S
                 ) {
                     Text(
                         modifier = Modifier.fillMaxWidth(),
-                        text = gift.brand
+                        text = gift.brand,
+                        color = MaterialTheme.colorScheme.onPrimary
                     )
                     Text(
                         modifier = Modifier.fillMaxWidth(),
                         fontWeight = FontWeight.Bold,
                         fontSize = 20.sp,
-                        text = gift.name
+                        text = gift.name,
+                        color = MaterialTheme.colorScheme.onPrimary
                     )
                     Text(
                         modifier = Modifier.fillMaxWidth(),
                         textAlign = TextAlign.Right,
-                        text = "~ $formattedEndDate"
+                        text = "~ $formattedEndDate",
+                        color = MaterialTheme.colorScheme.onPrimary
                     )
                 }
             }
@@ -437,7 +440,7 @@ fun GiftItem(isEdit: Boolean, gift: Gift, formattedEndDate: String, dDay: Pair<S
                     shape = CardDefaults.shape
                 )
                 .padding(start = 15.dp, end = 15.dp, top = 5.dp, bottom = 5.dp),
-            color = MaterialTheme.colorScheme.onPrimary
+            color = colorResource(id = R.color.white)
         )
 
         // selected color
@@ -497,23 +500,26 @@ fun TopAppBarDropDownMenu(topTitle: Int, setTopTitle: (Int) -> Unit) {
                 Text(
                     modifier = Modifier.fillMaxWidth(),
                     textAlign = TextAlign.Center,
-                    text = stringResource(id = recentTitle)
+                    text = stringResource(id = recentTitle),
+                    color = MaterialTheme.colorScheme.onPrimary
                 )
             }
         )
 
-        HorizontalDivider()
+        HorizontalDivider(color = MaterialTheme.colorScheme.background)
 
         val dDayTitle = R.string.top_app_bar_end_date
         DropdownMenuItem(
-            onClick = { expanded.value = false
+            onClick = {
+                expanded.value = false
                 setTopTitle(dDayTitle)
             },
             text = {
                 Text(
                     modifier = Modifier.fillMaxWidth(),
                     textAlign = TextAlign.Center,
-                    text = stringResource(id = dDayTitle)
+                    text = stringResource(id = dDayTitle),
+                    color = MaterialTheme.colorScheme.onPrimary
                 )
             }
         )

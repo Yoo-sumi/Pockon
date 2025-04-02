@@ -28,6 +28,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.scale
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
@@ -234,9 +235,9 @@ fun SettingItem(text: String, isTitle: Boolean = false, isSwitch: Boolean = fals
                             checkedTrackColor = MaterialTheme.colorScheme.primaryContainer,
                             checkedThumbColor = MaterialTheme.colorScheme.background,
                             checkedBorderColor = MaterialTheme.colorScheme.primaryContainer,
-                            uncheckedTrackColor = MaterialTheme.colorScheme.errorContainer,
+                            uncheckedTrackColor = Color.LightGray,
                             uncheckedThumbColor = MaterialTheme.colorScheme.background,
-                            uncheckedBorderColor = MaterialTheme.colorScheme.errorContainer,
+                            uncheckedBorderColor = Color.LightGray
                         )
                     )
                 }

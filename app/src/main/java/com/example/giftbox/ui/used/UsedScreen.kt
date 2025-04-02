@@ -249,14 +249,14 @@ fun UsedGiftItem(
         Card(
             modifier = Modifier
                 .fillMaxWidth()
-                .background(MaterialTheme.colorScheme.onPrimary),
+                .background(MaterialTheme.colorScheme.secondaryContainer),
             shape = RoundedCornerShape(10.dp), // 모서리 둥글기
             border = BorderStroke(0.5.dp, MaterialTheme.colorScheme.outline) // 테두리 색상과 두께 지정
         ) {
             // 카드 콘텐츠
             Column(
                 modifier = Modifier
-                    .background(MaterialTheme.colorScheme.background)
+                    .background(MaterialTheme.colorScheme.secondaryContainer)
                     .fillMaxWidth()
             ) {
                 Box {
