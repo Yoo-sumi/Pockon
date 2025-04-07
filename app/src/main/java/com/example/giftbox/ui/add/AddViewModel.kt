@@ -8,9 +8,9 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.giftbox.R
 import com.example.giftbox.alarm.MyAlarmManager
-import com.example.giftbox.data.GiftRepository
-import com.example.giftbox.model.Gift
-import com.example.giftbox.ui.utils.getDdayInt
+import com.example.giftbox.data.repository.GiftRepository
+import com.example.giftbox.data.model.Gift
+import com.example.giftbox.util.getDdayInt
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -70,9 +70,26 @@ class AddViewModel @Inject constructor(
         ).format(Date(System.currentTimeMillis()))
 
         val gift = if (_isCheckedCash.value) {
-            Gift(uid = uid, name = _name.value, photo = _photo.value, brand = _brand.value, endDt = _endDate.value, addDt = addDate, memo = _memo.value, cash = _cash.value)
+            Gift(
+                uid = uid,
+                name = _name.value,
+                photo = _photo.value,
+                brand = _brand.value,
+                endDt = _endDate.value,
+                addDt = addDate,
+                memo = _memo.value,
+                cash = _cash.value
+            )
         } else {
-            Gift(uid = uid, name = _name.value, photo = _photo.value, brand = _brand.value, endDt = _endDate.value, addDt = addDate, memo = _memo.value)
+            Gift(
+                uid = uid,
+                name = _name.value,
+                photo = _photo.value,
+                brand = _brand.value,
+                endDt = _endDate.value,
+                addDt = addDate,
+                memo = _memo.value
+            )
         }
         viewModelScope.launch {
             giftRepository.addGift(isGuestMode, gift) { id ->
@@ -81,7 +98,8 @@ class AddViewModel @Inject constructor(
                     viewModelScope.launch(Dispatchers.IO) {
                         giftRepository.insertGift(gift.copy(id = id))
                     }
-                    val alarmList = sharedPref.getStringSet("alarm_list", mutableSetOf())?.toMutableSet()
+                    val alarmList =
+                        sharedPref.getStringSet("alarm_list", mutableSetOf())?.toMutableSet()
                     // 알림 등록
                     if (isNotiEndDt && getDdayInt(gift.endDt) in 0..1 && alarmList?.contains(gift.id) == false) {
                         alarmList.add(gift.id)

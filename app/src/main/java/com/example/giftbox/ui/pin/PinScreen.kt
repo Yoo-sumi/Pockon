@@ -100,7 +100,8 @@ fun PinScreen(onSuccess: () -> Unit) {
                 } else { // pin circle shape
                     Row {
                         (0 until pinViewModel.getPinSize()).forEach {
-                            val bgColor = if (pinViewModel.inputPin.size > it) R.color.onPrimary else R.color.background
+                            val bgColor =
+                                if (pinViewModel.inputPin.size > it) R.color.onPrimary else R.color.background
                             Box(
                                 modifier = Modifier
                                     .padding(8.dp)
@@ -207,7 +208,7 @@ fun PinScreen(onSuccess: () -> Unit) {
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     PinKeyItem(
-                        onClick = {  }
+                        onClick = { }
                     ) {
                         Spacer(modifier = Modifier.padding(4.dp))
                     }

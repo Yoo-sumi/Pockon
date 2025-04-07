@@ -20,7 +20,7 @@
             android:layout_width="match_parent"
             android:layout_height="80dp"
             android:contentDescription="@string/app_name"
-            android:src="@drawable/icon_gift" />
+            android:src="@drawable/ic_gift" />
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -57,7 +57,7 @@
             android:layout_height="wrap_content"
             android:text="@string/btn_guest_login"
             android:textSize="14sp"
-            android:drawableStart="@drawable/icon_guest"
+            android:drawableStart="@drawable/ic_guest"
             android:drawableTint="@color/primary"
             android:textAllCaps="false"
             style="@style/CustomButtonStyle"

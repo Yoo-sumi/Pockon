@@ -39,7 +39,7 @@
             android:value="${NAVER_MAP_CLIENT_ID}" />
 
         <activity
-            android:name=".MainActivity"
+            android:name=".ui.main.MainActivity"
             android:exported="true"
             android:theme="@style/Theme.AppCompat.Light.NoActionBar">
             <intent-filter>

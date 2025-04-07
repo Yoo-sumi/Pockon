@@ -12,6 +12,7 @@
     <color name="gray">#777777</color>
     <color name="light_gray">#FFBDBDBD</color>
     <color name="my_blue">#178FEB</color>
+    <color name="black_loading">#80000000</color>
 
     <color name="primary">#171719</color>
     <color name="onPrimary">#FFFFFF</color>

@@ -58,12 +58,12 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import coil.compose.AsyncImage
-import com.example.giftbox.ui.utils.DateTransformation
+import com.example.giftbox.util.DateTransformation
 import com.example.giftbox.R
-import com.example.giftbox.ui.LoadingScreen
-import com.example.giftbox.ui.utils.formatDateToYYYYMMDD
-import com.example.giftbox.ui.utils.getBitmapFromUri
-import com.example.giftbox.ui.utils.thousandSeparatorTransformation
+import com.example.giftbox.ui.loading.LoadingScreen
+import com.example.giftbox.util.formatDateToYYYYMMDD
+import com.example.giftbox.util.getBitmapFromUri
+import com.example.giftbox.util.thousandSeparatorTransformation
 import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
 import java.util.Calendar
@@ -203,7 +203,7 @@ fun AddGifticon(onBack: (Boolean) -> Unit) {
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(start = 25.dp, end = 25.dp, bottom = 15.dp)
-                ) {
+            ) {
                 Text(
                     color = MaterialTheme.colorScheme.onPrimary,
                     text = stringResource(id = R.string.btn_add),
@@ -231,7 +231,13 @@ fun AddGifticon(onBack: (Boolean) -> Unit) {
 }
 
 @Composable
-fun InputDataTextField(value: String, label: Int, index: Int, onValueChange: (Int, String) -> Unit, onDatePicker: () -> Unit) {
+fun InputDataTextField(
+    value: String,
+    label: Int,
+    index: Int,
+    onValueChange: (Int, String) -> Unit,
+    onDatePicker: () -> Unit
+) {
     var modifier = Modifier
         .fillMaxWidth()
         .padding(end = 0.dp, start = 0.dp, bottom = 5.dp, top = 0.dp)
@@ -248,8 +254,13 @@ fun InputDataTextField(value: String, label: Int, index: Int, onValueChange: (In
             onValueChange(index, it)
         },
         maxLines = if (index == 4) 50 else 1,
-        label = { Text(text = stringResource(id = label), color = MaterialTheme.colorScheme.onPrimary) },
-        visualTransformation = when(index) {
+        label = {
+            Text(
+                text = stringResource(id = label),
+                color = MaterialTheme.colorScheme.onPrimary
+            )
+        },
+        visualTransformation = when (index) {
             2 -> thousandSeparatorTransformation(true)
             3 -> DateTransformation()
             else -> VisualTransformation.None
@@ -270,7 +281,10 @@ fun InputDataTextField(value: String, label: Int, index: Int, onValueChange: (In
 }
 
 @Composable
-fun GiftImage(selectedImage: Bitmap?, galleryLauncher:  ManagedActivityResultLauncher<PickVisualMediaRequest, Uri?>) {
+fun GiftImage(
+    selectedImage: Bitmap?,
+    galleryLauncher: ManagedActivityResultLauncher<PickVisualMediaRequest, Uri?>
+) {
     Row(
         horizontalArrangement = Arrangement.Center,
         modifier = Modifier
@@ -296,7 +310,7 @@ fun GiftImage(selectedImage: Bitmap?, galleryLauncher:  ManagedActivityResultLau
                     modifier = Modifier
                         .width(80.dp)
                         .height(80.dp),
-                    painter = painterResource(id = R.drawable.icon_add_photo),
+                    painter = painterResource(id = R.drawable.ic_add_photo),
                     contentDescription = "add photo",
                     contentScale = ContentScale.Crop
                 )
@@ -327,8 +341,8 @@ fun AddGiftScreenTopBar(onBack: () -> Unit) {
             }
         ) {
             Icon(
-                imageVector = Icons.AutoMirrored.Filled.ArrowBack
-                , contentDescription = "back button"
+                imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                contentDescription = "back button"
             )
         }
         Text(

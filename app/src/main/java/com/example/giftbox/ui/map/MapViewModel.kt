@@ -4,11 +4,11 @@ import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.giftbox.data.BrandSearchRepository
-import com.example.giftbox.data.GiftRepository
-import com.example.giftbox.model.Document
-import com.example.giftbox.model.Gift
-import com.example.giftbox.ui.utils.loadImageFromPath
+import com.example.giftbox.data.repository.BrandSearchRepository
+import com.example.giftbox.data.repository.GiftRepository
+import com.example.giftbox.data.model.Document
+import com.example.giftbox.data.model.Gift
+import com.example.giftbox.util.loadImageFromPath
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.collectLatest
@@ -25,9 +25,6 @@ class MapViewModel @Inject constructor(
     private val _displayInfoList = mutableStateOf<List<Pair<Document, List<Gift>>>>(listOf())
     val displayInfoList: State<List<Pair<Document, List<Gift>>>> = _displayInfoList
 
-    private val _selectedGift = mutableStateOf<Gift?>(null)
-    val selectedGift: State<Gift?> = _selectedGift
-
     private var giftList = listOf<Gift>()
     private var brandInfoList = mutableMapOf<String, List<Document>>()
     private var nearestDoc: Document? = null
@@ -41,8 +38,19 @@ class MapViewModel @Inject constructor(
         viewModelScope.launch(Dispatchers.IO) {
             giftRepository.getAllGift().take(1).collectLatest { allGift -> // 지도에서는 실시간 갱신 안함 > 1로제한
                 if (allGift.isNotEmpty()) {
-                    giftList =  allGift.map { gift ->
-                        Gift(id = gift.id, uid = gift.uid, photo = loadImageFromPath(gift.photoPath), name = gift.name, brand = gift.brand, endDt = gift.endDt, addDt = gift.addDt, memo = gift.memo, usedDt = gift.usedDt, cash = gift.cash)
+                    giftList = allGift.map { gift ->
+                        Gift(
+                            id = gift.id,
+                            uid = gift.uid,
+                            photo = loadImageFromPath(gift.photoPath),
+                            name = gift.name,
+                            brand = gift.brand,
+                            endDt = gift.endDt,
+                            addDt = gift.addDt,
+                            memo = gift.memo,
+                            usedDt = gift.usedDt,
+                            cash = gift.cash
+                        )
                     }
                     getAllBrands() // 키워드별 브랜드 위치 정보 가져오기(로컬)
                 } else {
@@ -71,7 +79,8 @@ class MapViewModel @Inject constructor(
             documents.forEach { document ->
                 // 가장 가까운곳 뽑아내기
                 if (nearestDoc == null) nearestDoc = document
-                else if (nearestDoc!!.distance.toDouble() > document.distance.toDouble()) nearestDoc = document
+                else if (nearestDoc!!.distance.toDouble() > document.distance.toDouble()) nearestDoc =
+                    document
 
                 if (mappingList.keys.contains(document)) mappingList[document]?.add(keyword)
                 else mappingList[document] = mutableSetOf(keyword)
@@ -88,9 +97,4 @@ class MapViewModel @Inject constructor(
     }
 
     fun getNearestDoc() = this.nearestDoc
-
-    fun setSelectedGift(gift: Gift?) {
-        _selectedGift.value = gift
-    }
-
 }

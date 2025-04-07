@@ -8,10 +8,10 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.giftbox.R
 import com.example.giftbox.alarm.MyAlarmManager
-import com.example.giftbox.data.GiftRepository
-import com.example.giftbox.model.Gift
-import com.example.giftbox.ui.utils.getDdayInt
-import com.example.giftbox.ui.utils.loadImageFromPath
+import com.example.giftbox.data.repository.GiftRepository
+import com.example.giftbox.data.model.Gift
+import com.example.giftbox.util.getDdayInt
+import com.example.giftbox.util.loadImageFromPath
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.collectLatest
@@ -73,7 +73,20 @@ class DetailViewModel @Inject constructor(
     fun getGift(id: String) {
         viewModelScope.launch(Dispatchers.IO) {
             giftRepository.getGift(id).collectLatest { gift ->
-                setGift(Gift(id = gift.id, uid = gift.uid, photo = loadImageFromPath(gift.photoPath), name = gift.name, brand = gift.brand, endDt = gift.endDt, addDt = gift.addDt, memo = gift.memo, usedDt = gift.usedDt, cash = gift.cash))
+                setGift(
+                    Gift(
+                        id = gift.id,
+                        uid = gift.uid,
+                        photo = loadImageFromPath(gift.photoPath),
+                        name = gift.name,
+                        brand = gift.brand,
+                        endDt = gift.endDt,
+                        addDt = gift.addDt,
+                        memo = gift.memo,
+                        usedDt = gift.usedDt,
+                        cash = gift.cash
+                    )
+                )
             }
         }
     }
@@ -133,9 +146,31 @@ class DetailViewModel @Inject constructor(
     fun updateGift(onComplete: (Boolean) -> Unit) {
         _isShowIndicator.value = true
         val updateGift = if (_isCheckedCash.value) {
-            Gift(id = _gift.value.id, uid = _gift.value.uid, photo = _photo.value, name = _name.value, brand = _brand.value, endDt = _endDate.value, addDt = _gift.value.addDt, memo = _memo.value, usedDt = _gift.value.usedDt, cash = _cash.value)
+            Gift(
+                id = _gift.value.id,
+                uid = _gift.value.uid,
+                photo = _photo.value,
+                name = _name.value,
+                brand = _brand.value,
+                endDt = _endDate.value,
+                addDt = _gift.value.addDt,
+                memo = _memo.value,
+                usedDt = _gift.value.usedDt,
+                cash = _cash.value
+            )
         } else {
-            Gift(id = _gift.value.id, uid = _gift.value.uid, photo = _photo.value, name = _name.value, brand = _brand.value, endDt = _endDate.value, addDt = _gift.value.addDt, memo = _memo.value, usedDt = _gift.value.usedDt, cash = "")
+            Gift(
+                id = _gift.value.id,
+                uid = _gift.value.uid,
+                photo = _photo.value,
+                name = _name.value,
+                brand = _brand.value,
+                endDt = _endDate.value,
+                addDt = _gift.value.addDt,
+                memo = _memo.value,
+                usedDt = _gift.value.usedDt,
+                cash = ""
+            )
         }
         giftRepository.updateGift(isGuestMode, updateGift, true) { result ->
             // 수정 성공
@@ -145,7 +180,7 @@ class DetailViewModel @Inject constructor(
                     giftRepository.insertGift(updateGift)
                 }
                 // 날짜 수정 했을때만 알람 수정
-                if(_gift.value.endDt != _endDate.value) {
+                if (_gift.value.endDt != _endDate.value) {
                     myAlarmManager.cancel(updateGift.id)
                     // 알림 등록
                     if (isNotiEndDt && getDdayInt(updateGift.endDt) in 0..1) {
@@ -171,7 +206,10 @@ class DetailViewModel @Inject constructor(
                 Locale.getDefault()
             ).format(Date(System.currentTimeMillis()))
         }
-        val gift = if (cash == null) _gift.value.copy(usedDt = nowDt) else _gift.value.copy(usedDt = nowDt, cash = cash.toString())
+        val gift = if (cash == null) _gift.value.copy(usedDt = nowDt) else _gift.value.copy(
+            usedDt = nowDt,
+            cash = cash.toString()
+        )
         giftRepository.updateGift(isGuestMode, gift, false) { result ->
             if (result) {
                 // 로컬 수정

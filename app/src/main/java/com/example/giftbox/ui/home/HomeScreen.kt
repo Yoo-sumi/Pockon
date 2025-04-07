@@ -22,7 +22,6 @@ import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -47,7 +46,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.colorResource
@@ -61,15 +59,20 @@ import androidx.core.content.ContextCompat
 import androidx.hilt.navigation.compose.hiltViewModel
 import coil.compose.AsyncImage
 import com.example.giftbox.R
-import com.example.giftbox.model.Document
-import com.example.giftbox.model.Gift
-import com.example.giftbox.ui.utils.formatString
-import com.example.giftbox.ui.utils.getDday
+import com.example.giftbox.data.model.Document
+import com.example.giftbox.data.model.Gift
+import com.example.giftbox.util.formatString
+import com.example.giftbox.util.getDday
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationServices
 
 @Composable
-fun HomeScreen(onAdd: () -> Unit, showMap: () -> Unit, onDetail: (String) -> Unit, isLoading: (Boolean) -> Unit) {
+fun HomeScreen(
+    onAdd: () -> Unit,
+    showMap: () -> Unit,
+    onDetail: (String) -> Unit,
+    isLoading: (Boolean) -> Unit
+) {
     val homeViewModel = hiltViewModel<HomeViewModel>()
     val context = LocalContext.current
     val fusedLocationClient = remember {
@@ -240,7 +243,13 @@ fun HomeScreen(onAdd: () -> Unit, showMap: () -> Unit, onDetail: (String) -> Uni
 
 /** 기프티콘 각각의 카드*/
 @Composable
-fun HomeGiftItem(gift: Gift, formattedEndDate: String, dDay: Pair<String, Boolean>, document: Document? = null, onClick: () -> Unit) {
+fun HomeGiftItem(
+    gift: Gift,
+    formattedEndDate: String,
+    dDay: Pair<String, Boolean>,
+    document: Document? = null,
+    onClick: () -> Unit
+) {
     Box(
         modifier = Modifier
             .clip(shape = RoundedCornerShape(10.dp))
@@ -252,7 +261,7 @@ fun HomeGiftItem(gift: Gift, formattedEndDate: String, dDay: Pair<String, Boolea
             modifier = Modifier
                 .width(160.dp),
             shape = RoundedCornerShape(10.dp), // 모서리 둥글기
-            border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline) // 테두리 색상과 두께 지정
+            border = BorderStroke(1.5.dp, MaterialTheme.colorScheme.outline) // 테두리 색상과 두께 지정
         ) {
             Column(
                 modifier = Modifier
@@ -394,7 +403,10 @@ private fun getLocation(
     fusedLocationClient: FusedLocationProviderClient,
     onComplete: (Location?) -> Unit
 ) {
-    val permissions = arrayOf(Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION)
+    val permissions = arrayOf(
+        Manifest.permission.ACCESS_FINE_LOCATION,
+        Manifest.permission.ACCESS_COARSE_LOCATION
+    )
 
     if (permissions.all {
             ContextCompat.checkSelfPermission(

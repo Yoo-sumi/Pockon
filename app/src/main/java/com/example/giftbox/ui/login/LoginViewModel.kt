@@ -9,7 +9,7 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.giftbox.data.LoginRepository
+import com.example.giftbox.data.repository.LoginRepository
 import com.google.android.libraries.identity.googleid.GoogleIdTokenCredential
 import com.google.android.libraries.identity.googleid.GoogleIdTokenParsingException
 import com.google.firebase.auth.GoogleAuthProvider
@@ -60,7 +60,8 @@ class LoginViewModel @Inject constructor(
                 _isLoading.value = true
                 if (credential.type == GoogleIdTokenCredential.TYPE_GOOGLE_ID_TOKEN_CREDENTIAL) {
                     try {
-                        val googleIdTokenCredential = GoogleIdTokenCredential.createFrom(credential.data)
+                        val googleIdTokenCredential =
+                            GoogleIdTokenCredential.createFrom(credential.data)
                         val idToken = googleIdTokenCredential.idToken
                         val firebaseCredential = GoogleAuthProvider.getCredential(idToken, null)
 
@@ -83,6 +84,7 @@ class LoginViewModel @Inject constructor(
                     _isFail.value = true
                 }
             }
+
             else -> {
                 _isLoading.value = false
                 _isFail.value = true
@@ -97,5 +99,4 @@ class LoginViewModel @Inject constructor(
     private fun saveMyUid(uid: String) {
         sharedPref.edit().putString("uid", uid).apply()
     }
-
 }

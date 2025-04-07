@@ -5,9 +5,9 @@ import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.giftbox.data.GiftRepository
-import com.example.giftbox.model.Gift
-import com.example.giftbox.ui.utils.loadImageFromPath
+import com.example.giftbox.data.repository.GiftRepository
+import com.example.giftbox.data.model.Gift
+import com.example.giftbox.util.loadImageFromPath
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.collectLatest
@@ -49,9 +49,20 @@ class UsedViewModel @Inject constructor(
             giftRepository.getAllUsedGift().collectLatest { allGift ->
                 if (allGift.isNotEmpty()) {
                     val dateFormat = SimpleDateFormat("yyyyMMdd", Locale.KOREA)
-                    _giftList.value =  allGift.map { gift ->
-                        Gift(id = gift.id, uid = gift.uid, photo = loadImageFromPath(gift.photoPath), name = gift.name, brand = gift.brand, endDt = gift.endDt, addDt = gift.addDt, memo = gift.memo, usedDt = gift.usedDt, cash = gift.cash)
-                    }.sortedByDescending {  gift -> dateFormat.parse(gift.endDt)?.time }
+                    _giftList.value = allGift.map { gift ->
+                        Gift(
+                            id = gift.id,
+                            uid = gift.uid,
+                            photo = loadImageFromPath(gift.photoPath),
+                            name = gift.name,
+                            brand = gift.brand,
+                            endDt = gift.endDt,
+                            addDt = gift.addDt,
+                            memo = gift.memo,
+                            usedDt = gift.usedDt,
+                            cash = gift.cash
+                        )
+                    }.sortedByDescending { gift -> dateFormat.parse(gift.endDt)?.time }
                 } else {
                     // 기프티콘 없음
                     _giftList.value = listOf()
@@ -119,5 +130,4 @@ class UsedViewModel @Inject constructor(
             _checkedGiftList.value = listOf()
         }
     }
-
 }

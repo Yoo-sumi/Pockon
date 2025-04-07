@@ -1,4 +1,5 @@
 <resources>
+    <!--txt-->
     <string name="app_name">GiftBox</string>
     <string name="preference_file_key">key_login</string>
     <string name="login_state">login_state</string>
@@ -9,10 +10,6 @@
     <string name="detail">상세</string>
     <string name="empty">초기</string>
     <string name="map">지도</string>
-    <string name="title_add_gift">기프티콘 추가</string>
-    <string name="title_detail_gift">상세정보</string>
-    <string name="title_used_gift">사용완료 기프티콘</string>
-    <string name="msg_permission_photo">사진 접근 권한이 거부되었습니다.</string>
     <string name="txt_alert">알림</string>
     <string name="txt_delete">제거</string>
     <string name="txt_used">사용\n완료</string>
@@ -23,26 +20,27 @@
     <string name="txt_end_date">유효기간</string>
     <string name="txt_memo">메모</string>
     <string name="txt_won">₩</string>
-    <string name="btn_all_cash">전액</string>
-    <string name="btn_add">추가하기</string>
-    <string name="btn_register">등록하기</string>
-    <string name="btn_use">기프티콘 사용</string>
-    <string name="btn_save">저장하기</string>
-    <string name="btn_cancel">취소</string>
-    <string name="btn_confirm">확인</string>
-    <string name="btn_use_complete">사용 완료</string>
-    <string name="btn_use_cancel">사용 취소</string>
-    <string name="btn_open_map">지도보기</string>
-    <string name="btn_goggle_login">Sign In With Google</string>
-    <string name="btn_guest_login">"Sign In As Guest</string>
-    <string name="btn_delete">삭제</string>
-    <string name="btn_edit">편집</string>
-    <string name="dlg_msg_delete">정말 삭제하시겠습니까?\n삭제된 기프티콘은 복구할 수 없습니다.</string>
-    <string name="dlg_msg_use_cancel">기프티콘 사용을 취소하시겠습니까?</string>
-    <string name="dlg_msg_use_pin">소중한 기프티콘을 지킬 수 있는 보안을 설정하시겠습니까?</string>
-    <string name="title_msg_use_pin">보안 수단 미설정</string>
-    <string name="btn_pin_not_use">사용안함</string>
-    <string name="btn_pin_setting">설정</string>
+    <string name="txt_no_gift">사용 가능한 기프티콘이 없습니다.</string>
+    <string name="txt_used_stamp">사용완료\n%1$s</string>
+    <string name="txt_create_pin">PIN 번호를 생성하세요.</string>
+    <string name="txt_check_pin">입력한 PIN 번호를 확인합니다.</string>
+    <string name="txt_input_pin">PIN 번호를 입력해주세요.</string>
+    <string name="txt_no_pin_auth">보안 설정 사용 안 함</string>
+    <string name="txt_use_near">근처 사용 가능 기프티콘</string>
+    <string name="txt_use_end">사용 기한 임박 기프티콘</string>
+    <string name="txt_use_cash_inpur">사용금액 입력</string>
+    <string name="txt_all_select">전체 선택</string>
+
+    <!--title-->
+    <string name="title_add_gift">기프티콘 추가</string>
+    <string name="title_detail_gift">상세정보</string>
+    <string name="title_used_gift">사용완료 기프티콘</string>
+    <string name="top_app_bar_recent">최신순</string>
+    <string name="top_app_bar_end_date">디데이순</string>
+    <string name="chip_all">전체</string>
+
+    <!--msg-->
+    <string name="msg_permission_photo">사진 접근 권한이 거부되었습니다.</string>
     <string name="msg_no_photo">사진을 추가해주세요.</string>
     <string name="msg_no_name">이름을 입력해주세요.</string>
     <string name="msg_no_brand">브랜드를 입력해주세요.</string>
@@ -57,22 +55,34 @@
     <string name="msg_noti_end_dt_today">오늘은 기프티콘 만료일 입니다!</string>
     <string name="msg_noti_end_dt">기프티콘 만료일 %d일 전입니다.</string>
     <string name="msg_login_fail">로그인에 실패했습니다.</string>
-    <string name="chip_all">전체</string>
-    <string name="top_app_bar_recent">최신순</string>
-    <string name="top_app_bar_end_date">디데이순</string>
-    <string name="txt_no_gift">사용 가능한 기프티콘이 없습니다.</string>
-    <string name="txt_used_stamp">사용완료\n%1$s</string>
-    <string name="txt_create_pin">PIN 번호를 생성하세요.</string>
-    <string name="txt_check_pin">입력한 PIN 번호를 확인합니다.</string>
-    <string name="txt_input_pin">PIN 번호를 입력해주세요.</string>
-    <string name="txt_no_pin_auth">보안 설정 사용 안 함</string>
-    <string name="txt_use_near">근처 사용 가능 기프티콘</string>
-    <string name="txt_use_end">사용 기한 임박 기프티콘</string>
-    <string name="txt_use_cash_inpur">사용금액 입력</string>
-    <string name="txt_all_select">전체 선택</string>
     <string name="msg_pin_auth_fail">PIN 번호가 일치하지 않습니다.</string>
     <string name="msg_no_permission">권한이 거부되었습니다.\n설정에서 권한을 모두 허용해 주세요.</string>
     <string name="msg_no_internet">네트워크에 연결되지 않았습니다.\nWi-Fi 또는 모바일 데이터를 켜주세요.</string>
+
+    <!--btn-->
+    <string name="btn_all_cash">전액</string>
+    <string name="btn_add">추가하기</string>
+    <string name="btn_register">등록하기</string>
+    <string name="btn_use">기프티콘 사용</string>
+    <string name="btn_save">저장하기</string>
+    <string name="btn_cancel">취소</string>
+    <string name="btn_confirm">확인</string>
+    <string name="btn_use_complete">사용 완료</string>
+    <string name="btn_use_cancel">사용 취소</string>
+    <string name="btn_open_map">지도보기</string>
+    <string name="btn_goggle_login">Sign In With Google</string>
+    <string name="btn_guest_login">"Sign In As Guest</string>
+    <string name="btn_delete">삭제</string>
+    <string name="btn_edit">편집</string>
+    <string name="btn_pin_setting">설정</string>
+
+    <!--dlg-->
+    <string name="dlg_msg_delete">정말 삭제하시겠습니까?\n삭제된 기프티콘은 복구할 수 없습니다.</string>
+    <string name="dlg_msg_use_cancel">기프티콘 사용을 취소하시겠습니까?</string>
+    <string name="dlg_msg_use_pin">소중한 기프티콘을 지킬 수 있는 보안을 설정하시겠습니까?</string>
+    <string name="btn_pin_not_use">사용안함</string>
+
+    <!--format-->
     <string name="format_end_date">~%s</string>
     <string name="format_cash">%s원</string>
     <string name="format_remain_cash">잔액: %s원</string>
@@ -89,9 +99,8 @@
     <string name="dlg_msg_logout_in_guest">로그아웃을 하시겠습니까?\n저장된 데이터가 모두 삭제됩니다.</string>
     <string name="dlg_msg_remove_account">회원 탈퇴를 하시겠습니까?\n저장된 데이터가 모두 삭제됩니다.</string>
 
+    <!--copyright-->
     <string name="txt_copyright">Copyright</string>
-    <string name="txt_copyright_info">
-        Icons made by [author_name] from Flaticon (https://www.flaticon.com/)
-    </string>
-
+    <string name="txt_copyright_info">Icons made by [%s] from Flaticon</string>
+    <string name="txt_copyright_info_url">(%s)</string>
 </resources>

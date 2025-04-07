@@ -18,24 +18,29 @@ import javax.inject.Inject
 @AndroidEntryPoint
 class MainFragment : Fragment() {
 
-    @Inject lateinit var sharedPref: SharedPreferences
+    @Inject
+    lateinit var sharedPref: SharedPreferences
 
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View = ComposeView(requireContext()).apply {
+    override fun onCreateView(
+        inflater: LayoutInflater,
+        container: ViewGroup?,
+        savedInstanceState: Bundle?
+    ): View = ComposeView(requireContext()).apply {
         val isGuestMode = sharedPref.getBoolean("guest_mode", false)
         setContent {
             val lightColorScheme = lightColorScheme(
-                primary = colorResource(id = R.color.primary),  // Primary 색상
-                onPrimary = colorResource(id = R.color.onPrimary),  // Primary 색상의 텍스트 색
-                primaryContainer = colorResource(id = R.color.primaryContainer),  // Primary 색상에 맞춘 컨테이너 색상
-                onPrimaryContainer = colorResource(id = R.color.onPrimary),  // Primary 컨테이너의 텍스트 색상
-                secondary = colorResource(id = R.color.secondary),  // Secondary 색상 Color(0xFF8AC3E1)
+                primary = colorResource(id = R.color.primary),
+                onPrimary = colorResource(id = R.color.onPrimary),
+                primaryContainer = colorResource(id = R.color.primaryContainer),
+                onPrimaryContainer = colorResource(id = R.color.onPrimary),
+                secondary = colorResource(id = R.color.secondary),
                 secondaryContainer = colorResource(id = R.color.secondaryContainer),
-                tertiary = colorResource(id = R.color.tertiary),  // Tertiary 색상
-                tertiaryContainer = colorResource(id = R.color.tertiaryContainer),  // Tertiary 색상
-                outline = colorResource(id = R.color.light_gray),  // Tertiary 색상
-                error = colorResource(id = R.color.red),  // Error 색상에 맞춘 컨테이너 색상
-                errorContainer = colorResource(id = R.color.light_gray),  // Error 색상에 맞춘 컨테이너 색상
-                background = colorResource(id = R.color.background)  // Error 색상에 맞춘 컨테이너 색상
+                tertiary = colorResource(id = R.color.tertiary),
+                tertiaryContainer = colorResource(id = R.color.tertiaryContainer),
+                outline = colorResource(id = R.color.light_gray),
+                error = colorResource(id = R.color.red),
+                errorContainer = colorResource(id = R.color.light_gray),
+                background = colorResource(id = R.color.background)
             )
             MaterialTheme(
                 colorScheme = lightColorScheme  // Light Mode Color Scheme
@@ -62,5 +67,4 @@ class MainFragment : Fragment() {
             }
         }
     }
-
 }

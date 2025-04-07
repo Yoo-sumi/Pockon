@@ -57,17 +57,23 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import com.example.giftbox.R
-import com.example.giftbox.ui.LoadingScreen
+import com.example.giftbox.ui.loading.LoadingScreen
 import com.example.giftbox.ui.add.AddGifticon
 import com.example.giftbox.ui.detail.DetailScreen
 import com.example.giftbox.ui.home.HomeScreen
 import com.example.giftbox.ui.list.ListScreen
 import com.example.giftbox.ui.map.MapScreen
-import com.example.giftbox.ui.settings.SettingScreen
+import com.example.giftbox.ui.settings.CopyrightScreen
+import com.example.giftbox.ui.settings.SettingsScreen
 import com.example.giftbox.ui.used.UsedScreen
 
 @Composable
-fun BottomNavigationBar(isGuestMode: Boolean, movePinScreen: () -> Unit, moveLogInScreen: () -> Unit, onFinish: () -> Unit) {
+fun BottomNavigationBar(
+    isGuestMode: Boolean,
+    movePinScreen: () -> Unit,
+    moveLogInScreen: () -> Unit,
+    onFinish: () -> Unit
+) {
     val navController = rememberNavController()
 
     val navBackStackEntry by navController.currentBackStackEntryAsState()
@@ -160,7 +166,7 @@ fun BottomNavigationBar(isGuestMode: Boolean, movePinScreen: () -> Unit, moveLog
                     onAdd = {
                         navController.navigate(route = Screen.Add.route)
                     },
-                    showMap =  {
+                    showMap = {
                         navController.navigate(route = Screen.Map.route)
                     },
                     onDetail = { id ->
@@ -185,7 +191,7 @@ fun BottomNavigationBar(isGuestMode: Boolean, movePinScreen: () -> Unit, moveLog
                 )
             }
             composable(Screen.Setting.route) {
-                SettingScreen(
+                SettingsScreen(
                     onUsedGift = {
                         navController.navigate(route = Screen.Used.route)
                     },
@@ -194,6 +200,9 @@ fun BottomNavigationBar(isGuestMode: Boolean, movePinScreen: () -> Unit, moveLog
                     },
                     moveLogInScreen = {
                         moveLogInScreen()
+                    },
+                    moveCopyrightScreen = {
+                        navController.navigate(route = Screen.Copyright.route)
                     },
                     isLoading = {
                         isShowIndicator = it
@@ -251,6 +260,9 @@ fun BottomNavigationBar(isGuestMode: Boolean, movePinScreen: () -> Unit, moveLog
                     }
                 )
             }
+            composable(Screen.Copyright.route) {
+                CopyrightScreen()
+            }
         }
     }
 
@@ -277,9 +289,18 @@ private fun CheckPermission(
     launcher: ManagedActivityResultLauncher<Array<String>, Map<String, Boolean>>
 ) {
     val permissions = if (Build.VERSION.SDK_INT >= 33) {
-        arrayOf(Manifest.permission.POST_NOTIFICATIONS, Manifest.permission.READ_MEDIA_IMAGES, Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION)
+        arrayOf(
+            Manifest.permission.POST_NOTIFICATIONS,
+            Manifest.permission.READ_MEDIA_IMAGES,
+            Manifest.permission.ACCESS_FINE_LOCATION,
+            Manifest.permission.ACCESS_COARSE_LOCATION
+        )
     } else {
-        arrayOf(Manifest.permission.READ_EXTERNAL_STORAGE,  Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION)
+        arrayOf(
+            Manifest.permission.READ_EXTERNAL_STORAGE,
+            Manifest.permission.ACCESS_FINE_LOCATION,
+            Manifest.permission.ACCESS_COARSE_LOCATION
+        )
     }
 
     if (!permissions.all {
@@ -303,10 +324,12 @@ sealed class Screen(val route: String, val icon: ImageVector, @StringRes val lab
     data object Detail : Screen("detail", Icons.Filled.Search, R.string.detail)
     data object Map : Screen("map", Icons.Filled.LocationOn, R.string.map)
     data object Used : Screen("used", Icons.Filled.LocationOn, R.string.map)
+    data object Copyright : Screen("copyright", Icons.Filled.LocationOn, R.string.map)
 }
 
 fun isNetworkConnected(context: Context): Boolean {
-    val connectivityManager = context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
+    val connectivityManager =
+        context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
         val network = connectivityManager.activeNetwork
         val capabilities = connectivityManager.getNetworkCapabilities(network)

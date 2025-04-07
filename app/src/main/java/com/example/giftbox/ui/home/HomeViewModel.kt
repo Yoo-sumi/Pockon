@@ -5,12 +5,14 @@ import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.giftbox.GiftEntity
-import com.example.giftbox.data.BrandSearchRepository
-import com.example.giftbox.data.GiftRepository
-import com.example.giftbox.model.Document
-import com.example.giftbox.model.Gift
-import com.example.giftbox.ui.utils.loadImageFromPath
+import com.example.giftbox.alarm.MyAlarmManager
+import com.example.giftbox.data.local.gift.GiftEntity
+import com.example.giftbox.data.repository.BrandSearchRepository
+import com.example.giftbox.data.repository.GiftRepository
+import com.example.giftbox.data.model.Document
+import com.example.giftbox.data.model.Gift
+import com.example.giftbox.util.getDdayInt
+import com.example.giftbox.util.loadImageFromPath
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.collectLatest
@@ -23,7 +25,8 @@ import javax.inject.Inject
 class HomeViewModel @Inject constructor(
     private val giftRepository: GiftRepository,
     private val brandSearchRepository: BrandSearchRepository,
-    private val sharedPref: SharedPreferences
+    private val sharedPref: SharedPreferences,
+    private val myAlarmManager: MyAlarmManager
 ) : ViewModel() {
 
     private var longitude: Double? = null
@@ -32,6 +35,7 @@ class HomeViewModel @Inject constructor(
     private var uid = sharedPref.getString("uid", "") ?: ""
     private var isGuestMode = sharedPref.getBoolean("guest_mode", false)
     private var isFirstLogin = sharedPref.getBoolean("first_login", true)
+    private var isNotiEndDt = sharedPref.getBoolean("noti_end_dt", true)
 
     private var giftList: List<Gift> = listOf()
 
@@ -87,12 +91,40 @@ class HomeViewModel @Inject constructor(
     private fun showGiftList(allGift: List<GiftEntity>) {
         if (allGift.isNotEmpty()) {
             giftList = allGift.map { gift ->
-                Gift(id = gift.id, uid = gift.uid, photo = loadImageFromPath(gift.photoPath), name = gift.name, brand = gift.brand, endDt = gift.endDt, addDt = gift.addDt, memo = gift.memo, usedDt = gift.usedDt, cash = gift.cash)
+                Gift(
+                    id = gift.id,
+                    uid = gift.uid,
+                    photo = loadImageFromPath(gift.photoPath),
+                    name = gift.name,
+                    brand = gift.brand,
+                    endDt = gift.endDt,
+                    addDt = gift.addDt,
+                    memo = gift.memo,
+                    usedDt = gift.usedDt,
+                    cash = gift.cash
+                )
+            }
+
+            val alarmList = sharedPref.getStringSet("alarm_list", mutableSetOf())?.toMutableSet()
+            giftList.forEach { gift ->
+                if (isNotiEndDt) {
+                    // 알림 등록
+                    if (getDdayInt(gift.endDt) in 0..1 && alarmList?.contains(gift.id) == false) {
+                        alarmList.add(gift.id)
+                        sharedPref.edit().putStringSet("alarm_list", alarmList).apply()
+                        myAlarmManager.schedule(gift, getDdayInt(gift.endDt))
+                    }
+                } else {
+                    sharedPref.edit().putStringSet("alarm_list", mutableSetOf()).apply()
+                    myAlarmManager.cancel(gift.id)
+                }
             }
 
             // 기한 임박 기프티콘 목록(TOP 30)
             val dateFormat = SimpleDateFormat("yyyyMMdd", Locale.KOREA)
-            _closeToGiftList.value = giftList.sortedBy { gift -> dateFormat.parse(gift.endDt)?.time }.filterIndexed { index, gift -> index < 30 }
+            _closeToGiftList.value =
+                giftList.sortedBy { gift -> dateFormat.parse(gift.endDt)?.time }
+                    .filterIndexed { index, gift -> index < 30 }
 
             getBrandInfoList() // 브랜드 검색
         } else {
@@ -110,8 +142,12 @@ class HomeViewModel @Inject constructor(
         giftList.forEach {
             if (!brandNames.contains(it.brand)) brandNames.add(it.brand)
         }
-        if (brandNames.isNotEmpty() && longitude != null && latitude != null)  {
-            brandSearchRepository.searchBrandInfoList(longitude!!, latitude!!, brandNames) { brandInfoList ->
+        if (brandNames.isNotEmpty() && longitude != null && latitude != null) {
+            brandSearchRepository.searchBrandInfoList(
+                longitude!!,
+                latitude!!,
+                brandNames
+            ) { brandInfoList ->
                 giftList.forEach { gift ->
                     // 가장 가까운 첫번째 위치만 보여준다(여러개의 스타벅스 중 가장 가까이 있는 한 곳)
                     if (brandInfoList[gift.brand]?.isEmpty() == true) return@forEach // 검색 결과가 없는 경우 스킵
@@ -142,7 +178,10 @@ class HomeViewModel @Inject constructor(
                 viewModelScope.launch(Dispatchers.IO) {
                     brandSearchRepository.deleteAllBrands()
                     brandInfoList.forEach { (keyword, documents) ->
-                        if (documents != null) brandSearchRepository.insertBrands(keyword, documents) // 키워드별 브랜드 위치정보 저장
+                        if (documents != null) brandSearchRepository.insertBrands(
+                            keyword,
+                            documents
+                        ) // 키워드별 브랜드 위치정보 저장
                     }
                 }
             }
@@ -155,7 +194,9 @@ class HomeViewModel @Inject constructor(
 
         if (giftList.isNotEmpty()) {
             val dateFormat = SimpleDateFormat("yyyyMMdd", Locale.KOREA)
-            _closeToGiftList.value = giftList.sortedBy { gift -> dateFormat.parse(gift.endDt)?.time }.filterIndexed { index, gift -> index < 30 }
+            _closeToGiftList.value =
+                giftList.sortedBy { gift -> dateFormat.parse(gift.endDt)?.time }
+                    .filterIndexed { index, gift -> index < 30 }
             getBrandInfoList()
         } else {
             _closeToGiftList.value = listOf()

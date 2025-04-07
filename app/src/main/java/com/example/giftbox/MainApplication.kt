@@ -7,7 +7,7 @@ import android.os.Build
 import dagger.hilt.android.HiltAndroidApp
 
 @HiltAndroidApp
-class MainApplication: Application() {
+class MainApplication : Application() {
 
     companion object {
         const val CHANNEL_NAME = "GiftBox"
@@ -15,20 +15,23 @@ class MainApplication: Application() {
         const val CHANNEL_ID = "Channel_Gift"
     }
 
-    override fun onCreate(){
+    override fun onCreate() {
         super.onCreate()
         createNotificationChannel()
     }
 
     private fun createNotificationChannel() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            getSystemService(NotificationManager::class.java).run{
-                val channel =NotificationChannel(CHANNEL_ID, CHANNEL_NAME, NotificationManager.IMPORTANCE_HIGH).apply {
+            getSystemService(NotificationManager::class.java).run {
+                val channel = NotificationChannel(
+                    CHANNEL_ID,
+                    CHANNEL_NAME,
+                    NotificationManager.IMPORTANCE_HIGH
+                ).apply {
                     description = CHANNEL_DESCRIPTION
                 }
                 createNotificationChannel(channel)
             }
         }
     }
-
 }

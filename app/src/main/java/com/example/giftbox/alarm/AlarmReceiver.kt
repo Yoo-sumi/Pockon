@@ -8,12 +8,12 @@ import android.content.Intent
 import android.content.SharedPreferences
 import android.os.Build
 import androidx.core.app.NotificationCompat
-import com.example.giftbox.MainActivity
+import com.example.giftbox.ui.main.MainActivity
 import com.example.giftbox.MainApplication.Companion.CHANNEL_ID
 import com.example.giftbox.R
-import com.example.giftbox.data.GiftRepository
-import com.example.giftbox.model.Gift
-import com.example.giftbox.ui.utils.getDdayInt
+import com.example.giftbox.data.repository.GiftRepository
+import com.example.giftbox.data.model.Gift
+import com.example.giftbox.util.getDdayInt
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -41,7 +41,17 @@ class AlarmReceiver : BroadcastReceiver() {
                 val alarmList = mutableSetOf<String>()
                 giftRepository.getAllGift().take(1).collectLatest { allGift ->
                     allGift.forEach { gift ->
-                        val tempGift = Gift(id = gift.id, uid = gift.uid, name = gift.name, brand = gift.brand, endDt = gift.endDt, addDt = gift.addDt, memo = gift.memo, usedDt = gift.usedDt, cash = gift.cash)
+                        val tempGift = Gift(
+                            id = gift.id,
+                            uid = gift.uid,
+                            name = gift.name,
+                            brand = gift.brand,
+                            endDt = gift.endDt,
+                            addDt = gift.addDt,
+                            memo = gift.memo,
+                            usedDt = gift.usedDt,
+                            cash = gift.cash
+                        )
                         // 알림 등록
                         if (isNotiEndDt && getDdayInt(tempGift.endDt) in 0..1) {
                             alarmList.add(gift.id)
@@ -75,7 +85,7 @@ class AlarmReceiver : BroadcastReceiver() {
                 PendingIntent.getActivity(context, 0, myIntent, PendingIntent.FLAG_IMMUTABLE)
 
             val notificationBuilder = NotificationCompat.Builder(context, CHANNEL_ID)
-                .setSmallIcon(R.drawable.icon_gift)
+                .setSmallIcon(R.drawable.ic_noti_gift)
                 .setContentTitle("${gift?.brand} ${gift?.name}")
                 .setPriority(NotificationCompat.PRIORITY_HIGH)
                 .setCategory(NotificationCompat.CATEGORY_RECOMMENDATION)

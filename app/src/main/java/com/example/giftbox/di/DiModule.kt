@@ -4,21 +4,21 @@ import android.content.Context
 import android.content.SharedPreferences
 import androidx.core.content.ContextCompat.getString
 import androidx.room.Room
-import com.example.giftbox.BrandDao
-import com.example.giftbox.BrandDatabase
-import com.example.giftbox.GiftDao
-import com.example.giftbox.GiftDatabase
-import com.example.giftbox.data.GiftRepository
-import com.example.giftbox.data.LoginRepository
+import com.example.giftbox.data.local.brand.BrandDatabase
+import com.example.giftbox.data.local.gift.GiftDatabase
+import com.example.giftbox.data.repository.GiftRepository
+import com.example.giftbox.data.repository.LoginRepository
 import com.example.giftbox.R
 import com.example.giftbox.alarm.MyAlarmManager
-import com.example.giftbox.data.BrandSearchRepository
-import com.example.giftbox.data.remote.BrandSearchDataSource
-import com.example.giftbox.data.local.BrandDataSource
-import com.example.giftbox.data.local.GiftLocalDataSource
-import com.example.giftbox.data.remote.GiftDataSource
-import com.example.giftbox.data.remote.GiftPhotoDataSource
-import com.example.giftbox.data.remote.LoginDataSource
+import com.example.giftbox.data.repository.BrandSearchRepository
+import com.example.giftbox.data.remote.brand.BrandSearchRemoteDataSource
+import com.example.giftbox.data.local.gift.GiftLocalDataSource
+import com.example.giftbox.data.local.brand.BrandDao
+import com.example.giftbox.data.local.brand.BrandLocalDataSource
+import com.example.giftbox.data.local.gift.GiftDao
+import com.example.giftbox.data.remote.gift.GiftDataRemoteSource
+import com.example.giftbox.data.remote.gift.GiftPhotoRemoteDataSource
+import com.example.giftbox.data.remote.login.LoginDataSource
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.firestore.FirebaseFirestore
@@ -37,86 +37,93 @@ import javax.inject.Singleton
 class DiModule {
     @Singleton
     @Provides
-    fun provideFirebaseAuth() : FirebaseAuth {
+    fun provideFirebaseAuth(): FirebaseAuth {
         return Firebase.auth
     }
 
     @Singleton
     @Provides
-    fun provideFirebaseFirestore() : FirebaseFirestore {
+    fun provideFirebaseFirestore(): FirebaseFirestore {
         return FirebaseFirestore.getInstance()
     }
 
     @Singleton
     @Provides
-    fun provideLoginRepository(loginDataSource: LoginDataSource) : LoginRepository {
+    fun provideLoginRepository(loginDataSource: LoginDataSource): LoginRepository {
         return LoginRepository(loginDataSource)
     }
 
     @Singleton
     @Provides
-    fun provideLoginDataSource(auth: FirebaseAuth) : LoginDataSource {
+    fun provideLoginDataSource(auth: FirebaseAuth): LoginDataSource {
         return LoginDataSource(auth)
     }
 
     @Singleton
     @Provides
-    fun provideGiftRepository(giftDataSource: GiftDataSource, giftPhotoDataSource: GiftPhotoDataSource, giftLocalDataSource: GiftLocalDataSource, @ApplicationContext context: Context) : GiftRepository {
-        return GiftRepository(giftDataSource, giftPhotoDataSource, giftLocalDataSource, context)
+    fun provideGiftRepository(
+        giftDataRemoteSource: GiftDataRemoteSource,
+        giftPhotoRemoteDataSource: GiftPhotoRemoteDataSource,
+        giftLocalDataSource: GiftLocalDataSource,
+        @ApplicationContext context: Context
+    ): GiftRepository {
+        return GiftRepository(giftDataRemoteSource, giftPhotoRemoteDataSource, giftLocalDataSource, context)
     }
 
     @Singleton
     @Provides
-    fun provideGiftDataSource(firestore: FirebaseFirestore) : GiftDataSource {
-        return GiftDataSource(firestore)
+    fun provideGiftDataRemoteSource(firestore: FirebaseFirestore): GiftDataRemoteSource {
+        return GiftDataRemoteSource(firestore)
     }
 
     @Singleton
     @Provides
-    fun provideBrandSearchRepository(brandSearchDataSource: BrandSearchDataSource, giftPlaceDataSource: BrandDataSource) : BrandSearchRepository {
-        return BrandSearchRepository(brandSearchDataSource, giftPlaceDataSource)
+    fun provideBrandSearchRepository(
+        brandSearchRemoteDataSource: BrandSearchRemoteDataSource, brandLocalDataSource: BrandLocalDataSource
+    ): BrandSearchRepository {
+        return BrandSearchRepository(brandSearchRemoteDataSource, brandLocalDataSource)
     }
 
     @Provides
-    fun provideBrandSearchDataSource() : BrandSearchDataSource {
-        return BrandSearchDataSource()
+    fun provideBrandSearchRemoteDataSource(): BrandSearchRemoteDataSource {
+        return BrandSearchRemoteDataSource()
     }
 
     @Provides
-    fun provideBrandDataSource(brandsDao: BrandDao) : BrandDataSource {
-        return BrandDataSource(brandsDao)
+    fun provideBrandLocalDataSource(brandsDao: BrandDao): BrandLocalDataSource {
+        return BrandLocalDataSource(brandsDao)
     }
 
     @Provides
-    fun provideGiftLocalDataSource(giftDao: GiftDao) : GiftLocalDataSource {
+    fun provideGiftLocalDataSource(giftDao: GiftDao): GiftLocalDataSource {
         return GiftLocalDataSource(giftDao)
     }
 
     @Singleton
     @Provides
-    fun provideFirebaseFirestorage() : StorageReference {
+    fun provideFirebaseFirestorage(): StorageReference {
         return FirebaseStorage.getInstance().reference
     }
 
     @Singleton
     @Provides
-    fun provideGiftPhotoDataSource(storageRef: StorageReference) : GiftPhotoDataSource {
-        return GiftPhotoDataSource(storageRef)
+    fun provideGiftPhotoRemoteDataSource(storageRef: StorageReference): GiftPhotoRemoteDataSource {
+        return GiftPhotoRemoteDataSource(storageRef)
     }
 
     @Singleton
     @Provides
     fun provideSharedPref(@ApplicationContext context: Context): SharedPreferences {
-        return context.getSharedPreferences(getString(context, R.string.preference_file_key), Context.MODE_PRIVATE)
+        return context.getSharedPreferences(
+            getString(context, R.string.preference_file_key), Context.MODE_PRIVATE
+        )
     }
 
     @Singleton
     @Provides
     fun provideBrandDatabase(
         @ApplicationContext context: Context
-    ): BrandDatabase = Room
-        .databaseBuilder(context, BrandDatabase::class.java, "brand.db")
-        .build()
+    ): BrandDatabase = Room.databaseBuilder(context, BrandDatabase::class.java, "brand.db").build()
 
     @Singleton
     @Provides
@@ -126,9 +133,7 @@ class DiModule {
     @Provides
     fun provideGiftDatabase(
         @ApplicationContext context: Context
-    ): GiftDatabase = Room
-        .databaseBuilder(context, GiftDatabase::class.java, "gift.db")
-        .build()
+    ): GiftDatabase = Room.databaseBuilder(context, GiftDatabase::class.java, "gift.db").build()
 
     @Singleton
     @Provides

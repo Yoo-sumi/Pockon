@@ -57,11 +57,11 @@ import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import coil.compose.AsyncImage
 import com.example.giftbox.R
-import com.example.giftbox.model.Gift
-import com.example.giftbox.ui.LoadingScreen
+import com.example.giftbox.data.model.Gift
+import com.example.giftbox.ui.loading.LoadingScreen
 import com.example.giftbox.ui.detail.UsedStamp
 import com.example.giftbox.ui.list.ConfirmDialog
-import com.example.giftbox.ui.utils.formatString
+import com.example.giftbox.util.formatString
 import kotlinx.coroutines.launch
 
 @Composable
@@ -78,7 +78,7 @@ fun UsedScreen(onDetail: (String) -> Unit, onBack: () -> Unit) {
 
     Scaffold(
         snackbarHost = {
-            SnackbarHost(hostState = snackbarHostState)
+        SnackbarHost(hostState = snackbarHostState)
         }
     ) { innerPadding ->
         Column(
@@ -101,15 +101,11 @@ fun UsedScreen(onDetail: (String) -> Unit, onBack: () -> Unit) {
                     }
                     .padding(top = 10.dp, bottom = 10.dp),
             ) {
-                IconButton(
-                    modifier = Modifier.align(Alignment.CenterStart),
-                    onClick = {
-                        onBack()
-                    }
-                ) {
+                IconButton(modifier = Modifier.align(Alignment.CenterStart), onClick = {
+                    onBack()
+                }) {
                     Icon(
-                        Icons.AutoMirrored.Default.ArrowBack,
-                        contentDescription = "back button"
+                        Icons.AutoMirrored.Default.ArrowBack, contentDescription = "back button"
                     )
                 }
                 Text(
@@ -150,17 +146,17 @@ fun UsedScreen(onDetail: (String) -> Unit, onBack: () -> Unit) {
 
             // all delete
             if (isEdit) {
-                Row(modifier = Modifier
-                    .padding(start = 10.dp, top = 8.dp)
-                    .padding(8.dp),
+                Row(
+                    modifier = Modifier
+                        .padding(start = 10.dp, top = 8.dp)
+                        .padding(8.dp),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Box(
                         modifier = Modifier.size(5.dp)
                     ) {
                         Checkbox(
-                            modifier = Modifier
-                                .scale(0.8f),
+                            modifier = Modifier.scale(0.8f),
                             checked = usedViewModel.isAllSelect.value,
                             onCheckedChange = {
                                 usedViewModel.onClickAllSelect()
@@ -187,16 +183,14 @@ fun UsedScreen(onDetail: (String) -> Unit, onBack: () -> Unit) {
                 horizontalArrangement = Arrangement.spacedBy(10.dp),
             ) {
                 itemsIndexed(items = usedViewModel.giftList.value) { index, gift ->
-                    UsedGiftItem(
-                        gift = gift,
+                    UsedGiftItem(gift = gift,
                         formattedEndDate = formatString(gift.endDt),
                         isEdit = isEdit,
                         isCheck = usedViewModel.checkedGiftList.value.contains(gift.id),
                         onClick = {
                             if (isEdit) usedViewModel.checkedGift(gift.id)
                             else onDetail(gift.id)
-                        }
-                    )
+                        })
                 }
 
             }
@@ -204,24 +198,20 @@ fun UsedScreen(onDetail: (String) -> Unit, onBack: () -> Unit) {
     }
 
     if (showRemoveDlg) {
-        ConfirmDialog(
-            text = R.string.dlg_msg_delete,
-            onConfirm = {
-                showRemoveDlg = false
-                usedViewModel.deleteSelection { result ->
-                    scope.launch {
-                        if (!result) snackbarHostState.showSnackbar(message = context.getString(R.string.msg_no_delete))
-                    }
-                    isEdit = !isEdit
-                    usedViewModel.setIsAllSelect(false)
-                    usedViewModel.clearCheckedGiftList()
+        ConfirmDialog(text = R.string.dlg_msg_delete, onConfirm = {
+            showRemoveDlg = false
+            usedViewModel.deleteSelection { result ->
+                scope.launch {
+                    if (!result) snackbarHostState.showSnackbar(message = context.getString(R.string.msg_no_delete))
                 }
-            },
-            onDismiss = {
-                showRemoveDlg = false
-
+                isEdit = !isEdit
+                usedViewModel.setIsAllSelect(false)
+                usedViewModel.clearCheckedGiftList()
             }
-        )
+        }, onDismiss = {
+            showRemoveDlg = false
+
+        })
     }
 
     if (usedViewModel.isShowIndicator.value) {
@@ -233,25 +223,19 @@ fun UsedScreen(onDetail: (String) -> Unit, onBack: () -> Unit) {
 /** 기프티콘 각각의 카드*/
 @Composable
 fun UsedGiftItem(
-    gift: Gift,
-    formattedEndDate: String,
-    isEdit: Boolean,
-    isCheck: Boolean,
-    onClick: () -> Unit
+    gift: Gift, formattedEndDate: String, isEdit: Boolean, isCheck: Boolean, onClick: () -> Unit
 ) {
-    Box(
-        modifier = Modifier
-            .clip(shape = RoundedCornerShape(10.dp))
-            .fillMaxWidth()
-            .wrapContentHeight()
-            .clickable { onClick() }
-    ) {
+    Box(modifier = Modifier
+        .clip(shape = RoundedCornerShape(10.dp))
+        .fillMaxWidth()
+        .wrapContentHeight()
+        .clickable { onClick() }) {
         Card(
             modifier = Modifier
                 .fillMaxWidth()
                 .background(MaterialTheme.colorScheme.secondaryContainer),
             shape = RoundedCornerShape(10.dp), // 모서리 둥글기
-            border = BorderStroke(0.5.dp, MaterialTheme.colorScheme.outline) // 테두리 색상과 두께 지정
+            border = BorderStroke(1.5.dp, MaterialTheme.colorScheme.outline) // 테두리 색상과 두께 지정
         ) {
             // 카드 콘텐츠
             Column(

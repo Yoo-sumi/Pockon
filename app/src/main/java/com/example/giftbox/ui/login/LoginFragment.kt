@@ -15,7 +15,7 @@ import androidx.navigation.Navigation
 import com.example.giftbox.BuildConfig
 import com.example.giftbox.R
 import com.example.giftbox.databinding.FragmentLoginBinding
-import com.example.giftbox.ui.LoadingScreen
+import com.example.giftbox.ui.loading.LoadingScreen
 import com.google.android.libraries.identity.googleid.GetGoogleIdOption
 import com.google.android.material.snackbar.Snackbar
 import dagger.hilt.android.AndroidEntryPoint
@@ -27,7 +27,11 @@ class LoginFragment : Fragment() {
     private lateinit var binding: FragmentLoginBinding
     private val loginViewModel: LoginViewModel by viewModels()
 
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
+    override fun onCreateView(
+        inflater: LayoutInflater,
+        container: ViewGroup?,
+        savedInstanceState: Bundle?
+    ): View {
         binding = FragmentLoginBinding.inflate(inflater, container, false)
         val btnGoogle: TextView = binding.btnGoogleLogin.getChildAt(0) as TextView
         btnGoogle.text = getString(R.string.btn_goggle_login)
@@ -59,7 +63,11 @@ class LoginFragment : Fragment() {
                     )
                     loginViewModel.login(credentialManager, result) // 구글 로그인 이어서 진행
                 } catch (e: GetCredentialException) { // 구글 로그인 실패
-                    Snackbar.make(binding.root, getString(R.string.msg_login_fail), Snackbar.LENGTH_SHORT).show()
+                    Snackbar.make(
+                        binding.root,
+                        getString(R.string.msg_login_fail),
+                        Snackbar.LENGTH_SHORT
+                    ).show()
                 }
             }
         }
@@ -77,7 +85,11 @@ class LoginFragment : Fragment() {
         loginViewModel.isFail.observe(viewLifecycleOwner) {
             if (it) {
                 // 로그인 실패 스낵바
-                Snackbar.make(binding.root, getString(R.string.msg_login_fail), Snackbar.LENGTH_LONG).show()
+                Snackbar.make(
+                    binding.root,
+                    getString(R.string.msg_login_fail),
+                    Snackbar.LENGTH_LONG
+                ).show()
             }
         }
 
@@ -89,5 +101,4 @@ class LoginFragment : Fragment() {
 
         return binding.root
     }
-
 }

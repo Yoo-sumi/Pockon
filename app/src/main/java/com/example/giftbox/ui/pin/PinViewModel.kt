@@ -1,7 +1,6 @@
 package com.example.giftbox.ui.pin
 
 import android.content.SharedPreferences
-import android.util.Log
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateListOf
@@ -18,6 +17,7 @@ import javax.inject.Inject
 class PinViewModel @Inject constructor(
     private val sharedPref: SharedPreferences
 ) : ViewModel() {
+
     private val pinNumber = sharedPref.getString("pin_num", "") ?: ""
     private val pinSize = 6
     private var checkPin = ""
@@ -75,6 +75,7 @@ class PinViewModel @Inject constructor(
                         inputPin.clear()
                         _error.value = null
                     }
+
                     1 -> {
                         if (inputPin.joinToString("") == checkPin) {
                             saveMyPin(checkPin)
@@ -85,6 +86,7 @@ class PinViewModel @Inject constructor(
                             _error.value = R.string.msg_pin_auth_fail
                         }
                     }
+
                     else -> {
                         if (inputPin.joinToString("") == pinNumber) {
                             _error.value = null

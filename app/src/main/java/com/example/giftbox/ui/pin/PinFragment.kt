@@ -13,7 +13,11 @@ import dagger.hilt.android.AndroidEntryPoint
 @AndroidEntryPoint
 class PinFragment : Fragment() {
 
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View = ComposeView(requireContext()).apply {
+    override fun onCreateView(
+        inflater: LayoutInflater,
+        container: ViewGroup?,
+        savedInstanceState: Bundle?
+    ): View = ComposeView(requireContext()).apply {
         setContent {
             PinScreen {
                 // 핀 로그인 성공 > 메인 화면 이동
@@ -23,5 +27,4 @@ class PinFragment : Fragment() {
             }
         }
     }
-
 }

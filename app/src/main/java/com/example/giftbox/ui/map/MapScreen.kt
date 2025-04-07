@@ -27,11 +27,11 @@ import androidx.fragment.app.FragmentContainerView
 import androidx.fragment.app.commit
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.giftbox.R
-import com.example.giftbox.model.Gift
+import com.example.giftbox.data.model.Gift
 import com.example.giftbox.ui.detail.DetailScreen
 import com.example.giftbox.ui.list.GiftItem
-import com.example.giftbox.ui.utils.formatString
-import com.example.giftbox.ui.utils.getDday
+import com.example.giftbox.util.formatString
+import com.example.giftbox.util.getDday
 
 @Composable
 fun MapScreen(onBack: () -> Unit) {
@@ -47,31 +47,23 @@ fun MapScreen(onBack: () -> Unit) {
     }
 
     Box(modifier = Modifier.fillMaxSize()) {
-        AndroidView(
-            modifier = Modifier
-                .fillMaxSize(),
-            factory = {
-                fragmentContainerView
-            },
-            update = {
-                if (!hasFragmentBeenSet.value) {
-                    val baseContext = (it.context as ContextWrapper).baseContext
-                    val fragmentManager = (baseContext as FragmentActivity).supportFragmentManager
+        AndroidView(modifier = Modifier.fillMaxSize(), factory = {
+            fragmentContainerView
+        }, update = {
+            if (!hasFragmentBeenSet.value) {
+                val baseContext = (it.context as ContextWrapper).baseContext
+                val fragmentManager = (baseContext as FragmentActivity).supportFragmentManager
 
-                    fragmentManager.commit {
-                        replace(
-                            R.id.fragment_container_view,
-                            MapFragment(mapViewmodel) { giftList ->
-                                point = giftList
-                            }
-                        )
-                        addToBackStack(null) // 백 스택에 추가하여 뒤로가기 처리
-                    }
-
-                    hasFragmentBeenSet.value = true
+                fragmentManager.commit {
+                    replace(R.id.fragment_container_view, MapFragment(mapViewmodel) { giftList ->
+                        point = giftList
+                    })
+                    addToBackStack(null) // 백 스택에 추가하여 뒤로가기 처리
                 }
+
+                hasFragmentBeenSet.value = true
             }
-        )
+        })
 
         if (point.isNotEmpty()) {
             val pagerState = rememberPagerState(pageCount = { point.size })
@@ -87,8 +79,7 @@ fun MapScreen(onBack: () -> Unit) {
                     .align(Alignment.BottomCenter)
             ) { pageIndex ->
                 val gift = point[pageIndex]
-                GiftItem(
-                    isEdit = false,
+                GiftItem(isEdit = false,
                     gift = gift,
                     formattedEndDate = formatString(gift.endDt),
                     dDay = getDday(gift.endDt),
@@ -96,8 +87,7 @@ fun MapScreen(onBack: () -> Unit) {
                     onClick = {
                         // 상세보기 이동
                         detailGift = gift
-                    }
-                )
+                    })
             }
         }
 

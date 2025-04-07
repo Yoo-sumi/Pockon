@@ -24,7 +24,6 @@ import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
-import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -49,10 +48,7 @@ import androidx.compose.material3.SmallFloatingActionButton
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Surface
-import androidx.compose.material3.SwipeToDismissBox
-import androidx.compose.material3.SwipeToDismissBoxValue
 import androidx.compose.material3.Text
-import androidx.compose.material3.rememberSwipeToDismissBoxState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
@@ -78,16 +74,15 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import androidx.hilt.navigation.compose.hiltViewModel
 import coil.compose.AsyncImage
-import com.example.giftbox.model.Gift
-import com.example.giftbox.ui.utils.formatString
-import com.example.giftbox.ui.utils.getDday
+import com.example.giftbox.data.model.Gift
+import com.example.giftbox.util.formatString
+import com.example.giftbox.util.getDday
 import com.google.accompanist.swiperefresh.SwipeRefresh
 import com.google.accompanist.swiperefresh.rememberSwipeRefreshState
 import kotlinx.coroutines.launch
@@ -135,7 +130,11 @@ fun ListScreen(onDetail: (String) -> Unit, onAdd: () -> Unit, isLoading: (Boolea
                     listViewModel.deleteSelection { result ->
                         isLoading(false)
                         scope.launch {
-                            if (!result) snackbarHostState.showSnackbar(message = context.getString(R.string.msg_no_delete))
+                            if (!result) snackbarHostState.showSnackbar(
+                                message = context.getString(
+                                    R.string.msg_no_delete
+                                )
+                            )
                         }
                         isEdit = !isEdit
                         listViewModel.setIsAllSelect(false)
@@ -145,7 +144,11 @@ fun ListScreen(onDetail: (String) -> Unit, onAdd: () -> Unit, isLoading: (Boolea
                     listViewModel.removeGift { result ->
                         isLoading(false)
                         scope.launch {
-                            if (!result) snackbarHostState.showSnackbar(message = context.getString(R.string.msg_no_delete))
+                            if (!result) snackbarHostState.showSnackbar(
+                                message = context.getString(
+                                    R.string.msg_no_delete
+                                )
+                            )
                         }
                     }
                 }
@@ -363,7 +366,14 @@ fun ListScreen(onDetail: (String) -> Unit, onAdd: () -> Unit, isLoading: (Boolea
 }
 
 @Composable
-fun GiftItem(isEdit: Boolean, gift: Gift, formattedEndDate: String, dDay: Pair<String, Boolean>, isCheck: Boolean, onClick: () -> Unit) {
+fun GiftItem(
+    isEdit: Boolean,
+    gift: Gift,
+    formattedEndDate: String,
+    dDay: Pair<String, Boolean>,
+    isCheck: Boolean,
+    onClick: () -> Unit
+) {
     Box(
         modifier = Modifier
             .fillMaxSize()
@@ -376,7 +386,7 @@ fun GiftItem(isEdit: Boolean, gift: Gift, formattedEndDate: String, dDay: Pair<S
             modifier = Modifier
                 .background(MaterialTheme.colorScheme.secondaryContainer),
             shape = RoundedCornerShape(10.dp), // 모서리 둥글기
-            border = BorderStroke(0.5.dp, MaterialTheme.colorScheme.outline) // 테두리 색상과 두께 지정
+            border = BorderStroke(1.5.dp, MaterialTheme.colorScheme.outline) // 테두리 색상과 두께 지정
         ) {
             Row(
                 modifier = Modifier
@@ -456,7 +466,8 @@ fun GiftItem(isEdit: Boolean, gift: Gift, formattedEndDate: String, dDay: Pair<S
                             .align(Alignment.Center)
                             .size(30.dp),
                         imageVector = Icons.Filled.CheckCircle,
-                        contentDescription = "check")
+                        contentDescription = "check"
+                    )
                 }
             }
         }
@@ -667,7 +678,8 @@ fun ListScreenTopBar(title: Int, actionText: Int, onDropDown: (Int) -> Unit, onC
 @Composable
 fun SwipeToDismissItem(onDismiss: (Float) -> Unit, content: @Composable () -> Unit) {
     val animatableOffsetX = remember { Animatable(0f) } // 애니메이션을 위한 Animatable
-    val screenWidth = LocalDensity.current.run { LocalConfiguration.current.screenWidthDp.dp.toPx() } // 화면의 너비 계산
+    val screenWidth =
+        LocalDensity.current.run { LocalConfiguration.current.screenWidthDp.dp.toPx() } // 화면의 너비 계산
     val scope = rememberCoroutineScope()
 
     Box(

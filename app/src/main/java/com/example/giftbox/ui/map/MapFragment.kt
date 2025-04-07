@@ -1,16 +1,14 @@
 package com.example.giftbox.ui.map
 
 import android.graphics.Color
-import android.graphics.Rect
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
-import androidx.recyclerview.widget.RecyclerView
 import com.example.giftbox.databinding.FragmentMapBinding
-import com.example.giftbox.model.Document
-import com.example.giftbox.model.Gift
+import com.example.giftbox.data.model.Document
+import com.example.giftbox.data.model.Gift
 import com.naver.maps.geometry.LatLng
 import com.naver.maps.map.CameraAnimation
 import com.naver.maps.map.CameraUpdate
@@ -31,11 +29,15 @@ class MapFragment(
     private val LOCATION_PERMISSION_REQUEST_CODE = 1000
     private lateinit var binding: FragmentMapBinding
     private lateinit var mapView: MapView
-    private lateinit var naverMap : NaverMap
+    private lateinit var naverMap: NaverMap
     private lateinit var locationSource: FusedLocationSource
     private val markerList = mutableMapOf<String, Marker>()
 
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
+    override fun onCreateView(
+        inflater: LayoutInflater,
+        container: ViewGroup?,
+        savedInstanceState: Bundle?
+    ): View {
         binding = FragmentMapBinding.inflate(inflater, container, false)
         mapView = binding.mapView
         mapView.getMapAsync(this)
@@ -89,8 +91,9 @@ class MapFragment(
                     }
                 }
                 // 카메라 이동
-                val cameraUpdate = CameraUpdate.scrollTo(LatLng(document.y.toDouble(), document.x.toDouble()))
-                    .animate(CameraAnimation.Easing)
+                val cameraUpdate =
+                    CameraUpdate.scrollTo(LatLng(document.y.toDouble(), document.x.toDouble()))
+                        .animate(CameraAnimation.Easing)
                 naverMap.moveCamera(cameraUpdate)
                 false
             }
@@ -103,7 +106,12 @@ class MapFragment(
                     onClick(it.second)
 
                     // 카메라 이동
-                    val cameraUpdate = CameraUpdate.scrollTo(LatLng(nearestDoc.y.toDouble(), nearestDoc.x.toDouble()))
+                    val cameraUpdate = CameraUpdate.scrollTo(
+                        LatLng(
+                            nearestDoc.y.toDouble(),
+                            nearestDoc.x.toDouble()
+                        )
+                    )
                     naverMap.moveCamera(cameraUpdate)
 
                     marker.iconTintColor = Color.RED
@@ -116,29 +124,4 @@ class MapFragment(
             markerList[it.first.id] = marker
         }
     }
-
-    private fun initViewPager() {
-        val previewWidth = 45
-        val itemMargin = 20
-        val decoMargin = previewWidth + itemMargin
-        val pageTransX = decoMargin + previewWidth
-        val decoration = PageDecoration(decoMargin)
-
-        binding.viewPager.also {
-            it.offscreenPageLimit = 1
-            it.addItemDecoration(decoration)
-            it.setPageTransformer { page, position ->
-                page.translationX = position * - pageTransX
-            }
-        }
-    }
-}
-
-private class PageDecoration(private val margin: Int): RecyclerView.ItemDecoration() {
-
-    override fun getItemOffsets(outRect: Rect, view: View, parent: RecyclerView, state: RecyclerView.State) {
-        outRect.left = margin
-        outRect.right = margin
-    }
-
 }

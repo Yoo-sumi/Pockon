@@ -4,7 +4,7 @@ import android.app.AlarmManager
 import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
-import com.example.giftbox.model.Gift
+import com.example.giftbox.data.model.Gift
 import java.util.Calendar
 
 class MyAlarmManager(private val context: Context) {
@@ -52,5 +52,4 @@ class MyAlarmManager(private val context: Context) {
             )
         )
     }
-
 }

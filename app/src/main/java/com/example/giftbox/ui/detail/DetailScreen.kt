@@ -94,14 +94,14 @@ import androidx.compose.ui.window.Dialog
 import androidx.hilt.navigation.compose.hiltViewModel
 import coil.compose.AsyncImage
 import coil.compose.rememberAsyncImagePainter
-import com.example.giftbox.ui.utils.DateTransformation
+import com.example.giftbox.util.DateTransformation
 import com.example.giftbox.R
-import com.example.giftbox.ui.LoadingScreen
+import com.example.giftbox.ui.loading.LoadingScreen
 import com.example.giftbox.ui.add.CustomDatePickerDialog
 import com.example.giftbox.ui.list.ConfirmDialog
-import com.example.giftbox.ui.utils.decimalFormat
-import com.example.giftbox.ui.utils.getBitmapFromUri
-import com.example.giftbox.ui.utils.thousandSeparatorTransformation
+import com.example.giftbox.util.decimalFormat
+import com.example.giftbox.util.getBitmapFromUri
+import com.example.giftbox.util.thousandSeparatorTransformation
 import kotlinx.coroutines.launch
 
 @Composable
@@ -211,7 +211,11 @@ fun DetailScreen(id: String, onBack: () -> Unit) {
                     .verticalScroll(scrollSate)
             ) {
                 // gift image
-                GiftImage(detailViewModel.isEdit.value, detailViewModel.photo.value, detailViewModel.usedDt.value) {
+                GiftImage(
+                    detailViewModel.isEdit.value,
+                    detailViewModel.photo.value,
+                    detailViewModel.usedDt.value
+                ) {
                     if (detailViewModel.isEdit.value) {
                         galleryLauncher.launch(
                             PickVisualMediaRequest(
@@ -244,7 +248,7 @@ fun DetailScreen(id: String, onBack: () -> Unit) {
                             Checkbox(
                                 modifier = Modifier
                                     .scale(0.8f)
-                                    .padding(0.dp) ,
+                                    .padding(0.dp),
                                 checked = detailViewModel.isCheckedCash.value,
                                 onCheckedChange = {
                                     detailViewModel.chgCheckedCash()
@@ -291,8 +295,16 @@ fun DetailScreen(id: String, onBack: () -> Unit) {
                         } else {
                             detailViewModel.updateGift { result ->
                                 scope.launch {
-                                    if (result) snackbarHostState.showSnackbar(message = context.getString(R.string.msg_ok_update))
-                                    else snackbarHostState.showSnackbar(message = context.getString(R.string.msg_no_update))
+                                    if (result) snackbarHostState.showSnackbar(
+                                        message = context.getString(
+                                            R.string.msg_ok_update
+                                        )
+                                    )
+                                    else snackbarHostState.showSnackbar(
+                                        message = context.getString(
+                                            R.string.msg_no_update
+                                        )
+                                    )
                                 }
                             }
 
@@ -336,7 +348,10 @@ fun DetailScreen(id: String, onBack: () -> Unit) {
         }
 
         if (detailViewModel.isShowBottomSheet.value) {
-            GiftBottomSheet(image = detailViewModel.photo.value, isVisible = detailViewModel.isShowBottomSheet.value) { isUsed ->
+            GiftBottomSheet(
+                image = detailViewModel.photo.value,
+                isVisible = detailViewModel.isShowBottomSheet.value
+            ) { isUsed ->
                 if (isUsed) {
                     if (detailViewModel.cash.value.isNotEmpty()) {
                         detailViewModel.setIsShowUseCashDialog(true)
@@ -344,7 +359,11 @@ fun DetailScreen(id: String, onBack: () -> Unit) {
                     } else {
                         detailViewModel.setIsUsed(true) { result ->
                             scope.launch {
-                                if (!result) snackbarHostState.showSnackbar(message = context.getString(R.string.msg_no_use))
+                                if (!result) snackbarHostState.showSnackbar(
+                                    message = context.getString(
+                                        R.string.msg_no_use
+                                    )
+                                )
                             }
                         }
                     }
@@ -359,7 +378,11 @@ fun DetailScreen(id: String, onBack: () -> Unit) {
                 onConfirm = {
                     detailViewModel.setIsUsed(false) { result ->
                         scope.launch {
-                            if (!result) snackbarHostState.showSnackbar(message = context.getString(R.string.msg_no_use_cancel))
+                            if (!result) snackbarHostState.showSnackbar(
+                                message = context.getString(
+                                    R.string.msg_no_use_cancel
+                                )
+                            )
                         }
                     }
                     detailViewModel.setIsShowCancelDialog(false)
@@ -388,7 +411,11 @@ fun DetailScreen(id: String, onBack: () -> Unit) {
                         onConfirm = { useCash ->
                             detailViewModel.setIsUsed(true, useCash) { result ->
                                 scope.launch {
-                                    if (!result) snackbarHostState.showSnackbar(message = context.getString(R.string.msg_no_use))
+                                    if (!result) snackbarHostState.showSnackbar(
+                                        message = context.getString(
+                                            R.string.msg_no_use
+                                        )
+                                    )
                                 }
                             }
                         }
@@ -416,8 +443,14 @@ fun DetailScreen(id: String, onBack: () -> Unit) {
 }
 
 @Composable
-fun InputDataTextField(value: String, label: Int, index: Int, isEdit: Boolean, onValueChange: (Int, String) -> Unit, onDatePicker: () -> Unit)
-{
+fun InputDataTextField(
+    value: String,
+    label: Int,
+    index: Int,
+    isEdit: Boolean,
+    onValueChange: (Int, String) -> Unit,
+    onDatePicker: () -> Unit
+) {
     var modifier = Modifier
         .fillMaxWidth()
         .padding(end = 0.dp, start = 0.dp, bottom = 5.dp, top = 0.dp)
@@ -435,8 +468,13 @@ fun InputDataTextField(value: String, label: Int, index: Int, isEdit: Boolean, o
             onValueChange(index, it)
         },
         maxLines = if (index == 4) 50 else 1,
-        label = { Text(text = stringResource(id = label), color = MaterialTheme.colorScheme.onPrimary) },
-        visualTransformation = when(index) {
+        label = {
+            Text(
+                text = stringResource(id = label),
+                color = MaterialTheme.colorScheme.onPrimary
+            )
+        },
+        visualTransformation = when (index) {
             2 -> thousandSeparatorTransformation(true)
             3 -> DateTransformation()
             else -> VisualTransformation.None
@@ -452,7 +490,9 @@ fun InputDataTextField(value: String, label: Int, index: Int, isEdit: Boolean, o
                 }
             }
         },
-        keyboardOptions = if (isEdit && (index == 2 || index == 3)) KeyboardOptions.Default.copy(keyboardType = KeyboardType.Number) else KeyboardOptions.Default
+        keyboardOptions = if (isEdit && (index == 2 || index == 3)) KeyboardOptions.Default.copy(
+            keyboardType = KeyboardType.Number
+        ) else KeyboardOptions.Default
     )
 }
 
@@ -479,7 +519,7 @@ fun GiftImage(isEdit: Boolean, selectedImage: Bitmap?, usedDt: String, onClick: 
                     modifier = Modifier
                         .width(80.dp)
                         .height(80.dp),
-                    painter = painterResource(id = R.drawable.icon_add_photo),
+                    painter = painterResource(id = R.drawable.ic_add_photo),
                     contentDescription = "add photo",
                     contentScale = ContentScale.Crop
                 )
@@ -502,9 +542,10 @@ fun GiftImage(isEdit: Boolean, selectedImage: Bitmap?, usedDt: String, onClick: 
 
 @Composable
 fun UsedStamp(usedDate: String) {
-    Box(modifier = Modifier
-        .size(200.dp)
-        .background(Color.Black.copy(0.3f)),
+    Box(
+        modifier = Modifier
+            .size(200.dp)
+            .background(Color.Black.copy(0.3f)),
         contentAlignment = Alignment.Center
     ) {
         Box(
@@ -550,7 +591,7 @@ fun UsedStamp(usedDate: String) {
 
 // 사용 금액 입력 다이얼로그
 @Composable
-fun UseCashDialog(remainCash: String, onCancel: () -> Unit, onConfirm: (Int) -> Unit){
+fun UseCashDialog(remainCash: String, onCancel: () -> Unit, onConfirm: (Int) -> Unit) {
     var inputCash by rememberSaveable { mutableStateOf("") }
     Surface(
         modifier = Modifier
@@ -745,7 +786,8 @@ fun UseCashDialog(remainCash: String, onCancel: () -> Unit, onConfirm: (Int) -> 
 @Composable
 fun GiftBottomSheet(image: Bitmap?, isVisible: Boolean, onDismiss: (Boolean) -> Unit) {
     val screenHeight = LocalConfiguration.current.screenHeightDp.dp
-    val screenHeightToPx = LocalDensity.current.run { LocalConfiguration.current.screenHeightDp.dp.toPx() }
+    val screenHeightToPx =
+        LocalDensity.current.run { LocalConfiguration.current.screenHeightDp.dp.toPx() }
     val sheetHeight = screenHeight * 0.95f // BottomSheet 높이 (화면의 95%)
     val sheetOffsetY = remember { Animatable(screenHeight.value) } // 초기 위치: 화면 아래
     val coroutineScope = rememberCoroutineScope()
@@ -840,7 +882,7 @@ fun GiftBottomSheet(image: Bitmap?, isVisible: Boolean, onDismiss: (Boolean) -> 
                     if (image == null) {
                         Image(
                             modifier = Modifier.fillMaxWidth(),
-                            painter = painterResource(id = R.drawable.icon_add_photo),
+                            painter = painterResource(id = R.drawable.ic_add_photo),
                             contentDescription = "use photo",
                             contentScale = ContentScale.Crop
                         )
@@ -899,7 +941,9 @@ fun ImageFullScreenDialog(image: Bitmap?, onDismiss: () -> Unit) {
     ) {
         var currentScale by remember { mutableFloatStateOf(scale) }
 
-        Box(modifier = Modifier.fillMaxWidth().height(50.dp)) {
+        Box(modifier = Modifier
+            .fillMaxWidth()
+            .height(50.dp)) {
             IconButton(
                 onClick = onDismiss,
                 modifier = Modifier.align(Alignment.CenterEnd)
@@ -932,6 +976,8 @@ fun ImageFullScreenDialog(image: Bitmap?, onDismiss: () -> Unit) {
                 )
         )
 
-        Box(modifier = Modifier.fillMaxWidth().height(50.dp))
+        Box(modifier = Modifier
+            .fillMaxWidth()
+            .height(50.dp))
     }
 }

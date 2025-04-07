@@ -8,10 +8,9 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.giftbox.alarm.MyAlarmManager
-import com.example.giftbox.model.Gift
-import com.example.giftbox.data.GiftRepository
-import com.example.giftbox.ui.utils.getDdayInt
-import com.example.giftbox.ui.utils.loadImageFromPath
+import com.example.giftbox.data.model.Gift
+import com.example.giftbox.data.repository.GiftRepository
+import com.example.giftbox.util.loadImageFromPath
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.collectLatest
@@ -28,8 +27,8 @@ class ListViewModel @Inject constructor(
     private val sharedPref: SharedPreferences,
     private val myAlarmManager: MyAlarmManager
 ) : ViewModel() {
+
     private var uid = sharedPref.getString("uid", "") ?: ""
-    private var isNotiEndDt = sharedPref.getBoolean("noti_end_dt", true)
     private var isGuestMode = sharedPref.getBoolean("guest_mode", false)
 
     private var removeGift: Gift? = null
@@ -51,7 +50,7 @@ class ListViewModel @Inject constructor(
     private val _checkedGiftList = mutableStateOf<List<String>>(listOf())
     val checkedGiftList: State<List<String>> = _checkedGiftList
 
-    private val _isAllSelect = mutableStateOf<Boolean>(false)
+    private val _isAllSelect = mutableStateOf(false)
     val isAllSelect: State<Boolean> = _isAllSelect
 
     init {
@@ -72,21 +71,20 @@ class ListViewModel @Inject constructor(
             giftRepository.getAllGift().collectLatest { allGift ->
                 if (allGift.isNotEmpty()) {
                     val tempList = ArrayList<Gift>()
-                    val alarmList = sharedPref.getStringSet("alarm_list", mutableSetOf())?.toMutableSet()
                     allGift.forEach { gift ->
-                        val tempGift = Gift(id = gift.id, uid = gift.uid, photo = loadImageFromPath(gift.photoPath), name = gift.name, brand = gift.brand, endDt = gift.endDt, addDt = gift.addDt, memo = gift.memo, usedDt = gift.usedDt, cash = gift.cash)
+                        val tempGift = Gift(
+                            id = gift.id,
+                            uid = gift.uid,
+                            photo = loadImageFromPath(gift.photoPath),
+                            name = gift.name,
+                            brand = gift.brand,
+                            endDt = gift.endDt,
+                            addDt = gift.addDt,
+                            memo = gift.memo,
+                            usedDt = gift.usedDt,
+                            cash = gift.cash
+                        )
                         tempList.add(tempGift)
-                        if (isNotiEndDt) {
-                            // 알림 등록
-                            if (getDdayInt(tempGift.endDt) in 0..1 && alarmList?.contains(gift.id) == false) {
-                                alarmList.add(gift.id)
-                                sharedPref.edit().putStringSet("alarm_list", alarmList).apply()
-                                myAlarmManager.schedule(tempGift, getDdayInt(tempGift.endDt))
-                            }
-                        } else {
-                            sharedPref.edit().putStringSet("alarm_list", mutableSetOf()).apply()
-                            myAlarmManager.cancel(tempGift.id)
-                        }
                     }
                     _giftList.value = tempList
                     _copyGiftList.value = _giftList.value
@@ -140,7 +138,8 @@ class ListViewModel @Inject constructor(
 
         _chipElement.value?.keys?.forEach { key ->
             val state = _chipElement.value!![key]
-            if (targetList.contains(key)) beforeElements[key] = !state!! else beforeElements[key] = state!!
+            if (targetList.contains(key)) beforeElements[key] = !state!! else beforeElements[key] =
+                state!!
 
             if (targetList.contains("") && key.isNotEmpty()) { // 전체 클릭
                 beforeElements[key] = false
@@ -209,7 +208,7 @@ class ListViewModel @Inject constructor(
 
     // 기프티콘 삭제
     fun removeGift(onComplete: (Boolean) -> Unit) {
-        if (removeGift ==  null) return
+        if (removeGift == null) return
         if (removeGift?.id?.isEmpty() == true) return
         val uid = removeGift!!.uid
         val id = removeGift!!.id
@@ -286,6 +285,4 @@ class ListViewModel @Inject constructor(
             }
         }
     }
-
-    fun getIsGuestMode() = isGuestMode
 }

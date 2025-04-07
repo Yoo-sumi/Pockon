@@ -76,6 +76,9 @@ android {
 }
 
 dependencies {
+    // exifinterface
+    implementation(libs.androidx.exifinterface)
+
     // swiperefresh
     implementation(libs.accompanist.swiperefresh)
 
