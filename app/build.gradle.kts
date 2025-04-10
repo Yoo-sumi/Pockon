@@ -14,11 +14,11 @@ plugins {
 }
 
 android {
-    namespace = "com.example.giftbox"
+    namespace = "com.sumi.giftbox"
     compileSdk = 34
 
     defaultConfig {
-        applicationId = "com.example.giftbox"
+        applicationId = "com.sumi.giftbox"
         minSdk = 24
         targetSdk = 34
         versionCode = 1

@@ -6,7 +6,7 @@
 
     <fragment
         android:id="@+id/loginFragment"
-        android:name="com.example.giftbox.ui.login.LoginFragment"
+        android:name="com.sumi.giftbox.ui.login.LoginFragment"
         android:label="LoginFragment" >
         <action
             android:id="@+id/action_LoginFragment_to_mainFragment"
@@ -18,7 +18,7 @@
 
     <fragment
         android:id="@+id/pinFragment"
-        android:name="com.example.giftbox.ui.pin.PinFragment"
+        android:name="com.sumi.giftbox.ui.pin.PinFragment"
         android:label="PinFragment" >
         <action
             android:id="@+id/action_pinFragment_to_mainFragment"
@@ -27,7 +27,7 @@
 
     <fragment
         android:id="@+id/mainFragment"
-        android:name="com.example.giftbox.ui.main.MainFragment"
+        android:name="com.sumi.giftbox.ui.main.MainFragment"
         android:label="MainFragment" >
         <action
             android:id="@+id/action_mainFragment_to_pinFragment"
