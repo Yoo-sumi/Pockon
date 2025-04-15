@@ -4,7 +4,7 @@
     android:layout_height="match_parent"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:background="@color/primary"
-    android:name="com.sumi.giftbox.LoginFragment">
+    android:name="com.sumi.pockon.LoginFragment">
 
     <LinearLayout
         android:layout_width="match_parent"

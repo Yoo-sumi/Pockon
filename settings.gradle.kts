@@ -20,6 +20,6 @@ dependencyResolutionManagement {
     }
 }
 
-rootProject.name = "GiftBox"
+rootProject.name = "Pockon"
 include(":app")
  

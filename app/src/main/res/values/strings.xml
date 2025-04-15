@@ -1,6 +1,6 @@
 <resources>
     <!--txt-->
-    <string name="app_name">GiftBox</string>
+    <string name="app_name">Pockon</string>
     <string name="preference_file_key">key_login</string>
     <string name="login_state">login_state</string>
     <string name="home">홈</string>

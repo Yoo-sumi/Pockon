@@ -14,11 +14,11 @@ plugins {
 }
 
 android {
-    namespace = "com.sumi.giftbox"
+    namespace = "com.sumi.pockon"
     compileSdk = 34
 
     defaultConfig {
-        applicationId = "com.sumi.giftbox"
+        applicationId = "com.sumi.pockon"
         minSdk = 24
         targetSdk = 34
         versionCode = 1

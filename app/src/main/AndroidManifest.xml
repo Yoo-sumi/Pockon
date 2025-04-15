@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
-    package="com.sumi.giftbox">
+    package="com.sumi.pockon">
 
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
@@ -17,7 +17,7 @@
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
 
     <application
-        android:name="com.sumi.giftbox.MainApplication"
+        android:name="com.sumi.pockon.MainApplication"
         android:allowBackup="false"
         android:dataExtractionRules="@xml/data_extraction_rules"
         android:fullBackupContent="@xml/backup_rules"
@@ -27,7 +27,7 @@
         android:supportsRtl="true"
         tools:targetApi="31">
 
-        <receiver android:name="com.sumi.giftbox.alarm.AlarmReceiver"
+        <receiver android:name="com.sumi.pockon.alarm.AlarmReceiver"
             android:exported="false">
             <intent-filter>
                 <action android:name="android.intent.action.BOOT_COMPLETED"/>
@@ -39,7 +39,7 @@
             android:value="${NAVER_MAP_CLIENT_ID}" />
 
         <activity
-            android:name="com.sumi.giftbox.ui.main.MainActivity"
+            android:name="com.sumi.pockon.ui.main.MainActivity"
             android:exported="true"
             android:theme="@style/Theme.AppCompat.Light.NoActionBar">
             <intent-filter>
