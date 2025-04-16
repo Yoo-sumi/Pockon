@@ -119,7 +119,7 @@ class AlarmReceiver : BroadcastReceiver() {
                 .setAutoCancel(true)
                 .build()
 
-            notificationManager.notify("${gift?.id}${getDdayInt(gift?.endDt ?: "0")}".hashCode(), summaryNotification)
+            notificationManager.notify(gift?.id.hashCode(), summaryNotification)
         }
     }
 }

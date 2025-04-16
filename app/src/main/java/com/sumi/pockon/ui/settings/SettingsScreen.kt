@@ -312,16 +312,15 @@ fun CopyrightItem(name: String, url: String) {
 
 @Composable
 fun CopyrightScreen() {
-    val nameList = listOf("pojok d", "Md Tanvirul Haque", "Kiranshastry")
+    val nameList = listOf("Md Tanvirul Haque", "Kiranshastry")
     val urlList = listOf(
-        "https://www.flaticon.com/free-icon/gift_3850991?term=gift&page=1&position=15&origin=search&related_id=3850991",
         "https://www.flaticon.com/free-icon/user_9131646?term=user&page=2&position=35&origin=tag&related_id=9131646",
         "https://www.flaticon.com/free-icon/gallery_833281?term=photo&page=1&position=1&origin=tag&related_id=833281"
     )
     LazyColumn(
         modifier = Modifier.fillMaxSize()
     ) {
-        items((0..2).toList()) { idx ->
+        items((0..1).toList()) { idx ->
             CopyrightItem(
                 name = nameList[idx],
                 url = urlList[idx]
