@@ -30,6 +30,8 @@
     <string name="txt_use_end">사용 기한 임박 기프티콘</string>
     <string name="txt_use_cash_inpur">사용금액 입력</string>
     <string name="txt_all_select">전체 선택</string>
+    <string name="txt_today">당일</string>
+    <string name="txt_day_before">%d일 전</string>
 
     <!--title-->
     <string name="title_add_gift">기프티콘 추가</string>
@@ -91,6 +93,7 @@
     <string name="msg_remove_account_fail">회원 탈퇴에 실패했습니다.</string>
     <string name="txt_usage_history">사용내역</string>
     <string name="txt_noti_of_imminent_use">사용 임박 알림</string>
+    <string name="txt_noti_of_imminent_use_select">* 사용 임박 알림 시점을 선택해주세요.</string>
     <string name="txt_use_pwd">비밀번호 사용</string>
     <string name="txt_user">사용자</string>
     <string name="txt_logout">로그아웃</string>

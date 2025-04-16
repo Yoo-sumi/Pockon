@@ -39,6 +39,7 @@ class SettingsViewModel @Inject constructor(
         sharedPref.edit().putBoolean("noti_end_dt", flag).apply()
         isNotiEndDt = flag
 
+        val notiEndDay = sharedPref.getInt("noti_end_dt_day", 0)
         viewModelScope.launch(Dispatchers.IO) {
             giftRepository.getAllGift().take(1).collectLatest { allGift ->
                 val alarmList =
@@ -58,7 +59,7 @@ class SettingsViewModel @Inject constructor(
                     )
                     if (isNotiEndDt) {
                         // 알림 등록
-                        if (getDdayInt(tempGift.endDt) in 0..1 && alarmList?.contains(gift.id) == false) {
+                        if (getDdayInt(tempGift.endDt) == notiEndDay && alarmList?.contains(gift.id) == false) {
                             alarmList.add(gift.id)
                             sharedPref.edit().putStringSet("alarm_list", alarmList).apply()
                             myAlarmManager.schedule(tempGift, getDdayInt(tempGift.endDt))

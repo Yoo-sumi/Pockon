@@ -455,7 +455,7 @@ fun InputDataTextField(
         .fillMaxWidth()
         .padding(end = 0.dp, start = 0.dp, bottom = 5.dp, top = 0.dp)
     if (index == 4) {
-        modifier = modifier.height(150.dp)
+        modifier = modifier.height(170.dp)
     }
 
     OutlinedTextField(
@@ -464,6 +464,8 @@ fun InputDataTextField(
         value = value,
         textStyle = TextStyle(MaterialTheme.colorScheme.onPrimary),
         onValueChange = {
+            if (index in 0..1 && it.length > 20) return@OutlinedTextField
+            if (index == 4 && it.length > 300) return@OutlinedTextField
             if (((it.length > 9 || it == "00") && index == 2) || (it.length > 8 && index == 3)) return@OutlinedTextField
             onValueChange(index, it)
         },

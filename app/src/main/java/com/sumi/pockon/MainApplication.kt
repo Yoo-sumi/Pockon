@@ -11,8 +11,9 @@ class MainApplication : Application() {
 
     companion object {
         const val CHANNEL_NAME = "Pockon"
-        const val CHANNEL_DESCRIPTION = "END_DT"
-        const val CHANNEL_ID = "Channel_Gift"
+        const val CHANNEL_DESCRIPTION = "End_Dt"
+        const val CHANNEL_ID = "Channel_Pockon"
+        const val GROUP_KEY = "Group_Pockon"
     }
 
     override fun onCreate() {

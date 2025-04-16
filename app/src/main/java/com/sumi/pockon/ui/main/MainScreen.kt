@@ -63,6 +63,7 @@ import com.sumi.pockon.ui.detail.DetailScreen
 import com.sumi.pockon.ui.home.HomeScreen
 import com.sumi.pockon.ui.list.ListScreen
 import com.sumi.pockon.ui.map.MapScreen
+import com.sumi.pockon.ui.notification.NotificationSettingScreen
 import com.sumi.pockon.ui.settings.CopyrightScreen
 import com.sumi.pockon.ui.settings.SettingsScreen
 import com.sumi.pockon.ui.used.UsedScreen
@@ -204,6 +205,9 @@ fun BottomNavigationBar(
                     moveCopyrightScreen = {
                         navController.navigate(route = Screen.Copyright.route)
                     },
+                    moveNotiImminentUseScreen = {
+                        navController.navigate(route = Screen.NotificationSetting.route)
+                    },
                     isLoading = {
                         isShowIndicator = it
                     }
@@ -263,6 +267,11 @@ fun BottomNavigationBar(
             composable(Screen.Copyright.route) {
                 CopyrightScreen()
             }
+            composable(Screen.NotificationSetting.route) {
+                NotificationSettingScreen {
+                    navController.popBackStack()
+                }
+            }
         }
     }
 
@@ -320,11 +329,12 @@ sealed class Screen(val route: String, val icon: ImageVector, @StringRes val lab
     data object List : Screen("list", Icons.AutoMirrored.Filled.List, R.string.list)
     data object Setting : Screen("setting", Icons.Filled.Settings, R.string.setting)
 
-    data object Add : Screen("add", Icons.Filled.Add, R.string.setting)
+    data object Add : Screen("add", Icons.Filled.Add, R.string.add)
     data object Detail : Screen("detail", Icons.Filled.Search, R.string.detail)
     data object Map : Screen("map", Icons.Filled.LocationOn, R.string.map)
-    data object Used : Screen("used", Icons.Filled.LocationOn, R.string.map)
-    data object Copyright : Screen("copyright", Icons.Filled.LocationOn, R.string.map)
+    data object Used : Screen("used", Icons.Filled.LocationOn, R.string.txt_usage_history)
+    data object Copyright : Screen("copyright", Icons.Filled.LocationOn, R.string.txt_copyright)
+    data object NotificationSetting : Screen("notification_setting", Icons.Filled.LocationOn, R.string.txt_noti_of_imminent_use)
 }
 
 fun isNetworkConnected(context: Context): Boolean {

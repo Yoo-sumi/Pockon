@@ -10,6 +10,7 @@ import android.os.Build
 import androidx.core.app.NotificationCompat
 import com.sumi.pockon.ui.main.MainActivity
 import com.sumi.pockon.MainApplication.Companion.CHANNEL_ID
+import com.sumi.pockon.MainApplication.Companion.GROUP_KEY
 import com.sumi.pockon.R
 import com.sumi.pockon.data.repository.GiftRepository
 import com.sumi.pockon.data.model.Gift
@@ -37,6 +38,7 @@ class AlarmReceiver : BroadcastReceiver() {
         if (intent.action == "android.intent.action.BOOT_COMPLETED") {
             CoroutineScope(Dispatchers.IO).launch {
                 val isNotiEndDt = sharedPref.getBoolean("noti_end_dt", true)
+                val notiEndDay = sharedPref.getInt("noti_end_dt_day", 0)
                 sharedPref.edit().putStringSet("alarm_list", mutableSetOf()).apply()
                 val alarmList = mutableSetOf<String>()
                 giftRepository.getAllGift().take(1).collectLatest { allGift ->
@@ -53,7 +55,7 @@ class AlarmReceiver : BroadcastReceiver() {
                             cash = gift.cash
                         )
                         // 알림 등록
-                        if (isNotiEndDt && getDdayInt(tempGift.endDt) in 0..1) {
+                        if (isNotiEndDt && getDdayInt(tempGift.endDt) == notiEndDay) {
                             alarmList.add(gift.id)
                             myAlarmManager.schedule(tempGift, getDdayInt(tempGift.endDt))
                         } else {
@@ -91,6 +93,7 @@ class AlarmReceiver : BroadcastReceiver() {
                 .setCategory(NotificationCompat.CATEGORY_RECOMMENDATION)
                 .setContentIntent(pendingIntent)
                 .setAutoCancel(true)
+                .setGroup(GROUP_KEY) // 그룹 키 지정
             if (dDay == 0) {
                 notificationBuilder.setContentText(context.getString(R.string.msg_noti_end_dt_today))
             } else {
@@ -106,6 +109,17 @@ class AlarmReceiver : BroadcastReceiver() {
                 "${gift?.id}${getDdayInt(gift?.endDt ?: "0")}".hashCode(),
                 notificationBuilder.build()
             )
+
+            // 그룹 요약 알림
+            val summaryNotification = NotificationCompat.Builder(context, CHANNEL_ID)
+                .setSmallIcon(R.drawable.ic_noti_gift)
+                .setStyle(NotificationCompat.InboxStyle())
+                .setGroup(GROUP_KEY)
+                .setGroupSummary(true)
+                .setAutoCancel(true)
+                .build()
+
+            notificationManager.notify("${gift?.id}${getDdayInt(gift?.endDt ?: "0")}".hashCode(), summaryNotification)
         }
     }
 }

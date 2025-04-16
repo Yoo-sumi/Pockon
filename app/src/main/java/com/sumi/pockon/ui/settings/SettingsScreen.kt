@@ -45,6 +45,7 @@ fun SettingsScreen(
     movePinScreen: () -> Unit,
     moveLogInScreen: () -> Unit,
     moveCopyrightScreen: () -> Unit,
+    moveNotiImminentUseScreen: () -> Unit,
     isLoading: (Boolean) -> Unit
 ) {
     val settingViewModel = hiltViewModel<SettingsViewModel>()
@@ -101,6 +102,9 @@ fun SettingsScreen(
                         onCheck = {
                             checkedAlarm = !checkedAlarm
                             settingViewModel.onOffNotiEndDt(checkedAlarm)
+                        },
+                        onClick = {
+                            if (checkedAlarm) moveNotiImminentUseScreen()
                         }
                     )
 

@@ -28,8 +28,9 @@ class DetailViewModel @Inject constructor(
     private val sharedPref: SharedPreferences
 ) : ViewModel() {
 
-    private var isNotiEndDt = sharedPref.getBoolean("noti_end_dt", true)
-    private var isGuestMode = sharedPref.getBoolean("guest_mode", false)
+    private val isNotiEndDt = sharedPref.getBoolean("noti_end_dt", true)
+    private val isGuestMode = sharedPref.getBoolean("guest_mode", false)
+    private val notiEndDay = sharedPref.getInt("noti_end_dt_day", 0)
 
     private val _gift = mutableStateOf(Gift())
     val gift: State<Gift> = _gift
@@ -183,7 +184,7 @@ class DetailViewModel @Inject constructor(
                 if (_gift.value.endDt != _endDate.value) {
                     myAlarmManager.cancel(updateGift.id)
                     // 알림 등록
-                    if (isNotiEndDt && getDdayInt(updateGift.endDt) in 0..1) {
+                    if (isNotiEndDt && getDdayInt(updateGift.endDt) == notiEndDay) {
                         myAlarmManager.schedule(updateGift, getDdayInt(updateGift.endDt))
                     }
                 }

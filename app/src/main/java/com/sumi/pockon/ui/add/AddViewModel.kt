@@ -26,9 +26,10 @@ class AddViewModel @Inject constructor(
     private val myAlarmManager: MyAlarmManager
 ) : ViewModel() {
 
-    private var uid = sharedPref.getString("uid", "") ?: ""
-    private var isNotiEndDt = sharedPref.getBoolean("noti_end_dt", true)
-    private var isGuestMode = sharedPref.getBoolean("guest_mode", false)
+    private val uid = sharedPref.getString("uid", "") ?: ""
+    private val isNotiEndDt = sharedPref.getBoolean("noti_end_dt", true)
+    private val isGuestMode = sharedPref.getBoolean("guest_mode", false)
+    private val notiEndDay = sharedPref.getInt("noti_end_dt_day", 0)
 
     private val _isShowDatePicker = mutableStateOf(false)
     val isShowDatePicker: State<Boolean> = _isShowDatePicker
@@ -98,10 +99,9 @@ class AddViewModel @Inject constructor(
                     viewModelScope.launch(Dispatchers.IO) {
                         giftRepository.insertGift(gift.copy(id = id))
                     }
-                    val alarmList =
-                        sharedPref.getStringSet("alarm_list", mutableSetOf())?.toMutableSet()
+                    val alarmList = sharedPref.getStringSet("alarm_list", mutableSetOf())?.toMutableSet()
                     // 알림 등록
-                    if (isNotiEndDt && getDdayInt(gift.endDt) in 0..1 && alarmList?.contains(gift.id) == false) {
+                    if (isNotiEndDt && getDdayInt(gift.endDt) == notiEndDay && alarmList?.contains(gift.id) == false) {
                         alarmList.add(gift.id)
                         sharedPref.edit().putStringSet("alarm_list", alarmList).apply()
                         myAlarmManager.schedule(gift, getDdayInt(gift.endDt))

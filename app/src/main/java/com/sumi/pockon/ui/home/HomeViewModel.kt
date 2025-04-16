@@ -32,10 +32,11 @@ class HomeViewModel @Inject constructor(
     private var longitude: Double? = null
     private var latitude: Double? = null
 
-    private var uid = sharedPref.getString("uid", "") ?: ""
-    private var isGuestMode = sharedPref.getBoolean("guest_mode", false)
-    private var isFirstLogin = sharedPref.getBoolean("first_login", true)
-    private var isNotiEndDt = sharedPref.getBoolean("noti_end_dt", true)
+    private val uid = sharedPref.getString("uid", "") ?: ""
+    private val isGuestMode = sharedPref.getBoolean("guest_mode", false)
+    private val isFirstLogin = sharedPref.getBoolean("first_login", true)
+    private val isNotiEndDt = sharedPref.getBoolean("noti_end_dt", true)
+    private val notiEndDay = sharedPref.getInt("noti_end_dt_day", 0)
 
     private var giftList: List<Gift> = listOf()
 
@@ -49,6 +50,7 @@ class HomeViewModel @Inject constructor(
     val isShowIndicator: State<Boolean> = _isShowIndicator
 
     init {
+        observeGiftList()
         getGiftList()
     }
 
@@ -58,7 +60,6 @@ class HomeViewModel @Inject constructor(
 
         if (isGuestMode || !isFirstLogin) {
             _isShowIndicator.value = false
-            observeGiftList()
             return
         } // 게스트 모드 또는 최초 로그인이 아니면 서버 안탐
 
@@ -67,7 +68,6 @@ class HomeViewModel @Inject constructor(
                 // 로컬 저장(기프티콘)
                 viewModelScope.launch(Dispatchers.IO) {
                     giftRepository.deleteAllAndInsertGifts(giftList)
-                    observeGiftList()
                     if (isFirstLogin) sharedPref.edit().putBoolean("first_login", false).apply()
                 }
             } else {
@@ -109,7 +109,7 @@ class HomeViewModel @Inject constructor(
             giftList.forEach { gift ->
                 if (isNotiEndDt) {
                     // 알림 등록
-                    if (getDdayInt(gift.endDt) in 0..1 && alarmList?.contains(gift.id) == false) {
+                    if (getDdayInt(gift.endDt) == notiEndDay && alarmList?.contains(gift.id) == false) {
                         alarmList.add(gift.id)
                         sharedPref.edit().putStringSet("alarm_list", alarmList).apply()
                         myAlarmManager.schedule(gift, getDdayInt(gift.endDt))

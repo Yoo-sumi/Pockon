@@ -90,6 +90,7 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material3.Card
 import androidx.compose.material3.CheckboxDefaults
+import androidx.compose.ui.text.style.TextOverflow
 
 @Composable
 fun ListScreen(onDetail: (String) -> Unit, onAdd: () -> Unit, isLoading: (Boolean) -> Unit) {
@@ -415,6 +416,8 @@ fun GiftItem(
                     Text(
                         modifier = Modifier.fillMaxWidth(),
                         text = gift.brand,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis,
                         color = MaterialTheme.colorScheme.onPrimary
                     )
                     Text(
@@ -422,6 +425,8 @@ fun GiftItem(
                         fontWeight = FontWeight.Bold,
                         fontSize = 20.sp,
                         text = gift.name,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis,
                         color = MaterialTheme.colorScheme.onPrimary
                     )
                     Text(
