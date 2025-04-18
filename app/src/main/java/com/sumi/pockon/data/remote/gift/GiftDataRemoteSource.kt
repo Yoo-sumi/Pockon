@@ -47,6 +47,16 @@ class GiftDataRemoteSource @Inject constructor(
             }
     }
 
+    fun updateDataIsFavorite(id: String, isFavorite: Boolean, onComplete: (Boolean) -> Unit) {
+        firestore
+            .collection("gift")
+            .document(id)
+            .update("favorite", isFavorite)
+            .addOnCompleteListener { task ->
+                onComplete(task.isSuccessful)
+            }
+    }
+
     fun deleteData(document: String, onComplete: (Boolean) -> Unit) {
         firestore
             .collection("gift")

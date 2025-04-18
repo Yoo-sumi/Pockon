@@ -49,6 +49,8 @@ class DetailViewModel @Inject constructor(
     val memo: State<String> = _memo
     private val _usedDt = mutableStateOf("")
     val usedDt: State<String> = _usedDt
+    private val _isFavorite = mutableStateOf(false)
+    val isFavorite: State<Boolean> = _isFavorite
 
     private val _isShowBottomSheet = mutableStateOf(false)
     val isShowBottomSheet: State<Boolean> = _isShowBottomSheet
@@ -85,7 +87,8 @@ class DetailViewModel @Inject constructor(
                         addDt = gift.addDt,
                         memo = gift.memo,
                         usedDt = gift.usedDt,
-                        cash = gift.cash
+                        cash = gift.cash,
+                        isFavorite = gift.isFavorite
                     )
                 )
             }
@@ -102,6 +105,7 @@ class DetailViewModel @Inject constructor(
         _usedDt.value = gift.usedDt
         _photo.value = gift.photo
         _isCheckedCash.value = gift.cash.isNotEmpty()
+        _isFavorite.value = gift.isFavorite
     }
 
     fun setGift(index: Int, value: String) {
@@ -144,6 +148,15 @@ class DetailViewModel @Inject constructor(
         _photo.value = photo
     }
 
+    fun toggleFavorite() {
+        _isFavorite.value = !_isFavorite.value
+        giftRepository.updateGiftIsFavorite(_gift.value.id, _isFavorite.value) {
+            viewModelScope.launch(Dispatchers.IO) {
+                giftRepository.updateGiftIsFavorite(_gift.value.id, _isFavorite.value)
+            }
+        }
+    }
+
     fun updateGift(onComplete: (Boolean) -> Unit) {
         _isShowIndicator.value = true
         val updateGift = if (_isCheckedCash.value) {
@@ -157,7 +170,8 @@ class DetailViewModel @Inject constructor(
                 addDt = _gift.value.addDt,
                 memo = _memo.value,
                 usedDt = _gift.value.usedDt,
-                cash = _cash.value
+                cash = _cash.value,
+                isFavorite = _isFavorite.value
             )
         } else {
             Gift(
@@ -170,7 +184,8 @@ class DetailViewModel @Inject constructor(
                 addDt = _gift.value.addDt,
                 memo = _memo.value,
                 usedDt = _gift.value.usedDt,
-                cash = ""
+                cash = "",
+                isFavorite = _isFavorite.value
             )
         }
         giftRepository.updateGift(isGuestMode, updateGift, true) { result ->

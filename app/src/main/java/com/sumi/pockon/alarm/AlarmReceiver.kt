@@ -52,7 +52,8 @@ class AlarmReceiver : BroadcastReceiver() {
                             addDt = gift.addDt,
                             memo = gift.memo,
                             usedDt = gift.usedDt,
-                            cash = gift.cash
+                            cash = gift.cash,
+                            isFavorite = gift.isFavorite
                         )
                         // 알림 등록
                         if (isNotiEndDt && getDdayInt(tempGift.endDt) == notiEndDay) {

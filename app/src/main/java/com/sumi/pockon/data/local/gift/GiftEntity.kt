@@ -14,5 +14,6 @@ data class GiftEntity(
     val addDt: String = "",
     val memo: String = "",
     val usedDt: String = "",
-    val cash: String = ""
+    val cash: String = "",
+    val isFavorite: Boolean = false
 )

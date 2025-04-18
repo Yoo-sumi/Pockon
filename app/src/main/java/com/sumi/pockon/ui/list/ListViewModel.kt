@@ -82,7 +82,8 @@ class ListViewModel @Inject constructor(
                             addDt = gift.addDt,
                             memo = gift.memo,
                             usedDt = gift.usedDt,
-                            cash = gift.cash
+                            cash = gift.cash,
+                            isFavorite = gift.isFavorite
                         )
                         tempList.add(tempGift)
                     }

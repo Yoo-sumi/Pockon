@@ -79,7 +79,8 @@ class AddViewModel @Inject constructor(
                 endDt = _endDate.value,
                 addDt = addDate,
                 memo = _memo.value,
-                cash = _cash.value
+                cash = _cash.value,
+                isFavorite = false
             )
         } else {
             Gift(
@@ -89,7 +90,8 @@ class AddViewModel @Inject constructor(
                 brand = _brand.value,
                 endDt = _endDate.value,
                 addDt = addDate,
-                memo = _memo.value
+                memo = _memo.value,
+                isFavorite = false
             )
         }
         viewModelScope.launch {

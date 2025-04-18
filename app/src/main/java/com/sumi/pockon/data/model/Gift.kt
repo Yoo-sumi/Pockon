@@ -13,5 +13,8 @@ data class Gift(
     val addDt: String = "",
     val memo: String = "",
     val usedDt: String = "",
-    val cash: String = ""
+    val cash: String = "",
+    @get:com.google.firebase.firestore.PropertyName("favorite")
+    @set:com.google.firebase.firestore.PropertyName("favorite")
+    var isFavorite: Boolean = false
 ) : Serializable

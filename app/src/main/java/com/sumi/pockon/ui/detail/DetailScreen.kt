@@ -43,6 +43,8 @@ import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.DateRange
 import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material.icons.filled.Star
+import androidx.compose.material.icons.outlined.StarOutline
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Checkbox
@@ -182,24 +184,38 @@ fun DetailScreen(id: String, onBack: () -> Unit) {
                     text = stringResource(id = R.string.title_detail_gift),
                     fontSize = 16.sp,
                 )
-                if (detailViewModel.gift.value.usedDt.isEmpty()) {
+                Row(
+                    modifier = Modifier.align(Alignment.CenterEnd)
+                ) {
                     IconButton(
-                        modifier = Modifier.align(Alignment.CenterEnd),
                         onClick = {
-                            detailViewModel.setIsEdit(true)
+                            detailViewModel.toggleFavorite()
                         }
                     ) {
-                        if (!detailViewModel.isEdit.value) {
-                            Icon(
-                                Icons.Default.Edit,
-                                contentDescription = "Edit"
-                            )
-                        } else {
-                            Text(
-                                modifier = Modifier.clickable { detailViewModel.setIsEdit(false) },
-                                text = stringResource(id = R.string.btn_cancel),
-                                fontSize = 14.sp
-                            )
+                        Icon(
+                            if (detailViewModel.isFavorite.value) Icons.Filled.Star else Icons.Outlined.StarOutline,
+                            contentDescription = "Star"
+                        )
+
+                    }
+                    if (detailViewModel.gift.value.usedDt.isEmpty()) {
+                        IconButton(
+                            onClick = {
+                                detailViewModel.setIsEdit(true)
+                            }
+                        ) {
+                            if (!detailViewModel.isEdit.value) {
+                                Icon(
+                                    Icons.Default.Edit,
+                                    contentDescription = "Edit"
+                                )
+                            } else {
+                                Text(
+                                    modifier = Modifier.clickable { detailViewModel.setIsEdit(false) },
+                                    text = stringResource(id = R.string.btn_cancel),
+                                    fontSize = 14.sp
+                                )
+                            }
                         }
                     }
                 }

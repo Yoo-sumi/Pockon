@@ -81,6 +81,14 @@ class GiftRepository @Inject constructor(
         }
     }
 
+    fun updateGiftIsFavorite(id: String, isFavorite: Boolean, onComplete: (Boolean) -> Unit) {
+        giftDataRemoteSource.updateDataIsFavorite(id, isFavorite, onComplete)
+    }
+
+    fun updateGiftIsFavorite(id: String, isFavorite: Boolean) {
+        giftLocalDataSource.updateGiftIsFavorite(id, isFavorite)
+    }
+
     fun removeGift(
         isGuestMode: Boolean,
         uid: String,
@@ -137,7 +145,8 @@ class GiftRepository @Inject constructor(
             addDt = gift.addDt,
             memo = gift.memo,
             usedDt = gift.usedDt,
-            cash = gift.cash
+            cash = gift.cash,
+            isFavorite = gift.isFavorite
         )
         giftLocalDataSource.insertGift(giftEntity)
     }

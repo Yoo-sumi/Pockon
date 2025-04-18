@@ -60,7 +60,8 @@ class UsedViewModel @Inject constructor(
                             addDt = gift.addDt,
                             memo = gift.memo,
                             usedDt = gift.usedDt,
-                            cash = gift.cash
+                            cash = gift.cash,
+                            isFavorite = gift.isFavorite
                         )
                     }.sortedByDescending { gift -> dateFormat.parse(gift.endDt)?.time }
                 } else {

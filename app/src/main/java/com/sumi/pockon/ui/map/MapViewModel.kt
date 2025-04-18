@@ -49,7 +49,8 @@ class MapViewModel @Inject constructor(
                             addDt = gift.addDt,
                             memo = gift.memo,
                             usedDt = gift.usedDt,
-                            cash = gift.cash
+                            cash = gift.cash,
+                            isFavorite = gift.isFavorite
                         )
                     }
                     getAllBrands() // 키워드별 브랜드 위치 정보 가져오기(로컬)

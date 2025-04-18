@@ -25,6 +25,9 @@ interface GiftDao {
     @Query("SELECT * FROM GiftEntity WHERE NULLIF(usedDt, '') IS NOT NULL")
     fun getAllUsedGift(): Flow<List<GiftEntity>>
 
+    @Query("UPDATE GiftEntity SET isFavorite = :isFavorite WHERE id = :id")
+    fun updateGiftIsFavorite(id: String, isFavorite: Boolean)
+
     @Query("DELETE FROM GiftEntity")
     fun deleteAllGift()
 
