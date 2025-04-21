@@ -40,11 +40,11 @@ class NotificationSettingViewModel @Inject constructor(
     fun changeNotiEndDt() {
         if (!isNotiEndDt || initialSelectedDay == _seletedDay.intValue) return
 
-        val notiEndDay = sharedPref.getInt("noti_end_dt_day", 0)
         sharedPref.edit().putStringSet("alarm_list", mutableSetOf()).apply()
         viewModelScope.launch(Dispatchers.IO) {
             giftRepository.getAllGift().take(1).collectLatest { allGift ->
-                val alarmList = sharedPref.getStringSet("alarm_list", mutableSetOf())?.toMutableSet()
+                val notiEndDay = sharedPref.getInt("noti_end_dt_day", 0)
+                val alarmList = mutableSetOf<String>()
                 allGift.forEach { gift ->
                     val tempGift = Gift(
                         id = gift.id,
@@ -60,12 +60,11 @@ class NotificationSettingViewModel @Inject constructor(
                         isFavorite = gift.isFavorite
                     )
                     // 알림 등록
-                    if (getDdayInt(tempGift.endDt) == notiEndDay && alarmList?.contains(gift.id) == false) {
-                        alarmList.add(gift.id)
-                        sharedPref.edit().putStringSet("alarm_list", alarmList).apply()
-                        myAlarmManager.schedule(tempGift, getDdayInt(tempGift.endDt))
-                    }
+                    alarmList.add(gift.id)
+                    myAlarmManager.cancel(tempGift.id)
+                    myAlarmManager.schedule(tempGift, notiEndDay)
                 }
+                sharedPref.edit().putStringSet("alarm_list", alarmList).apply()
             }
         }
     }

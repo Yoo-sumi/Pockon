@@ -103,10 +103,11 @@ class AddViewModel @Inject constructor(
                     }
                     val alarmList = sharedPref.getStringSet("alarm_list", mutableSetOf())?.toMutableSet()
                     // 알림 등록
-                    if (isNotiEndDt && getDdayInt(gift.endDt) == notiEndDay && alarmList?.contains(gift.id) == false) {
+                    if (isNotiEndDt && alarmList?.contains(gift.id) == false) {
+                        val notiEndDay = sharedPref.getInt("noti_end_dt_day", 0)
                         alarmList.add(gift.id)
                         sharedPref.edit().putStringSet("alarm_list", alarmList).apply()
-                        myAlarmManager.schedule(gift, getDdayInt(gift.endDt))
+                        myAlarmManager.schedule(gift, notiEndDay)
                     }
                 }
                 _isShowIndicator.value = false

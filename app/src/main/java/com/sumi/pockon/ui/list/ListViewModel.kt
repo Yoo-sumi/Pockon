@@ -200,6 +200,9 @@ class ListViewModel @Inject constructor(
                     giftRepository.insertGift(updateGift)
                 }
                 myAlarmManager.cancel(gift.id)
+                val alarmList = sharedPref.getStringSet("alarm_list", mutableSetOf())?.toMutableSet()
+                alarmList?.remove(gift.id)
+                sharedPref.edit().putStringSet("alarm_list", alarmList).apply()
                 onComplete(true)
             } else { // 수정 실패
                 onComplete(false)
@@ -221,6 +224,9 @@ class ListViewModel @Inject constructor(
                     giftRepository.deleteGift(id)
                 }
                 myAlarmManager.cancel(id)
+                val alarmList = sharedPref.getStringSet("alarm_list", mutableSetOf())?.toMutableSet()
+                alarmList?.remove(id)
+                sharedPref.edit().putStringSet("alarm_list", alarmList).apply()
                 onComplete(true)
             } else { // 삭제 실패
                 onComplete(false)
@@ -272,10 +278,13 @@ class ListViewModel @Inject constructor(
                         onComplete(false)
                     } else {
                         val idList = ArrayList<String>()
+                        val alarmList = sharedPref.getStringSet("alarm_list", mutableSetOf())?.toMutableSet()
                         _checkedGiftList.value.forEach { id ->
                             idList.add(id)
                             myAlarmManager.cancel(id)
+                            alarmList?.remove(id)
                         }
+                        sharedPref.edit().putStringSet("alarm_list", alarmList).apply()
                         // 로컬 삭제
                         viewModelScope.launch(Dispatchers.IO) {
                             giftRepository.deleteGifts(idList)

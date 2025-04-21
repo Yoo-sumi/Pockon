@@ -199,8 +199,12 @@ class DetailViewModel @Inject constructor(
                 if (_gift.value.endDt != _endDate.value) {
                     myAlarmManager.cancel(updateGift.id)
                     // 알림 등록
-                    if (isNotiEndDt && getDdayInt(updateGift.endDt) == notiEndDay) {
-                        myAlarmManager.schedule(updateGift, getDdayInt(updateGift.endDt))
+                    if (isNotiEndDt) {
+                        val notiEndDay = sharedPref.getInt("noti_end_dt_day", 0)
+                        myAlarmManager.schedule(updateGift, notiEndDay)
+
+                        val alarmList = sharedPref.getStringSet("alarm_list", mutableSetOf())?.toMutableSet()
+                        if (alarmList?.contains(updateGift.id) == false) alarmList.add(updateGift.id)
                     }
                 }
                 _gift.value = updateGift
