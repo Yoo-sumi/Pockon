@@ -2,8 +2,12 @@ package com.sumi.pockon.ui.home
 
 import android.Manifest
 import android.content.Context
+import android.content.Intent
 import android.content.pm.PackageManager
 import android.location.Location
+import android.net.Uri
+import android.provider.Settings
+import androidx.appcompat.app.AlertDialog
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -124,9 +128,25 @@ fun HomeScreen(
                         Box(modifier = Modifier.size(28.dp)) {
                             IconButton(
                                 onClick = {
-                                    getLocation(context, fusedLocationClient) { // 위치 동기화
-                                        longitude = it?.longitude
-                                        latitude = it?.latitude
+                                    // 권한 체크
+                                    if (checkLocationPermission(context)) {
+                                        getLocation(context, fusedLocationClient) { // 위치 동기화
+                                            longitude = it?.longitude
+                                            latitude = it?.latitude
+                                        }
+                                    } else {
+                                        AlertDialog.Builder(context)
+                                            .setTitle(context.getString(R.string.txt_alert))
+                                            .setMessage(context.getString(R.string.msg_no_location_permission))
+                                            .setPositiveButton(context.getString(R.string.btn_confirm)) { dialog, which ->
+                                                // 긍정 버튼 클릭 동작 처리
+                                                val intent = Intent(
+                                                    Settings.ACTION_APPLICATION_DETAILS_SETTINGS,
+                                                    Uri.fromParts("package", context.packageName, null)
+                                                )
+                                                context.startActivity(intent)
+                                            }
+                                            .show()
                                     }
                                 },
                                 modifier = Modifier
@@ -446,4 +466,19 @@ fun HomeScreenTopBar() {
             fontSize = 18.sp,
         )
     }
+}
+
+/** 위치 권한 체크 */
+private fun checkLocationPermission(context: Context): Boolean {
+    val permissions = arrayOf(
+        Manifest.permission.ACCESS_FINE_LOCATION,
+        Manifest.permission.ACCESS_COARSE_LOCATION
+    )
+
+    return permissions.all {
+            ContextCompat.checkSelfPermission(
+                context,
+                it
+            ) == PackageManager.PERMISSION_GRANTED
+        }
 }
