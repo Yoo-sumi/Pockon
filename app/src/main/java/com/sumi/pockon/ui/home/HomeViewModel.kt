@@ -105,19 +105,21 @@ class HomeViewModel @Inject constructor(
                 )
             }
 
-            val alarmList = sharedPref.getStringSet("alarm_list", mutableSetOf())?.toMutableSet()
+            sharedPref.edit().putStringSet("alarm_list", mutableSetOf()).apply()
+            val alarmList = mutableSetOf<String>()
+            val notiEndDay = sharedPref.getInt("noti_end_dt_day", 0)
             giftList.forEach { gift ->
+                myAlarmManager.cancel(gift.id)
                 if (isNotiEndDt) {
                     // 알림 등록
-                    if (getDdayInt(gift.endDt) == notiEndDay && alarmList?.contains(gift.id) == false) {
-                        alarmList.add(gift.id)
-                        sharedPref.edit().putStringSet("alarm_list", alarmList).apply()
-                        myAlarmManager.schedule(gift, getDdayInt(gift.endDt))
-                    }
-                } else {
-                    sharedPref.edit().putStringSet("alarm_list", mutableSetOf()).apply()
-                    myAlarmManager.cancel(gift.id)
+                    alarmList.add(gift.id)
+                    myAlarmManager.schedule(gift, notiEndDay)
                 }
+            }
+            if (isNotiEndDt) {
+                sharedPref.edit().putStringSet("alarm_list", alarmList).apply()
+            } else {
+                sharedPref.edit().putStringSet("alarm_list", mutableSetOf()).apply()
             }
 
             // 기한 임박 기프티콘 목록(TOP 30)

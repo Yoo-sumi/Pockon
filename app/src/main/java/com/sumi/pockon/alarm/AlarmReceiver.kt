@@ -38,7 +38,6 @@ class AlarmReceiver : BroadcastReceiver() {
         if (intent.action == "android.intent.action.BOOT_COMPLETED") {
             CoroutineScope(Dispatchers.IO).launch {
                 val isNotiEndDt = sharedPref.getBoolean("noti_end_dt", true)
-                val notiEndDay = sharedPref.getInt("noti_end_dt_day", 0)
                 sharedPref.edit().putStringSet("alarm_list", mutableSetOf()).apply()
                 val alarmList = mutableSetOf<String>()
                 giftRepository.getAllGift().take(1).collectLatest { allGift ->
@@ -55,11 +54,11 @@ class AlarmReceiver : BroadcastReceiver() {
                             cash = gift.cash
                         )
                         // 알림 등록
-                        if (isNotiEndDt && getDdayInt(tempGift.endDt) == notiEndDay) {
+                        myAlarmManager.cancel(tempGift.id)
+                        if (isNotiEndDt) {
+                            val notiEndDay = sharedPref.getInt("noti_end_dt_day", 0)
                             alarmList.add(gift.id)
-                            myAlarmManager.schedule(tempGift, getDdayInt(tempGift.endDt))
-                        } else {
-                            myAlarmManager.cancel(tempGift.id)
+                            myAlarmManager.schedule(tempGift, notiEndDay)
                         }
                     }
                     if (isNotiEndDt) {
