@@ -46,7 +46,7 @@ class UsedViewModel @Inject constructor(
     // 로컬 기프티콘 목록 변화 감지해서 가져오기
     private fun observeGiftList() {
         viewModelScope.launch(Dispatchers.IO) {
-            giftRepository.getAllUsedGift().collectLatest { allGift ->
+            giftRepository.getAllGift(2).collectLatest { allGift ->
                 if (allGift.isNotEmpty()) {
                     val dateFormat = SimpleDateFormat("yyyyMMdd", Locale.KOREA)
                     _giftList.value = allGift.map { gift ->

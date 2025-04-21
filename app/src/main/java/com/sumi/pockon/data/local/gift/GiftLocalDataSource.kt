@@ -12,6 +12,8 @@ class GiftLocalDataSource @Inject constructor(
 
     fun getAllGift() = giftDao.getAllGift()
 
+    fun getAllNotUsedGift() = giftDao.getAllNotUsedGift()
+
     fun getGift(id: String) = giftDao.getGift(id)
 
     fun getAllUsedGift() = giftDao.getAllUsedGift()

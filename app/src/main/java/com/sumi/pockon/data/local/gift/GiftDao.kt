@@ -16,8 +16,11 @@ interface GiftDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     fun insertGifts(items: List<GiftEntity>)
 
-    @Query("SELECT * FROM GiftEntity WHERE NULLIF(usedDt, '') IS NULL ORDER BY id")
+    @Query("SELECT * FROM GiftEntity ORDER BY id")
     fun getAllGift(): Flow<List<GiftEntity>>
+
+    @Query("SELECT * FROM GiftEntity WHERE NULLIF(usedDt, '') IS NULL ORDER BY id")
+    fun getAllNotUsedGift(): Flow<List<GiftEntity>>
 
     @Query("SELECT * FROM GiftEntity WHERE id = :id")
     fun getGift(id: String): Flow<GiftEntity>

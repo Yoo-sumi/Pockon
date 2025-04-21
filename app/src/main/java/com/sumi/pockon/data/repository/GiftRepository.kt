@@ -8,6 +8,7 @@ import com.sumi.pockon.data.remote.gift.GiftDataRemoteSource
 import com.sumi.pockon.data.remote.gift.GiftPhotoRemoteDataSource
 import com.sumi.pockon.util.saveBitmapToFile
 import dagger.hilt.android.qualifiers.ApplicationContext
+import kotlinx.coroutines.flow.Flow
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
@@ -151,11 +152,15 @@ class GiftRepository @Inject constructor(
         giftLocalDataSource.insertGift(giftEntity)
     }
 
-    fun getAllGift() = giftLocalDataSource.getAllGift()
+    fun getAllGift(mode: Int = 0): Flow<List<GiftEntity>> {
+        return when (mode) {
+            1 -> giftLocalDataSource.getAllGift()
+            2 -> giftLocalDataSource.getAllUsedGift()
+            else -> giftLocalDataSource.getAllNotUsedGift()
+        }
+    }
 
     fun getGift(id: String) = giftLocalDataSource.getGift(id)
-
-    fun getAllUsedGift() = giftLocalDataSource.getAllUsedGift()
 
     fun deleteGift(id: String) = giftLocalDataSource.deleteGift(id)
 
@@ -175,7 +180,8 @@ class GiftRepository @Inject constructor(
                 addDt = gift.addDt,
                 memo = gift.memo,
                 usedDt = gift.usedDt,
-                cash = gift.cash
+                cash = gift.cash,
+                isFavorite = gift.isFavorite
             )
         }
         giftLocalDataSource.deleteAllAndInsertGifts(giftEntityList)

@@ -155,7 +155,7 @@ fun HomeScreen(
                 }
 
                 if (homeViewModel.nearGiftList.value.isEmpty()) {
-                    EmptyNear()
+                    EmptyNear(R.string.txt_no_near_gift)
                 } else {
                     // gift item
                     LazyRow(
@@ -193,14 +193,14 @@ fun HomeScreen(
                         modifier = Modifier
                             .wrapContentSize()
                             .padding(bottom = 3.dp),
-                        text = stringResource(id = R.string.txt_use_end),
+                        text = stringResource(id = R.string.txt_favorite),
                         fontSize = 18.sp,
                         textAlign = TextAlign.Start
                     )
                 }
 
-                if (homeViewModel.closeToGiftList.value.isEmpty()) {
-                    EmptyNear()
+                if (homeViewModel.favoriteGiftList.value.isEmpty()) {
+                    EmptyNear(R.string.txt_no_favorite_gift)
                 } else {
                     // gift item
                     LazyRow(
@@ -210,7 +210,7 @@ fun HomeScreen(
                         horizontalArrangement = Arrangement.spacedBy(5.dp),
                     ) {
                         items(
-                            items = homeViewModel.closeToGiftList.value,
+                            items = homeViewModel.favoriteGiftList.value,
                             key = { gift -> gift.id }
                         ) { gift ->
                             HomeGiftItem(gift, formatString(gift.endDt), getDday(gift.endDt)) {
@@ -328,13 +328,13 @@ fun HomeGiftItem(
             }
         }
 
-        val color = if (dDay.second) {
+        val color = if (dDay.second || gift.usedDt.isNotEmpty()) {
             MaterialTheme.colorScheme.errorContainer
         } else {
             MaterialTheme.colorScheme.tertiary
         }
         Text(
-            text = dDay.first,
+            text = if (gift.usedDt.isNotEmpty()) stringResource(id = R.string.txt_used_no_enter) else dDay.first,
             fontSize = 14.sp,
             modifier = Modifier
                 .padding(2.dp)
@@ -351,7 +351,7 @@ fun HomeGiftItem(
 }
 
 @Composable
-fun EmptyNear() {
+fun EmptyNear(msg: Int) {
     Box(
         modifier = Modifier
             .padding(top = 5.dp)
@@ -391,8 +391,9 @@ fun EmptyNear() {
         Text(
             modifier = Modifier
                 .fillMaxWidth()
+                .padding(20.dp)
                 .align(Alignment.Center),
-            text = stringResource(id = R.string.txt_no_gift),
+            text = stringResource(id = msg),
             textAlign = TextAlign.Center,
             color = MaterialTheme.colorScheme.outline,
             fontWeight = FontWeight.Bold,

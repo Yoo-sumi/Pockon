@@ -43,8 +43,8 @@ class HomeViewModel @Inject constructor(
     private val _nearGiftList = mutableStateOf<List<Pair<Gift, Document>>>(listOf())
     val nearGiftList: State<List<Pair<Gift, Document>>> = _nearGiftList
 
-    private val _closeToGiftList = mutableStateOf<List<Gift>>(listOf())
-    val closeToGiftList: State<List<Gift>> = _closeToGiftList
+    private val _favoriteGiftList = mutableStateOf<List<Gift>>(listOf())
+    val favoriteGiftList: State<List<Gift>> = _favoriteGiftList
 
     private val _isShowIndicator = mutableStateOf(false)
     val isShowIndicator: State<Boolean> = _isShowIndicator
@@ -73,7 +73,7 @@ class HomeViewModel @Inject constructor(
             } else {
                 this.giftList = listOf()
                 _nearGiftList.value = listOf()
-                _closeToGiftList.value = listOf()
+                _favoriteGiftList.value = listOf()
             }
             _isShowIndicator.value = false
         }
@@ -82,7 +82,7 @@ class HomeViewModel @Inject constructor(
     // 로컬 기프티콘 목록 변화 감지해서 가져오기
     private fun observeGiftList() {
         viewModelScope.launch(Dispatchers.IO) {
-            giftRepository.getAllGift().collectLatest { allGift ->
+            giftRepository.getAllGift(1).collectLatest { allGift ->
                 showGiftList(allGift)
             }
         }
@@ -121,15 +121,11 @@ class HomeViewModel @Inject constructor(
                 }
             }
 
-            // 기한 임박 기프티콘 목록(TOP 30)
-            val dateFormat = SimpleDateFormat("yyyyMMdd", Locale.KOREA)
-            _closeToGiftList.value =
-                giftList.sortedBy { gift -> dateFormat.parse(gift.endDt)?.time }
-                    .filterIndexed { index, gift -> index < 30 }
-
+            // 즐겨찾기 기프티콘 목록
+            _favoriteGiftList.value = giftList.filter { it.isFavorite }
             getBrandInfoList() // 브랜드 검색
         } else {
-            _closeToGiftList.value = listOf()
+            _favoriteGiftList.value = listOf()
             _nearGiftList.value = listOf()
             giftList = listOf()
         }
@@ -140,7 +136,7 @@ class HomeViewModel @Inject constructor(
         val allList: ArrayList<Pair<Gift, Document>> = arrayListOf()
 
         val brandNames = ArrayList<String>()
-        giftList.forEach {
+        giftList.filter { it.usedDt.isEmpty() }.forEach {
             if (!brandNames.contains(it.brand)) brandNames.add(it.brand)
         }
         if (brandNames.isNotEmpty() && longitude != null && latitude != null) {
@@ -194,13 +190,10 @@ class HomeViewModel @Inject constructor(
         this.latitude = latitude
 
         if (giftList.isNotEmpty()) {
-            val dateFormat = SimpleDateFormat("yyyyMMdd", Locale.KOREA)
-            _closeToGiftList.value =
-                giftList.sortedBy { gift -> dateFormat.parse(gift.endDt)?.time }
-                    .filterIndexed { index, gift -> index < 30 }
+            _favoriteGiftList.value = giftList.filter { it.isFavorite }
             getBrandInfoList()
         } else {
-            _closeToGiftList.value = listOf()
+            _favoriteGiftList.value = listOf()
             _nearGiftList.value = listOf()
         }
     }

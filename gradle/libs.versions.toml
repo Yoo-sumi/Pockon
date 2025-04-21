@@ -17,6 +17,7 @@ activityCompose = "1.9.2"
 composeBom = "2024.04.01"
 mapSdk = "3.20.0"
 material = "1.7.2"
+materialIconsExtended = "1.7.8"
 navigationCompose = "2.8.1"
 composeMaterial = "1.4.0"
 playServicesLocation = "21.3.0"
@@ -33,6 +34,7 @@ accompanist-swiperefresh = { module = "com.google.accompanist:accompanist-swiper
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
 androidx-fragment-ktx = { module = "androidx.fragment:fragment-ktx", version.ref = "fragmentKtx" }
 androidx-material = { module = "androidx.compose.material:material", version.ref = "material" }
+androidx-material-icons-extended = { module = "androidx.compose.material:material-icons-extended", version.ref = "materialIconsExtended" }
 coil-compose = { module = "io.coil-kt:coil-compose", version.ref = "coilCompose" }
 converter-gson = { module = "com.squareup.retrofit2:converter-gson", version.ref = "converterGson" }
 design = { module = "com.android.support:design", version.ref = "design" }
