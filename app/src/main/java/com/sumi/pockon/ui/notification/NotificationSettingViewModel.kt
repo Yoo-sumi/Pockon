@@ -3,12 +3,12 @@ package com.sumi.pockon.ui.notification
 import android.content.SharedPreferences
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.sumi.pockon.alarm.MyAlarmManager
 import com.sumi.pockon.data.repository.GiftRepository
 import com.sumi.pockon.data.model.Gift
-import com.sumi.pockon.util.getDdayInt
 import com.sumi.pockon.util.loadImageFromPath
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
@@ -26,15 +26,23 @@ class NotificationSettingViewModel @Inject constructor(
 
     private val dayList = listOf(0, 1, 3, 7, 14)
     private var isNotiEndDt = sharedPref.getBoolean("noti_end_dt", true)
+    private val initialSelectedDay = sharedPref.getInt("noti_end_dt_day", 0)
+
     private val _seletedDay = mutableIntStateOf(sharedPref.getInt("noti_end_dt_day", 0))
     val seletedDay: State<Int> = _seletedDay
-    private val initialSelectedDay = sharedPref.getInt("noti_end_dt_day", 0)
+
+    private val _isShowTimePickerWheelDialog = mutableStateOf(false)
+    val isShowTimePickerWheelDialog: State<Boolean> = _isShowTimePickerWheelDialog
 
     fun getDayList() = dayList
 
     fun setSeletedDay(day: Int) {
         _seletedDay.intValue = day
         sharedPref.edit().putInt("noti_end_dt_day", day).apply()
+    }
+
+    fun toggleIsShowTimePickerWheelDialog() {
+        _isShowTimePickerWheelDialog.value = !_isShowTimePickerWheelDialog.value
     }
 
     fun changeNotiEndDt() {

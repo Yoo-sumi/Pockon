@@ -77,7 +77,7 @@ android {
 
 dependencies {
     // material-icons-extended
-    implementation(libs.androidx.material.icons.extended)
+    implementation(libs.androidx.material.icons.extended.v161)
 
     // exifinterface
     implementation(libs.androidx.exifinterface)
