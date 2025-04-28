@@ -1,10 +1,10 @@
 package com.sumi.pockon.ui.used
 
-import android.content.SharedPreferences
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.sumi.pockon.data.local.PreferenceRepository
 import com.sumi.pockon.data.repository.GiftRepository
 import com.sumi.pockon.data.model.Gift
 import com.sumi.pockon.util.loadImageFromPath
@@ -19,11 +19,11 @@ import javax.inject.Inject
 @HiltViewModel
 class UsedViewModel @Inject constructor(
     private val giftRepository: GiftRepository,
-    private val sharedPref: SharedPreferences
+    private val preferenceRepository: PreferenceRepository
 ) : ViewModel() {
 
-    private var uid = sharedPref.getString("uid", "") ?: ""
-    private var isGuestMode = sharedPref.getBoolean("guest_mode", false)
+    private var uid = preferenceRepository.getUid()
+    private var isGuestMode = preferenceRepository.isGuestMode()
 
     private var removeGift: Gift? = null
 

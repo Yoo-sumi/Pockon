@@ -1,13 +1,13 @@
 package com.sumi.pockon.ui.list
 
 import com.sumi.pockon.R
-import android.content.SharedPreferences
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.sumi.pockon.alarm.MyAlarmManager
+import com.sumi.pockon.data.local.PreferenceRepository
 import com.sumi.pockon.data.model.Gift
 import com.sumi.pockon.data.repository.GiftRepository
 import com.sumi.pockon.util.loadImageFromPath
@@ -24,12 +24,12 @@ import kotlin.collections.ArrayList
 @HiltViewModel
 class ListViewModel @Inject constructor(
     private val giftRepository: GiftRepository,
-    private val sharedPref: SharedPreferences,
+    private val preferenceRepository: PreferenceRepository,
     private val myAlarmManager: MyAlarmManager
 ) : ViewModel() {
 
-    private var uid = sharedPref.getString("uid", "") ?: ""
-    private var isGuestMode = sharedPref.getBoolean("guest_mode", false)
+    private var uid = preferenceRepository.getUid()
+    private var isGuestMode = preferenceRepository.isGuestMode()
 
     private var removeGift: Gift? = null
 
@@ -200,9 +200,10 @@ class ListViewModel @Inject constructor(
                     giftRepository.insertGift(updateGift)
                 }
                 myAlarmManager.cancel(gift.id)
-                val alarmList = sharedPref.getStringSet("alarm_list", mutableSetOf())?.toMutableSet()
+
+                val alarmList = preferenceRepository.getAlarmList()
                 alarmList?.remove(gift.id)
-                sharedPref.edit().putStringSet("alarm_list", alarmList).apply()
+                preferenceRepository.saveAlarmList(alarmList)
                 onComplete(true)
             } else { // 수정 실패
                 onComplete(false)
@@ -224,9 +225,9 @@ class ListViewModel @Inject constructor(
                     giftRepository.deleteGift(id)
                 }
                 myAlarmManager.cancel(id)
-                val alarmList = sharedPref.getStringSet("alarm_list", mutableSetOf())?.toMutableSet()
+                val alarmList = preferenceRepository.getAlarmList()
                 alarmList?.remove(id)
-                sharedPref.edit().putStringSet("alarm_list", alarmList).apply()
+                preferenceRepository.saveAlarmList(alarmList)
                 onComplete(true)
             } else { // 삭제 실패
                 onComplete(false)
@@ -278,13 +279,13 @@ class ListViewModel @Inject constructor(
                         onComplete(false)
                     } else {
                         val idList = ArrayList<String>()
-                        val alarmList = sharedPref.getStringSet("alarm_list", mutableSetOf())?.toMutableSet()
+                        val alarmList = preferenceRepository.getAlarmList()
                         _checkedGiftList.value.forEach { id ->
                             idList.add(id)
                             myAlarmManager.cancel(id)
                             alarmList?.remove(id)
                         }
-                        sharedPref.edit().putStringSet("alarm_list", alarmList).apply()
+                        preferenceRepository.saveAlarmList(alarmList)
                         // 로컬 삭제
                         viewModelScope.launch(Dispatchers.IO) {
                             giftRepository.deleteGifts(idList)

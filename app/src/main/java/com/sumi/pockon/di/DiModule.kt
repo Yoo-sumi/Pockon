@@ -25,6 +25,8 @@ import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.ktx.Firebase
 import com.google.firebase.storage.FirebaseStorage
 import com.google.firebase.storage.StorageReference
+import com.sumi.pockon.data.local.PreferenceLocalDataSource
+import com.sumi.pockon.data.local.PreferenceRepository
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -143,4 +145,16 @@ class DiModule {
     @Provides
     fun provideMyAlarmManager(@ApplicationContext context: Context): MyAlarmManager =
         MyAlarmManager(context)
+
+    @Singleton
+    @Provides
+    fun providePreferenceRepository(preferenceLocalDataSource: PreferenceLocalDataSource): PreferenceRepository {
+        return PreferenceRepository(preferenceLocalDataSource)
+    }
+
+    @Singleton
+    @Provides
+    fun providePreferenceLocalDataSource(sharedPreferences: SharedPreferences): PreferenceLocalDataSource {
+        return PreferenceLocalDataSource(sharedPreferences)
+    }
 }

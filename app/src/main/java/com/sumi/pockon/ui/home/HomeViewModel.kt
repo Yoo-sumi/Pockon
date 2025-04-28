@@ -1,42 +1,38 @@
 package com.sumi.pockon.ui.home
 
-import android.content.SharedPreferences
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.sumi.pockon.alarm.MyAlarmManager
+import com.sumi.pockon.data.local.PreferenceRepository
 import com.sumi.pockon.data.local.gift.GiftEntity
 import com.sumi.pockon.data.repository.BrandSearchRepository
 import com.sumi.pockon.data.repository.GiftRepository
 import com.sumi.pockon.data.model.Document
 import com.sumi.pockon.data.model.Gift
-import com.sumi.pockon.util.getDdayInt
 import com.sumi.pockon.util.loadImageFromPath
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
-import java.text.SimpleDateFormat
-import java.util.Locale
 import javax.inject.Inject
 
 @HiltViewModel
 class HomeViewModel @Inject constructor(
     private val giftRepository: GiftRepository,
     private val brandSearchRepository: BrandSearchRepository,
-    private val sharedPref: SharedPreferences,
+    private val preferenceRepository: PreferenceRepository,
     private val myAlarmManager: MyAlarmManager
 ) : ViewModel() {
 
     private var longitude: Double? = null
     private var latitude: Double? = null
 
-    private val uid = sharedPref.getString("uid", "") ?: ""
-    private val isGuestMode = sharedPref.getBoolean("guest_mode", false)
-    private val isFirstLogin = sharedPref.getBoolean("first_login", true)
-    private val isNotiEndDt = sharedPref.getBoolean("noti_end_dt", true)
-    private val notiEndDay = sharedPref.getInt("noti_end_dt_day", 0)
+    private val uid = preferenceRepository.getUid()
+    private val isGuestMode = preferenceRepository.isGuestMode()
+    private val isFirstLogin = preferenceRepository.isFirstLogin()
+    private val isNotiEndDt = preferenceRepository.isNotiEndDt()
 
     private var giftList: List<Gift> = listOf()
 
@@ -68,7 +64,7 @@ class HomeViewModel @Inject constructor(
                 // 로컬 저장(기프티콘)
                 viewModelScope.launch(Dispatchers.IO) {
                     giftRepository.deleteAllAndInsertGifts(giftList)
-                    if (isFirstLogin) sharedPref.edit().putBoolean("first_login", false).apply()
+                    if (isFirstLogin) preferenceRepository.saveIsFirstLogin(false)
                 }
             } else {
                 this.giftList = listOf()
@@ -106,9 +102,9 @@ class HomeViewModel @Inject constructor(
                 )
             }
 
-            sharedPref.edit().putStringSet("alarm_list", mutableSetOf()).apply()
+            preferenceRepository.saveAlarmList(mutableSetOf())
             val alarmList = mutableSetOf<String>()
-            val notiEndDay = sharedPref.getInt("noti_end_dt_day", 0)
+            val notiEndDay = preferenceRepository.getNotiEndDtDay()
             giftList.forEach { gift ->
                 myAlarmManager.cancel(gift.id)
                 if (isNotiEndDt) {
@@ -118,9 +114,9 @@ class HomeViewModel @Inject constructor(
                 }
             }
             if (isNotiEndDt) {
-                sharedPref.edit().putStringSet("alarm_list", alarmList).apply()
+                preferenceRepository.saveAlarmList(alarmList)
             } else {
-                sharedPref.edit().putStringSet("alarm_list", mutableSetOf()).apply()
+                preferenceRepository.saveAlarmList(mutableSetOf())
             }
 
             // 즐겨찾기 기프티콘 목록

@@ -1,14 +1,15 @@
 package com.sumi.pockon.ui.notification
 
-import android.content.SharedPreferences
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.sumi.pockon.alarm.MyAlarmManager
+import com.sumi.pockon.data.local.PreferenceRepository
 import com.sumi.pockon.data.repository.GiftRepository
 import com.sumi.pockon.data.model.Gift
+import com.sumi.pockon.util.convertTo12HourFormat
 import com.sumi.pockon.util.loadImageFromPath
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
@@ -20,38 +21,54 @@ import javax.inject.Inject
 @HiltViewModel
 class NotificationSettingViewModel @Inject constructor(
     private val giftRepository: GiftRepository,
-    private val sharedPref: SharedPreferences,
+    private val preferenceRepository: PreferenceRepository,
     private val myAlarmManager: MyAlarmManager
 ) : ViewModel() {
 
     private val dayList = listOf(0, 1, 3, 7, 14)
-    private var isNotiEndDt = sharedPref.getBoolean("noti_end_dt", true)
-    private val initialSelectedDay = sharedPref.getInt("noti_end_dt_day", 0)
+    private var isNotiEndDt = preferenceRepository.isNotiEndDt()
+    private val initialSelectedDay = preferenceRepository.getNotiEndDtDay()
 
-    private val _seletedDay = mutableIntStateOf(sharedPref.getInt("noti_end_dt_day", 0))
+    private val _seletedTime = mutableStateOf("")
+    val seletedTime: State<String> = _seletedTime
+
+    private val _seletedDay = mutableIntStateOf(preferenceRepository.getNotiEndDtDay())
     val seletedDay: State<Int> = _seletedDay
 
     private val _isShowTimePickerWheelDialog = mutableStateOf(false)
     val isShowTimePickerWheelDialog: State<Boolean> = _isShowTimePickerWheelDialog
 
+    init {
+        val time = preferenceRepository.getNotiEndDtTime()
+        _seletedTime.value = convertTo12HourFormat(time.first, time.second)
+    }
+
     fun getDayList() = dayList
 
     fun setSeletedDay(day: Int) {
         _seletedDay.intValue = day
-        sharedPref.edit().putInt("noti_end_dt_day", day).apply()
+        preferenceRepository.saveNotiEndDtDay(day)
     }
 
     fun toggleIsShowTimePickerWheelDialog() {
         _isShowTimePickerWheelDialog.value = !_isShowTimePickerWheelDialog.value
     }
 
+    fun getNotiEndDtTime() = preferenceRepository.getNotiEndDtTime()
+
+    fun saveNotiEndDtTime(hour24: Int, minute: Int) {
+        preferenceRepository.saveNotiEndDtTime(hour24, minute)
+        _seletedTime.value = convertTo12HourFormat(hour24, minute)
+        toggleIsShowTimePickerWheelDialog()
+    }
+
     fun changeNotiEndDt() {
         if (!isNotiEndDt || initialSelectedDay == _seletedDay.intValue) return
 
-        sharedPref.edit().putStringSet("alarm_list", mutableSetOf()).apply()
+        preferenceRepository.saveAlarmList(mutableSetOf())
         viewModelScope.launch(Dispatchers.IO) {
             giftRepository.getAllGift().take(1).collectLatest { allGift ->
-                val notiEndDay = sharedPref.getInt("noti_end_dt_day", 0)
+                val notiEndDay = preferenceRepository.getNotiEndDtDay()
                 val alarmList = mutableSetOf<String>()
                 allGift.forEach { gift ->
                     val tempGift = Gift(
@@ -72,7 +89,7 @@ class NotificationSettingViewModel @Inject constructor(
                     myAlarmManager.cancel(tempGift.id)
                     myAlarmManager.schedule(tempGift, notiEndDay)
                 }
-                sharedPref.edit().putStringSet("alarm_list", alarmList).apply()
+                preferenceRepository.saveAlarmList(alarmList)
             }
         }
     }

@@ -11,7 +11,7 @@ class MyAlarmManager(private val context: Context) {
 
     private val alarmManager = context.getSystemService(AlarmManager::class.java)
 
-    fun schedule(gift: Gift, dDay: Int) {
+    fun schedule(gift: Gift, dDay: Int, hour: Int = 0, minute: Int = 0) {
         val intent = Intent(context, AlarmReceiver::class.java).apply {
             putExtra("gift", gift.copy(photo = null))
             putExtra("dDay", dDay)
@@ -23,9 +23,10 @@ class MyAlarmManager(private val context: Context) {
             set(Calendar.YEAR, year.toInt())
             set(Calendar.MONTH, month.toInt() - 1) // 0이 1월
             set(Calendar.DATE, day.toInt())
-            set(Calendar.HOUR_OF_DAY, 0)
-            set(Calendar.MINUTE, 0)
+            set(Calendar.HOUR_OF_DAY, hour)
+            set(Calendar.MINUTE, minute)
             set(Calendar.SECOND, 0)
+            set(Calendar.MILLISECOND, 0)
 
             add(Calendar.DATE, -dDay)
         }

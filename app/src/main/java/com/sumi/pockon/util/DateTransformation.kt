@@ -7,6 +7,7 @@ import androidx.compose.ui.text.input.VisualTransformation
 import java.text.SimpleDateFormat
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
+import java.util.Calendar
 import java.util.Locale
 
 class DateTransformation : VisualTransformation {
@@ -91,4 +92,18 @@ fun formatDateToYYYYMMDD(year: Int, month: Int, dayOfMonth: Int): String {
     val formattedMonth = String.format(Locale.US, "%02d", month + 1) // 월은 1부터 시작
     val formattedDay = String.format(Locale.US, "%02d", dayOfMonth) // 일은 두 자릿수로 표현
     return "$year$formattedMonth$formattedDay"
+}
+
+
+fun convertTo12HourFormat(hour: Int, minute: Int): String {
+    // 24시간 형식을 12시간 형식으로 변환
+    val calendar = Calendar.getInstance().apply {
+        set(Calendar.HOUR_OF_DAY, hour)
+        set(Calendar.MINUTE, minute)
+    }
+
+    // 오전/오후 구분을 위한 포맷 지정
+    val sdf = SimpleDateFormat("a h시 mm분", Locale.KOREA)
+
+    return sdf.format(calendar.time)
 }

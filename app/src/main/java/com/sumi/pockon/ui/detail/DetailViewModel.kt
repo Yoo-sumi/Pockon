@@ -1,6 +1,5 @@
 package com.sumi.pockon.ui.detail
 
-import android.content.SharedPreferences
 import android.graphics.Bitmap
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
@@ -8,9 +7,9 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.sumi.pockon.R
 import com.sumi.pockon.alarm.MyAlarmManager
+import com.sumi.pockon.data.local.PreferenceRepository
 import com.sumi.pockon.data.repository.GiftRepository
 import com.sumi.pockon.data.model.Gift
-import com.sumi.pockon.util.getDdayInt
 import com.sumi.pockon.util.loadImageFromPath
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
@@ -25,12 +24,11 @@ import javax.inject.Inject
 class DetailViewModel @Inject constructor(
     private val giftRepository: GiftRepository,
     private val myAlarmManager: MyAlarmManager,
-    private val sharedPref: SharedPreferences
-) : ViewModel() {
+    private val preferenceRepository: PreferenceRepository
+    ) : ViewModel() {
 
-    private val isNotiEndDt = sharedPref.getBoolean("noti_end_dt", true)
-    private val isGuestMode = sharedPref.getBoolean("guest_mode", false)
-    private val notiEndDay = sharedPref.getInt("noti_end_dt_day", 0)
+    private val isNotiEndDt = preferenceRepository.isNotiEndDt()
+    private val isGuestMode = preferenceRepository.isGuestMode()
 
     private val _gift = mutableStateOf(Gift())
     val gift: State<Gift> = _gift
@@ -200,10 +198,10 @@ class DetailViewModel @Inject constructor(
                     myAlarmManager.cancel(updateGift.id)
                     // 알림 등록
                     if (isNotiEndDt) {
-                        val notiEndDay = sharedPref.getInt("noti_end_dt_day", 0)
+                        val notiEndDay = preferenceRepository.getNotiEndDtDay()
                         myAlarmManager.schedule(updateGift, notiEndDay)
 
-                        val alarmList = sharedPref.getStringSet("alarm_list", mutableSetOf())?.toMutableSet()
+                        val alarmList = preferenceRepository.getAlarmList()
                         if (alarmList?.contains(updateGift.id) == false) alarmList.add(updateGift.id)
                     }
                 }

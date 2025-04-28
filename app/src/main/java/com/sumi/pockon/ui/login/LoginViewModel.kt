@@ -1,6 +1,5 @@
 package com.sumi.pockon.ui.login
 
-import android.content.SharedPreferences
 import androidx.credentials.ClearCredentialStateRequest
 import androidx.credentials.CredentialManager
 import androidx.credentials.CustomCredential
@@ -13,6 +12,7 @@ import com.sumi.pockon.data.repository.LoginRepository
 import com.google.android.libraries.identity.googleid.GoogleIdTokenCredential
 import com.google.android.libraries.identity.googleid.GoogleIdTokenParsingException
 import com.google.firebase.auth.GoogleAuthProvider
+import com.sumi.pockon.data.local.PreferenceRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
 import java.util.UUID
@@ -21,8 +21,8 @@ import javax.inject.Inject
 @HiltViewModel
 class LoginViewModel @Inject constructor(
     private val loginRepository: LoginRepository,
-    private val sharedPref: SharedPreferences
-) : ViewModel() {
+    private val preferenceRepository: PreferenceRepository
+    ) : ViewModel() {
 
     private val _isLogin = MutableLiveData(false)
     val isLogin: LiveData<Boolean> = _isLogin
@@ -33,10 +33,10 @@ class LoginViewModel @Inject constructor(
     private val _isLoading = MutableLiveData(false)
     val isLoading: LiveData<Boolean> = _isLoading
 
-    private var isPinUse = sharedPref.getBoolean("auth_pin", false)
+    private var isPinUse = preferenceRepository.isAuthPin()
 
     init {
-        if (!sharedPref.getString("uid", null).isNullOrEmpty()) {
+        if (preferenceRepository.getUid().isNotEmpty()) {
             _isLogin.value = true
         }
     }
@@ -48,8 +48,8 @@ class LoginViewModel @Inject constructor(
     fun loginAsGuest() {
         isPinUse = true
         _isLogin.value = true
-        saveMyUid(UUID.randomUUID().toString())
-        sharedPref.edit().putBoolean("guest_mode", true).apply()
+        preferenceRepository.saveUid(UUID.randomUUID().toString())
+        preferenceRepository.saveIsGuestMode(true)
     }
 
     fun login(credentialManager: CredentialManager, result: GetCredentialResponse) {
@@ -72,7 +72,7 @@ class LoginViewModel @Inject constructor(
                                 _isFail.value = true
                             } else {
                                 _isLogin.value = true
-                                saveMyUid(it)
+                                preferenceRepository.saveUid(it)
                             }
                         }
                     } catch (e: GoogleIdTokenParsingException) {
@@ -97,6 +97,6 @@ class LoginViewModel @Inject constructor(
     }
 
     private fun saveMyUid(uid: String) {
-        sharedPref.edit().putString("uid", uid).apply()
+        preferenceRepository.saveUid(uid)
     }
 }

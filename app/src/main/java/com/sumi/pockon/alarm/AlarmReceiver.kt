@@ -5,13 +5,13 @@ import android.app.PendingIntent
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
-import android.content.SharedPreferences
 import android.os.Build
 import androidx.core.app.NotificationCompat
 import com.sumi.pockon.ui.main.MainActivity
 import com.sumi.pockon.MainApplication.Companion.CHANNEL_ID
 import com.sumi.pockon.MainApplication.Companion.GROUP_KEY
 import com.sumi.pockon.R
+import com.sumi.pockon.data.local.PreferenceRepository
 import com.sumi.pockon.data.repository.GiftRepository
 import com.sumi.pockon.data.model.Gift
 import com.sumi.pockon.util.getDdayInt
@@ -29,7 +29,7 @@ class AlarmReceiver : BroadcastReceiver() {
     @Inject
     lateinit var giftRepository: GiftRepository
     @Inject
-    lateinit var sharedPref: SharedPreferences
+    lateinit var preferenceRepository: PreferenceRepository
     @Inject
     lateinit var myAlarmManager: MyAlarmManager
 
@@ -37,8 +37,8 @@ class AlarmReceiver : BroadcastReceiver() {
         // 재부팅 후 알람 매니저 재등록
         if (intent.action == "android.intent.action.BOOT_COMPLETED") {
             CoroutineScope(Dispatchers.IO).launch {
-                val isNotiEndDt = sharedPref.getBoolean("noti_end_dt", true)
-                sharedPref.edit().putStringSet("alarm_list", mutableSetOf()).apply()
+                val isNotiEndDt = preferenceRepository.isNotiEndDt()
+                preferenceRepository.saveAlarmList(mutableSetOf())
                 val alarmList = mutableSetOf<String>()
                 giftRepository.getAllGift().take(1).collectLatest { allGift ->
                     allGift.forEach { gift ->
@@ -57,15 +57,15 @@ class AlarmReceiver : BroadcastReceiver() {
                         // 알림 등록
                         myAlarmManager.cancel(tempGift.id)
                         if (isNotiEndDt) {
-                            val notiEndDay = sharedPref.getInt("noti_end_dt_day", 0)
+                            val notiEndDay = preferenceRepository.getNotiEndDtDay()
                             alarmList.add(gift.id)
                             myAlarmManager.schedule(tempGift, notiEndDay)
                         }
                     }
                     if (isNotiEndDt) {
-                        sharedPref.edit().putStringSet("alarm_list", alarmList).apply()
+                        preferenceRepository.saveAlarmList(alarmList)
                     } else {
-                        sharedPref.edit().putStringSet("alarm_list", mutableSetOf()).apply()
+                        preferenceRepository.saveAlarmList(mutableSetOf())
                     }
                 }
             }

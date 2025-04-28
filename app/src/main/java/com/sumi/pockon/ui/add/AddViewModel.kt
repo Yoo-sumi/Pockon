@@ -1,6 +1,5 @@
 package com.sumi.pockon.ui.add
 
-import android.content.SharedPreferences
 import android.graphics.Bitmap
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
@@ -8,9 +7,9 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.sumi.pockon.R
 import com.sumi.pockon.alarm.MyAlarmManager
+import com.sumi.pockon.data.local.PreferenceRepository
 import com.sumi.pockon.data.repository.GiftRepository
 import com.sumi.pockon.data.model.Gift
-import com.sumi.pockon.util.getDdayInt
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -22,14 +21,13 @@ import javax.inject.Inject
 @HiltViewModel
 class AddViewModel @Inject constructor(
     private val giftRepository: GiftRepository,
-    private val sharedPref: SharedPreferences,
+    private val preferenceRepository: PreferenceRepository,
     private val myAlarmManager: MyAlarmManager
 ) : ViewModel() {
 
-    private val uid = sharedPref.getString("uid", "") ?: ""
-    private val isNotiEndDt = sharedPref.getBoolean("noti_end_dt", true)
-    private val isGuestMode = sharedPref.getBoolean("guest_mode", false)
-    private val notiEndDay = sharedPref.getInt("noti_end_dt_day", 0)
+    private val uid = preferenceRepository.getUid()
+    private val isNotiEndDt = preferenceRepository.isNotiEndDt()
+    private val isGuestMode = preferenceRepository.isGuestMode()
 
     private val _isShowDatePicker = mutableStateOf(false)
     val isShowDatePicker: State<Boolean> = _isShowDatePicker
@@ -101,12 +99,12 @@ class AddViewModel @Inject constructor(
                     viewModelScope.launch(Dispatchers.IO) {
                         giftRepository.insertGift(gift.copy(id = id))
                     }
-                    val alarmList = sharedPref.getStringSet("alarm_list", mutableSetOf())?.toMutableSet()
+                    val alarmList = preferenceRepository.getAlarmList()
                     // 알림 등록
                     if (isNotiEndDt && alarmList?.contains(gift.id) == false) {
-                        val notiEndDay = sharedPref.getInt("noti_end_dt_day", 0)
+                        val notiEndDay = preferenceRepository.getNotiEndDtDay()
                         alarmList.add(gift.id)
-                        sharedPref.edit().putStringSet("alarm_list", alarmList).apply()
+                        preferenceRepository.saveAlarmList(alarmList)
                         myAlarmManager.schedule(gift, notiEndDay)
                     }
                 }

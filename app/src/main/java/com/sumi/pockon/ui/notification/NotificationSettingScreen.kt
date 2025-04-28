@@ -1,5 +1,7 @@
 package com.sumi.pockon.ui.notification
 
+import android.util.Log
+import android.widget.NumberPicker
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
@@ -34,6 +36,8 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -46,17 +50,22 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.viewinterop.AndroidView
 import androidx.compose.ui.window.Dialog
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.sumi.pockon.R
+import com.sumi.pockon.util.DateTransformation
+import com.sumi.pockon.util.convertTo12HourFormat
 
 @Composable
 fun NotificationSettingScreen(onBack: () -> Unit) {
     val notificationSettingViewModel = hiltViewModel<NotificationSettingViewModel>()
     val day = notificationSettingViewModel.getDayList()
+
+    var selectedHour by rememberSaveable { mutableIntStateOf(0) }
+    var selectedMinute by rememberSaveable { mutableIntStateOf(0) }
 
     BackHandler {
         notificationSettingViewModel.changeNotiEndDt()
@@ -90,7 +99,7 @@ fun NotificationSettingScreen(onBack: () -> Unit) {
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(start = 15.dp, end = 15.dp, top = 10.dp, bottom = 10.dp),
-                text = "\uD83D\uDD52 알림 시간: 오전 9시",
+                text = "\uD83D\uDD52 ${notificationSettingViewModel.seletedTime.value}",
             )
         }
         Box(
@@ -147,9 +156,21 @@ fun NotificationSettingScreen(onBack: () -> Unit) {
                 shape = RoundedCornerShape(12.dp),
                 color = Color.White
             ) {
-                TimePickerWheelDialog(onCancel = { /*TODO*/ }) {
-
-                }
+                val time = notificationSettingViewModel.getNotiEndDtTime()
+                TimePickerWheelDialog(
+                    hour24 = time.first,
+                    minute = time.second,
+                    onCancel = {
+                        notificationSettingViewModel.toggleIsShowTimePickerWheelDialog()
+                    },
+                    onChanged = { hour24, minute ->
+                        selectedHour = hour24
+                        selectedMinute = minute
+                    },
+                    onConfirm = {
+                        notificationSettingViewModel.saveNotiEndDtTime(selectedHour, selectedMinute)
+                    }
+                )
             }
         }
     }
@@ -191,111 +212,9 @@ fun NotificationSettingScreenTopBar(onBack: () -> Unit) {
     }
 }
 
-@Composable
-fun TimePickerWithAmPm(
-    onConfirm: (String, Int, Int) -> Unit // AM/PM, hour, minute 전달
-) {
-    var selectedAmPmIndex by rememberSaveable { mutableIntStateOf(0) } // 0 = 오전, 1 = 오후
-    var selectedHourIndex by rememberSaveable { mutableIntStateOf(8) } // 기본값 8시
-    var selectedMinuteIndex by rememberSaveable { mutableIntStateOf(0) } // 기본값 0분
-
-    val amPmList = listOf("오전", "오후")
-    val hourList = (1..12).map { it.toString().padStart(2, '0') }
-    val minuteList = (0..59).map { it.toString().padStart(2, '0') }
-
-    Column(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(16.dp),
-        horizontalAlignment = Alignment.CenterHorizontally
-    ) {
-        Row(
-            horizontalArrangement = Arrangement.SpaceEvenly,
-            modifier = Modifier.fillMaxWidth()
-        ) {
-            WheelPickerWithHighlight(
-                items = amPmList,
-                selectedIndex = selectedAmPmIndex,
-                onItemSelected = { selectedAmPmIndex = it },
-                modifier = Modifier.weight(1f)
-            )
-            WheelPickerWithHighlight(
-                items = hourList,
-                selectedIndex = selectedHourIndex,
-                onItemSelected = { selectedHourIndex = it },
-                modifier = Modifier.weight(1f)
-            )
-            WheelPickerWithHighlight(
-                items = minuteList,
-                selectedIndex = selectedMinuteIndex,
-                onItemSelected = { selectedMinuteIndex = it },
-                modifier = Modifier.weight(1f)
-            )
-        }
-
-//        Spacer(modifier = Modifier.height(24.dp))
-//
-//        Button(onClick = {
-//            val amPm = amPmList[selectedAmPmIndex]
-//            val hour = hourList[selectedHourIndex].toInt()
-//            val minute = minuteList[selectedMinuteIndex].toInt()
-//            onConfirm(amPm, hour, minute)
-//        }) {
-//            Text("확인")
-//        }
-    }
-}
-
-@Composable
-fun WheelPickerWithHighlight(
-    items: List<String>,
-    selectedIndex: Int,
-    onItemSelected: (Int) -> Unit,
-    modifier: Modifier = Modifier
-) {
-    val visibleItemsCount = 3
-    val itemHeight = 48.dp
-
-    Box(modifier = modifier.height(itemHeight * visibleItemsCount)) {
-        Box(
-            Modifier
-                .align(Alignment.Center)
-                .fillMaxWidth()
-                .height(itemHeight)
-                .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.15f)) // 하이라이트 배경
-        )
-
-        LazyColumn(
-            modifier = Modifier.fillMaxSize(),
-            contentPadding = PaddingValues(vertical = itemHeight),
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.Center
-        ) {
-            itemsIndexed(items) { index, item ->
-                Box(modifier = Modifier.height(itemHeight)) {
-                    Text(
-                        text = item,
-                        fontSize = 20.sp,
-                        fontWeight = if (index == selectedIndex) FontWeight.Bold else FontWeight.Normal,
-                        color = if (index == selectedIndex)
-                            MaterialTheme.colorScheme.primary
-                        else
-                            MaterialTheme.colorScheme.onSurface,
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .clickable { onItemSelected(index) }
-                            .align(Alignment.Center),
-                        textAlign = TextAlign.Center
-                    )
-                }
-            }
-        }
-    }
-}
-
 // 사용 금액 입력 다이얼로그
 @Composable
-fun TimePickerWheelDialog(onCancel: () -> Unit, onConfirm: (Int) -> Unit) {
+fun TimePickerWheelDialog(hour24: Int, minute: Int, onCancel: () -> Unit, onChanged: (Int, Int) -> Unit, onConfirm: () -> Unit) {
     Surface(
         modifier = Modifier
             .wrapContentWidth()
@@ -325,8 +244,11 @@ fun TimePickerWheelDialog(onCancel: () -> Unit, onConfirm: (Int) -> Unit) {
             )
 
             // timepicker
-            TimePickerWithAmPm { isAm, hour, minute ->
-//                Log.d("TimePicker", "Selected: ${if (isAm) "AM" else "PM"} $hour:$minute")
+            TimePickerWithAmPmView(
+                initialHour = hour24,
+                initialMinute = minute
+            ) { hour24, minute ->
+                onChanged(hour24, minute)
             }
 
             // bottom button
@@ -342,7 +264,9 @@ fun TimePickerWheelDialog(onCancel: () -> Unit, onConfirm: (Int) -> Unit) {
                     .height(IntrinsicSize.Min)
             ) {
                 Button(
-                    onClick = {  },
+                    onClick = {
+                        onConfirm()
+                    },
                     shape = RectangleShape,
                     modifier = Modifier
                         .weight(1f)
@@ -398,11 +322,101 @@ fun TimePickerWheelDialog(onCancel: () -> Unit, onConfirm: (Int) -> Unit) {
     }
 }
 
-@Preview
 @Composable
-fun PPPP() {
-    TimePickerWheelDialog(
-        onCancel = {},
-        onConfirm = {}
-    )
+fun TimePickerWithAmPmView(
+    initialHour: Int = 10,  // 24시간 기준
+    initialMinute: Int = 30,
+    initialIsAm: Boolean = true,
+    onTimeChange: (hour24: Int, minute: Int) -> Unit
+) {
+    var hour by remember { mutableStateOf(if (initialHour == 0 || initialHour == 12) 12 else initialHour % 12) }
+    var minute by remember { mutableStateOf(initialMinute) }
+    var isAm by remember { mutableStateOf(initialIsAm) }
+
+    Row(
+        modifier = Modifier.padding(16.dp),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.Center
+    ) {
+        // AM/PM Picker
+        AndroidView(
+            factory = { context ->
+                NumberPicker(context).apply {
+                    minValue = 0
+                    maxValue = 1
+                    displayedValues = arrayOf("AM", "PM")
+                    value = if (isAm) 0 else 1
+                    setOnValueChangedListener { _, _, newVal ->
+                        isAm = newVal == 0
+                        val hour24 = if (isAm) {
+                            if (hour == 12) 0 else hour
+                        } else {
+                            if (hour == 12) 12 else hour + 12
+                        }
+                        onTimeChange(hour24, minute)
+                    }
+                }
+            },
+            update = { picker ->
+                val targetValue = if (isAm) 0 else 1
+                if (picker.value != targetValue) {
+                    picker.value = targetValue
+                }
+            },
+            modifier = Modifier.width(100.dp)
+        )
+
+        // Hour Picker (1~12)
+        AndroidView(
+            factory = { context ->
+                NumberPicker(context).apply {
+                    minValue = 1
+                    maxValue = 12
+                    value = hour
+                    setOnValueChangedListener { _, _, newVal ->
+                        hour = newVal
+                        val hour24 = if (isAm) {
+                            if (newVal == 12) 0 else newVal
+                        } else {
+                            if (newVal == 12) 12 else newVal + 12
+                        }
+                        onTimeChange(hour24, minute)
+                    }
+                }
+            },
+            update = { picker ->
+                if (picker.value != hour) {
+                    picker.value = hour
+                }
+            },
+            modifier = Modifier.width(100.dp)
+        )
+
+        // Minute Picker (0~59)
+        AndroidView(
+            factory = { context ->
+                NumberPicker(context).apply {
+                    minValue = 0
+                    maxValue = 59
+                    value = minute
+                    setFormatter { String.format("%02d", it) }
+                    setOnValueChangedListener { _, _, newVal ->
+                        minute = newVal
+                        val hour24 = if (isAm) {
+                            if (hour == 12) 0 else hour
+                        } else {
+                            if (hour == 12) 12 else hour + 12
+                        }
+                        onTimeChange(hour24, minute)
+                    }
+                }
+            },
+            update = { picker ->
+                if (picker.value != minute) {
+                    picker.value = minute
+                }
+            },
+            modifier = Modifier.width(100.dp)
+        )
+    }
 }

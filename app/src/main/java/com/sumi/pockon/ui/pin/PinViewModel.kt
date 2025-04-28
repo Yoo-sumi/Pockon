@@ -1,6 +1,5 @@
 package com.sumi.pockon.ui.pin
 
-import android.content.SharedPreferences
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateListOf
@@ -8,6 +7,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.sumi.pockon.R
+import com.sumi.pockon.data.local.PreferenceRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -15,10 +15,10 @@ import javax.inject.Inject
 
 @HiltViewModel
 class PinViewModel @Inject constructor(
-    private val sharedPref: SharedPreferences
+    private val preferenceRepository: PreferenceRepository
 ) : ViewModel() {
 
-    private val pinNumber = sharedPref.getString("pin_num", "") ?: ""
+    private val pinNumber = preferenceRepository.getPinNum()
     private val pinSize = 6
     private var checkPin = ""
 
@@ -78,7 +78,7 @@ class PinViewModel @Inject constructor(
 
                     1 -> {
                         if (inputPin.joinToString("") == checkPin) {
-                            saveMyPin(checkPin)
+                            preferenceRepository.savePinNum(checkPin)
                             _error.value = null
                             _showSuccess.value = true
                         } else {
@@ -99,10 +99,5 @@ class PinViewModel @Inject constructor(
                 }
             }
         }
-    }
-
-    private fun saveMyPin(pin: String) {
-        sharedPref.edit().putString("pin_num", pin).apply()
-        sharedPref.edit().putBoolean("auth_pin", true).apply()
     }
 }

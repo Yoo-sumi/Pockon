@@ -1,6 +1,5 @@
 package com.sumi.pockon.ui.main
 
-import android.content.SharedPreferences
 import android.os.Bundle
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
@@ -12,6 +11,7 @@ import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.res.colorResource
 import androidx.navigation.Navigation
 import com.sumi.pockon.R
+import com.sumi.pockon.data.local.PreferenceRepository
 import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
 
@@ -19,14 +19,14 @@ import javax.inject.Inject
 class MainFragment : Fragment() {
 
     @Inject
-    lateinit var sharedPref: SharedPreferences
+    lateinit var preferenceRepository: PreferenceRepository
 
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View = ComposeView(requireContext()).apply {
-        val isGuestMode = sharedPref.getBoolean("guest_mode", false)
+        val isGuestMode = preferenceRepository.isGuestMode()
         setContent {
             val lightColorScheme = lightColorScheme(
                 primary = colorResource(id = R.color.primary),
