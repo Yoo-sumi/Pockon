@@ -1,5 +1,7 @@
 package com.sumi.pockon.ui.settings
 
+import androidx.compose.runtime.State
+import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.sumi.pockon.alarm.MyAlarmManager
@@ -8,6 +10,7 @@ import com.sumi.pockon.data.repository.BrandSearchRepository
 import com.sumi.pockon.data.repository.GiftRepository
 import com.sumi.pockon.data.repository.LoginRepository
 import com.sumi.pockon.data.model.Gift
+import com.sumi.pockon.util.NetworkMonitor
 import com.sumi.pockon.util.loadImageFromPath
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
@@ -22,13 +25,17 @@ class SettingsViewModel @Inject constructor(
     private val giftRepository: GiftRepository,
     private val brandSearchRepository: BrandSearchRepository,
     private val preferenceRepository: PreferenceRepository,
-    private val myAlarmManager: MyAlarmManager
+    private val myAlarmManager: MyAlarmManager,
+    private val networkMonitor: NetworkMonitor
 ) : ViewModel() {
 
     private var uid = preferenceRepository.getUid()
     private var isAuthPin = preferenceRepository.isAuthPin()
     private var isNotiEndDt = preferenceRepository.isNotiEndDt()
     private var isGuestMode = preferenceRepository.isGuestMode()
+
+    private val _isShowNoInternetDialog = mutableStateOf(false)
+    val isShowNoInternetDialog: State<Boolean> = _isShowNoInternetDialog
 
     fun getIsNotiEndDt() = isNotiEndDt
 
@@ -85,6 +92,12 @@ class SettingsViewModel @Inject constructor(
     }
 
     fun removeAccount(onSuccess: (Boolean) -> Unit) {
+        if (!isGuestMode && !networkMonitor.isConnected()) {
+            onSuccess(false)
+            _isShowNoInternetDialog.value = true
+            return
+        }
+
         viewModelScope.launch(Dispatchers.IO) {
             giftRepository.getAllGift().take(1).collectLatest { gifts ->
                 // remote 데이터 삭제
@@ -107,4 +120,8 @@ class SettingsViewModel @Inject constructor(
     }
 
     fun getIsGuestMode() = this.isGuestMode
+
+    fun changeNoInternetDialogState() {
+        _isShowNoInternetDialog.value = !_isShowNoInternetDialog.value
+    }
 }

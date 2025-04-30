@@ -66,6 +66,8 @@
     <string name="msg_login_fail">로그인에 실패했습니다.</string>
     <string name="msg_pin_auth_fail">PIN 번호가 일치하지 않습니다.</string>
     <string name="msg_no_permission">필요한 권한이 꺼져 있어요.\n설정에서 모두 허용해 주세요!</string>
+    <string name="msg_no_photo_permission">사진을 불러오려면 권한이 필요해요.\n설정에서 권한을 허용해 주세요!</string>
+    <string name="msg_no_notification_permission">알림을 받으려면 권한이 필요해요.\n설정에서 알림 권한을 허용해 주세요!</string>
     <string name="msg_no_internet">인터넷이 연결되어 있지 않아요.\nWi-Fi나 모바일 데이터를 켜주세요!</string>
     <string name="msg_no_location_permission">위치 확인을 위해, 설정에서 위치 권한을 켜 주세요!</string>
 

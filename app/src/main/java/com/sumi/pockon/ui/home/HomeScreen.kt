@@ -86,6 +86,7 @@ fun HomeScreen(
 
     var longitude: Double? by rememberSaveable { mutableStateOf(null) }
     var latitude: Double? by rememberSaveable { mutableStateOf(null) }
+    var isShowNoInternetDialog by rememberSaveable { mutableStateOf(false) }
 
     getLocation(context, fusedLocationClient) {
         // 위치 가져오기
@@ -168,7 +169,11 @@ fun HomeScreen(
                         color = MaterialTheme.colorScheme.onPrimary,
                         modifier = Modifier
                             .clickable {
-                                if (homeViewModel.nearGiftList.value.isNotEmpty()) showMap()
+                                if (!homeViewModel.isNetworkConnected()) {
+                                    isShowNoInternetDialog = true
+                                } else if (homeViewModel.nearGiftList.value.isNotEmpty()) {
+                                    showMap()
+                                }
                             },
                         softWrap = true
                     )
@@ -256,6 +261,17 @@ fun HomeScreen(
                 Icon(imageVector = Icons.Filled.Add, contentDescription = "")
             }
         }
+    }
+
+    // NoInternetDialog
+    if (isShowNoInternetDialog) {
+        AlertDialog.Builder(context)
+            .setTitle(stringResource(id = R.string.txt_alert))
+            .setMessage(stringResource(id = R.string.msg_no_internet))
+            .setPositiveButton(stringResource(id = R.string.btn_confirm)) { dialog, which ->
+                isShowNoInternetDialog = false
+            }
+            .show()
     }
 
     isLoading(homeViewModel.isShowIndicator.value)

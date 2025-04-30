@@ -1,10 +1,14 @@
 package com.sumi.pockon.ui.detail
 
+import android.content.Intent
 import android.graphics.Bitmap
+import android.net.Uri
+import android.provider.Settings
 import androidx.activity.compose.BackHandler
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.appcompat.app.AlertDialog
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.spring
@@ -100,6 +104,7 @@ import com.sumi.pockon.util.DateTransformation
 import com.sumi.pockon.R
 import com.sumi.pockon.ui.loading.LoadingScreen
 import com.sumi.pockon.ui.add.CustomDatePickerDialog
+import com.sumi.pockon.ui.add.checkPhotoPermission
 import com.sumi.pockon.ui.list.ConfirmDialog
 import com.sumi.pockon.util.decimalFormat
 import com.sumi.pockon.util.getBitmapFromUri
@@ -233,11 +238,26 @@ fun DetailScreen(id: String, onBack: () -> Unit) {
                     detailViewModel.usedDt.value
                 ) {
                     if (detailViewModel.isEdit.value) {
-                        galleryLauncher.launch(
-                            PickVisualMediaRequest(
-                                ActivityResultContracts.PickVisualMedia.ImageOnly
+                        if (checkPhotoPermission(context)) {
+                            galleryLauncher.launch(
+                                PickVisualMediaRequest(
+                                    ActivityResultContracts.PickVisualMedia.ImageOnly
+                                )
                             )
-                        )
+                        } else {
+                            AlertDialog.Builder(context)
+                                .setTitle(context.getString(R.string.txt_alert))
+                                .setMessage(context.getString(R.string.msg_no_photo_permission))
+                                .setPositiveButton(context.getString(R.string.btn_confirm)) { dialog, which ->
+                                    // 긍정 버튼 클릭 동작 처리
+                                    val intent = Intent(
+                                        Settings.ACTION_APPLICATION_DETAILS_SETTINGS,
+                                        Uri.fromParts("package", context.packageName, null)
+                                    )
+                                    context.startActivity(intent)
+                                }
+                                .show()
+                        }
                     } else if (detailViewModel.usedDt.value.isEmpty()) {
                         detailViewModel.setIsShowBottomSheet(true)
                     } else {
@@ -450,6 +470,17 @@ fun DetailScreen(id: String, onBack: () -> Unit) {
                     detailViewModel.setGift(3, value = it)
                 }
             )
+        }
+
+        // NoInternetDialog
+        if (detailViewModel.isShowNoInternetDialog.value) {
+            AlertDialog.Builder(context)
+                .setTitle(stringResource(id = R.string.txt_alert))
+                .setMessage(stringResource(id = R.string.msg_no_internet))
+                .setPositiveButton(stringResource(id = R.string.btn_confirm)) { dialog, which ->
+                    detailViewModel.changeNoInternetDialogState()
+                }
+                .show()
         }
     }
 

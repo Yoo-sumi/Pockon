@@ -48,6 +48,7 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.core.content.ContextCompat
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavDestination.Companion.hierarchy
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.NavType
@@ -70,11 +71,10 @@ import com.sumi.pockon.ui.used.UsedScreen
 
 @Composable
 fun BottomNavigationBar(
-    isGuestMode: Boolean,
     movePinScreen: () -> Unit,
-    moveLogInScreen: () -> Unit,
-    onFinish: () -> Unit
+    moveLogInScreen: () -> Unit
 ) {
+    val mainViewModel = hiltViewModel<MainViewModel>()
     val navController = rememberNavController()
 
     val navBackStackEntry by navController.currentBackStackEntryAsState()
@@ -93,21 +93,13 @@ fun BottomNavigationBar(
     val launcherPermissions = rememberLauncherForActivityResult(
         ActivityResultContracts.RequestMultiplePermissions()
     ) { permissionsMap ->
-        val areGranted = permissionsMap.values.reduce { acc, next -> acc && next }
-        if (!areGranted) {
-            AlertDialog.Builder(context)
-                .setTitle(context.getString(R.string.txt_alert))
-                .setMessage(context.getString(R.string.msg_no_permission))
-                .setPositiveButton(context.getString(R.string.btn_confirm)) { dialog, which ->
-                    // 긍정 버튼 클릭 동작 처리
-                    val intent = Intent(
-                        Settings.ACTION_APPLICATION_DETAILS_SETTINGS,
-                        Uri.fromParts("package", context.packageName, null)
-                    )
-                    context.startActivity(intent)
-                    onFinish()
-                }
-                .show()
+        if (Build.VERSION.SDK_INT >= 33) {
+            val notificationGranted = permissionsMap[Manifest.permission.POST_NOTIFICATIONS] ?: true
+
+            if (!notificationGranted) {
+                // 알림 권한이 거부된 경우 사용 임박 알림 off
+                mainViewModel.disableNotification()
+            }
         }
     }
 
@@ -277,16 +269,7 @@ fun BottomNavigationBar(
 
     // 권한 체크
     CheckPermission(context, launcherPermissions)
-    // 네트워크 체크(게스트 모드는 네트워크 불필요)
-    if (!isNetworkConnected(context) && !isGuestMode) {
-        AlertDialog.Builder(context)
-            .setTitle(stringResource(id = R.string.txt_alert))
-            .setMessage(stringResource(id = R.string.msg_no_internet))
-            .setPositiveButton(stringResource(id = R.string.btn_confirm)) { dialog, which ->
-                onFinish()
-            }
-            .show()
-    }
+
     // Loading Indicator
     if (isShowIndicator) LoadingScreen()
 }
@@ -301,14 +284,14 @@ private fun CheckPermission(
         arrayOf(
             Manifest.permission.POST_NOTIFICATIONS,
             Manifest.permission.READ_MEDIA_IMAGES,
-//            Manifest.permission.ACCESS_FINE_LOCATION,
-//            Manifest.permission.ACCESS_COARSE_LOCATION
+            Manifest.permission.ACCESS_FINE_LOCATION,
+            Manifest.permission.ACCESS_COARSE_LOCATION
         )
     } else {
         arrayOf(
             Manifest.permission.READ_EXTERNAL_STORAGE,
-//            Manifest.permission.ACCESS_FINE_LOCATION,
-//            Manifest.permission.ACCESS_COARSE_LOCATION
+            Manifest.permission.ACCESS_FINE_LOCATION,
+            Manifest.permission.ACCESS_COARSE_LOCATION
         )
     }
 

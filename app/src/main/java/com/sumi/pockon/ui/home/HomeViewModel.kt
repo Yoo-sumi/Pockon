@@ -11,6 +11,7 @@ import com.sumi.pockon.data.repository.BrandSearchRepository
 import com.sumi.pockon.data.repository.GiftRepository
 import com.sumi.pockon.data.model.Document
 import com.sumi.pockon.data.model.Gift
+import com.sumi.pockon.util.NetworkMonitor
 import com.sumi.pockon.util.loadImageFromPath
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
@@ -23,7 +24,8 @@ class HomeViewModel @Inject constructor(
     private val giftRepository: GiftRepository,
     private val brandSearchRepository: BrandSearchRepository,
     private val preferenceRepository: PreferenceRepository,
-    private val myAlarmManager: MyAlarmManager
+    private val myAlarmManager: MyAlarmManager,
+    private val networkMonitor: NetworkMonitor
 ) : ViewModel() {
 
     private var longitude: Double? = null
@@ -54,7 +56,7 @@ class HomeViewModel @Inject constructor(
     private fun getGiftList() {
         _isShowIndicator.value = true
 
-        if (isGuestMode || !isFirstLogin) {
+        if (isGuestMode || !isFirstLogin || !networkMonitor.isConnected()) {
             _isShowIndicator.value = false
             return
         } // 게스트 모드 또는 최초 로그인이 아니면 서버 안탐
@@ -130,6 +132,8 @@ class HomeViewModel @Inject constructor(
 
     // 브랜드 검색 후 로컬에 저장
     private fun getBrandInfoList() {
+        if (!networkMonitor.isConnected()) return
+
         val allList: ArrayList<Pair<Gift, Document>> = arrayListOf()
 
         val brandNames = ArrayList<String>()
@@ -194,4 +198,6 @@ class HomeViewModel @Inject constructor(
             _nearGiftList.value = listOf()
         }
     }
+
+    fun isNetworkConnected() = networkMonitor.isConnected()
 }

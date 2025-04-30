@@ -10,6 +10,7 @@ import com.sumi.pockon.alarm.MyAlarmManager
 import com.sumi.pockon.data.local.PreferenceRepository
 import com.sumi.pockon.data.repository.GiftRepository
 import com.sumi.pockon.data.model.Gift
+import com.sumi.pockon.util.NetworkMonitor
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -22,7 +23,8 @@ import javax.inject.Inject
 class AddViewModel @Inject constructor(
     private val giftRepository: GiftRepository,
     private val preferenceRepository: PreferenceRepository,
-    private val myAlarmManager: MyAlarmManager
+    private val myAlarmManager: MyAlarmManager,
+    private val networkMonitor: NetworkMonitor
 ) : ViewModel() {
 
     private val uid = preferenceRepository.getUid()
@@ -37,6 +39,9 @@ class AddViewModel @Inject constructor(
 
     private val _isShowIndicator = mutableStateOf(false)
     val isShowIndicator: State<Boolean> = _isShowIndicator
+
+    private val _isShowNoInternetDialog = mutableStateOf(false)
+    val isShowNoInternetDialog: State<Boolean> = _isShowNoInternetDialog
 
     private val _photo = mutableStateOf<Bitmap?>(null)
     val photo: State<Bitmap?> = _photo
@@ -62,6 +67,12 @@ class AddViewModel @Inject constructor(
     }
 
     fun addGift(onAddComplete: (Boolean) -> Unit) {
+        if (!isGuestMode && !networkMonitor.isConnected()) {
+            onAddComplete(false)
+            _isShowNoInternetDialog.value = true
+            return
+        }
+
         _isShowIndicator.value = true
         val addDate = SimpleDateFormat(
             "yyyyMMddHHmmss",
@@ -119,6 +130,10 @@ class AddViewModel @Inject constructor(
 
     fun changeDatePickerState() {
         _isShowDatePicker.value = !_isShowDatePicker.value
+    }
+
+    fun changeNoInternetDialogState() {
+        _isShowNoInternetDialog.value = !_isShowNoInternetDialog.value
     }
 
     fun isValid(): Int? {

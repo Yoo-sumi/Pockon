@@ -10,6 +10,7 @@ import com.sumi.pockon.alarm.MyAlarmManager
 import com.sumi.pockon.data.local.PreferenceRepository
 import com.sumi.pockon.data.model.Gift
 import com.sumi.pockon.data.repository.GiftRepository
+import com.sumi.pockon.util.NetworkMonitor
 import com.sumi.pockon.util.loadImageFromPath
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
@@ -25,7 +26,8 @@ import kotlin.collections.ArrayList
 class ListViewModel @Inject constructor(
     private val giftRepository: GiftRepository,
     private val preferenceRepository: PreferenceRepository,
-    private val myAlarmManager: MyAlarmManager
+    private val myAlarmManager: MyAlarmManager,
+    private val networkMonitor: NetworkMonitor
 ) : ViewModel() {
 
     private var uid = preferenceRepository.getUid()
@@ -52,6 +54,9 @@ class ListViewModel @Inject constructor(
 
     private val _isAllSelect = mutableStateOf(false)
     val isAllSelect: State<Boolean> = _isAllSelect
+
+    private val _isShowNoInternetDialog = mutableStateOf(false)
+    val isShowNoInternetDialog: State<Boolean> = _isShowNoInternetDialog
 
     init {
         observeGiftList() // 관찰자 등록
@@ -106,6 +111,13 @@ class ListViewModel @Inject constructor(
             onComplete()
             return
         } // 게스트 모드는 서버 안탐
+
+        if (!networkMonitor.isConnected()) {
+            onComplete()
+            _isShowNoInternetDialog.value = true
+            return
+        }
+
         giftRepository.getAllGift(uid) { giftList ->
             if (giftList.isNotEmpty()) {
                 // 로컬 저장(기프티콘)
@@ -187,6 +199,12 @@ class ListViewModel @Inject constructor(
 
     // 기프티콘 수정
     fun usedGift(gift: Gift, onComplete: (Boolean) -> Unit) {
+        if (!isGuestMode && !networkMonitor.isConnected()) {
+            onComplete(false)
+            _isShowNoInternetDialog.value = true
+            return
+        }
+
         val nowDt = SimpleDateFormat(
             "yyyy.MM.dd",
             Locale.getDefault()
@@ -212,6 +230,12 @@ class ListViewModel @Inject constructor(
 
     // 기프티콘 삭제
     fun removeGift(onComplete: (Boolean) -> Unit) {
+        if (!isGuestMode && !networkMonitor.isConnected()) {
+            onComplete(false)
+            _isShowNoInternetDialog.value = true
+            return
+        }
+
         if (removeGift == null) return
         if (removeGift?.id?.isEmpty() == true) return
         val uid = removeGift!!.uid
@@ -266,6 +290,12 @@ class ListViewModel @Inject constructor(
 
     // 선택 삭제/전체 삭제
     fun deleteSelection(onComplete: (Boolean) -> Unit) {
+        if (!isGuestMode && !networkMonitor.isConnected()) {
+            onComplete(false)
+            _isShowNoInternetDialog.value = true
+            return
+        }
+
         val resultList = ArrayList<Boolean>()
         var isFail = false
         _checkedGiftList.value.forEach { giftId ->
@@ -294,5 +324,9 @@ class ListViewModel @Inject constructor(
                 }
             }
         }
+    }
+
+    fun changeNoInternetDialogState() {
+        _isShowNoInternetDialog.value = !_isShowNoInternetDialog.value
     }
 }

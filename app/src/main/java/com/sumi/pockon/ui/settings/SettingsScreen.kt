@@ -1,5 +1,13 @@
 package com.sumi.pockon.ui.settings
 
+import android.Manifest
+import android.content.Context
+import android.content.Intent
+import android.content.pm.PackageManager
+import android.net.Uri
+import android.os.Build
+import android.provider.Settings
+import androidx.appcompat.app.AlertDialog
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
@@ -35,6 +43,7 @@ import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.core.content.ContextCompat
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.sumi.pockon.R
 import com.sumi.pockon.ui.list.ConfirmDialog
@@ -101,8 +110,23 @@ fun SettingsScreen(
                         isSwitch = true,
                         checked = checkedAlarm,
                         onCheck = {
-                            checkedAlarm = !checkedAlarm
-                            settingViewModel.onOffNotiEndDt(checkedAlarm)
+                            if (checkNotificationPermission(context)) {
+                                checkedAlarm = !checkedAlarm
+                                settingViewModel.onOffNotiEndDt(checkedAlarm)
+                            } else {
+                                AlertDialog.Builder(context)
+                                    .setTitle(context.getString(R.string.txt_alert))
+                                    .setMessage(context.getString(R.string.msg_no_notification_permission))
+                                    .setPositiveButton(context.getString(R.string.btn_confirm)) { dialog, which ->
+                                        // 긍정 버튼 클릭 동작 처리
+                                        val intent = Intent(
+                                            Settings.ACTION_APPLICATION_DETAILS_SETTINGS,
+                                            Uri.fromParts("package", context.packageName, null)
+                                        )
+                                        context.startActivity(intent)
+                                    }
+                                    .show()
+                            }
                         },
                         onClick = {
                             if (checkedAlarm) moveNotiImminentUseScreen()
@@ -197,6 +221,17 @@ fun SettingsScreen(
                     showRemoveDlg = false
                 }
             )
+        }
+
+        // NoInternetDialog
+        if (settingViewModel.isShowNoInternetDialog.value) {
+            AlertDialog.Builder(context)
+                .setTitle(stringResource(id = R.string.txt_alert))
+                .setMessage(stringResource(id = R.string.msg_no_internet))
+                .setPositiveButton(stringResource(id = R.string.btn_confirm)) { dialog, which ->
+                    settingViewModel.changeNoInternetDialogState()
+                }
+                .show()
         }
     }
 }
@@ -327,5 +362,19 @@ fun CopyrightScreen() {
                 url = urlList[idx]
             )
         }
+    }
+}
+
+/** 알림 권한 체크 */
+fun checkNotificationPermission(context: Context): Boolean {
+    if (Build.VERSION.SDK_INT < 33) return true
+
+    val permissions = arrayOf(Manifest.permission.POST_NOTIFICATIONS)
+
+    return permissions.all {
+        ContextCompat.checkSelfPermission(
+            context,
+            it
+        ) == PackageManager.PERMISSION_GRANTED
     }
 }

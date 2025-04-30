@@ -82,8 +82,14 @@ class GiftRepository @Inject constructor(
         }
     }
 
-    fun updateGiftIsFavorite(id: String, isFavorite: Boolean, onComplete: (Boolean) -> Unit) {
-        giftDataRemoteSource.updateDataIsFavorite(id, isFavorite, onComplete)
+    fun updateGiftIsFavorite(isGuestMode: Boolean, id: String, isFavorite: Boolean, onComplete: (Boolean) -> Unit) {
+        if (isGuestMode) {
+            onComplete(true)
+        } else {
+            giftDataRemoteSource.updateDataIsFavorite(id, isFavorite) {
+                onComplete(it)
+            }
+        }
     }
 
     fun updateGiftIsFavorite(id: String, isFavorite: Boolean) {

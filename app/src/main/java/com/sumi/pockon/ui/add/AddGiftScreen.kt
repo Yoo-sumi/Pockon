@@ -1,13 +1,20 @@
 package com.sumi.pockon.ui.add
 
+import android.Manifest
 import android.app.DatePickerDialog
+import android.content.Context
 import android.content.DialogInterface
+import android.content.Intent
+import android.content.pm.PackageManager
 import android.graphics.Bitmap
 import android.net.Uri
+import android.os.Build
+import android.provider.Settings
 import androidx.activity.compose.ManagedActivityResultLauncher
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.appcompat.app.AlertDialog
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -57,6 +64,7 @@ import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.core.content.ContextCompat
 import androidx.hilt.navigation.compose.hiltViewModel
 import coil.compose.AsyncImage
 import com.sumi.pockon.util.DateTransformation
@@ -123,7 +131,7 @@ fun AddGifticon(onBack: (Boolean) -> Unit) {
                     .padding(top = 5.dp, bottom = 5.dp, start = 25.dp, end = 25.dp)
             ) {
                 // gift image
-                GiftImage(addViewModel.photo.value, galleryLauncher)
+                GiftImage(addViewModel.photo.value, context, galleryLauncher)
                 // cash
                 Box(
                     modifier = Modifier.fillMaxWidth()
@@ -229,6 +237,17 @@ fun AddGifticon(onBack: (Boolean) -> Unit) {
     if (addViewModel.isShowIndicator.value) {
         LoadingScreen()
     }
+
+    // NoInternetDialog
+    if (addViewModel.isShowNoInternetDialog.value) {
+        AlertDialog.Builder(context)
+            .setTitle(stringResource(id = R.string.txt_alert))
+            .setMessage(stringResource(id = R.string.msg_no_internet))
+            .setPositiveButton(stringResource(id = R.string.btn_confirm)) { dialog, which ->
+                addViewModel.changeNoInternetDialogState()
+            }
+            .show()
+    }
 }
 
 @Composable
@@ -285,6 +304,7 @@ fun InputDataTextField(
 @Composable
 fun GiftImage(
     selectedImage: Bitmap?,
+    context: Context,
     galleryLauncher: ManagedActivityResultLauncher<PickVisualMediaRequest, Uri?>
 ) {
     Row(
@@ -300,11 +320,26 @@ fun GiftImage(
                 .height(200.dp)
                 .background(MaterialTheme.colorScheme.outline)
                 .clickable {
-                    galleryLauncher.launch(
-                        PickVisualMediaRequest(
-                            ActivityResultContracts.PickVisualMedia.ImageOnly
+                    if (checkPhotoPermission(context)) {
+                        galleryLauncher.launch(
+                            PickVisualMediaRequest(
+                                ActivityResultContracts.PickVisualMedia.ImageOnly
+                            )
                         )
-                    )
+                    } else {
+                        AlertDialog.Builder(context)
+                            .setTitle(context.getString(R.string.txt_alert))
+                            .setMessage(context.getString(R.string.msg_no_photo_permission))
+                            .setPositiveButton(context.getString(R.string.btn_confirm)) { dialog, which ->
+                                // 긍정 버튼 클릭 동작 처리
+                                val intent = Intent(
+                                    Settings.ACTION_APPLICATION_DETAILS_SETTINGS,
+                                    Uri.fromParts("package", context.packageName, null)
+                                )
+                                context.startActivity(intent)
+                            }
+                            .show()
+                    }
                 }
         ) {
             if (selectedImage == null) {
@@ -401,4 +436,24 @@ fun CustomDatePickerDialog(
 
     // 다이얼로그 표시
     datePickerDialog.show()
+}
+
+/** 사진 권한 체크 */
+fun checkPhotoPermission(context: Context): Boolean {
+    val permissions = if (Build.VERSION.SDK_INT >= 33) {
+        arrayOf(
+            Manifest.permission.READ_MEDIA_IMAGES,
+        )
+    } else {
+        arrayOf(
+            Manifest.permission.READ_EXTERNAL_STORAGE,
+        )
+    }
+
+    return permissions.all {
+        ContextCompat.checkSelfPermission(
+            context,
+            it
+        ) == PackageManager.PERMISSION_GRANTED
+    }
 }

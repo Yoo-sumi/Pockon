@@ -1,5 +1,6 @@
 package com.sumi.pockon.ui.list
 
+import androidx.appcompat.app.AlertDialog
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.BorderStroke
@@ -159,6 +160,17 @@ fun ListScreen(onDetail: (String) -> Unit, onAdd: () -> Unit, isLoading: (Boolea
 
             }
         )
+    }
+
+    // NoInternetDialog
+    if (listViewModel.isShowNoInternetDialog.value) {
+        AlertDialog.Builder(context)
+            .setTitle(stringResource(id = R.string.txt_alert))
+            .setMessage(stringResource(id = R.string.msg_no_internet))
+            .setPositiveButton(stringResource(id = R.string.btn_confirm)) { dialog, which ->
+                listViewModel.changeNoInternetDialogState()
+            }
+            .show()
     }
 
     Scaffold(

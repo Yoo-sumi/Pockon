@@ -27,6 +27,7 @@ import com.google.firebase.storage.FirebaseStorage
 import com.google.firebase.storage.StorageReference
 import com.sumi.pockon.data.local.PreferenceLocalDataSource
 import com.sumi.pockon.data.local.PreferenceRepository
+import com.sumi.pockon.util.NetworkMonitor
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -156,5 +157,11 @@ class DiModule {
     @Provides
     fun providePreferenceLocalDataSource(sharedPreferences: SharedPreferences): PreferenceLocalDataSource {
         return PreferenceLocalDataSource(sharedPreferences)
+    }
+
+    @Singleton
+    @Provides
+    fun provideNetworkMonitor(@ApplicationContext context: Context): NetworkMonitor {
+        return NetworkMonitor(context)
     }
 }

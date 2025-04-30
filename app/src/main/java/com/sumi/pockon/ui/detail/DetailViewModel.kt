@@ -10,6 +10,7 @@ import com.sumi.pockon.alarm.MyAlarmManager
 import com.sumi.pockon.data.local.PreferenceRepository
 import com.sumi.pockon.data.repository.GiftRepository
 import com.sumi.pockon.data.model.Gift
+import com.sumi.pockon.util.NetworkMonitor
 import com.sumi.pockon.util.loadImageFromPath
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
@@ -24,7 +25,8 @@ import javax.inject.Inject
 class DetailViewModel @Inject constructor(
     private val giftRepository: GiftRepository,
     private val myAlarmManager: MyAlarmManager,
-    private val preferenceRepository: PreferenceRepository
+    private val preferenceRepository: PreferenceRepository,
+    private val networkMonitor: NetworkMonitor
 ) : ViewModel() {
 
     private val isNotiEndDt = preferenceRepository.isNotiEndDt()
@@ -70,6 +72,9 @@ class DetailViewModel @Inject constructor(
 
     private val _isShowIndicator = mutableStateOf(false)
     val isShowIndicator: State<Boolean> = _isShowIndicator
+
+    private val _isShowNoInternetDialog = mutableStateOf(false)
+    val isShowNoInternetDialog: State<Boolean> = _isShowNoInternetDialog
 
     fun getGift(id: String) {
         viewModelScope.launch(Dispatchers.IO) {
@@ -147,15 +152,28 @@ class DetailViewModel @Inject constructor(
     }
 
     fun toggleFavorite() {
-        _isFavorite.value = !_isFavorite.value
-        giftRepository.updateGiftIsFavorite(_gift.value.id, _isFavorite.value) {
+        if (!isGuestMode && !networkMonitor.isConnected()) {
+            _isShowNoInternetDialog.value = true
+            return
+        }
+
+        val isFavorite = !_isFavorite.value
+        giftRepository.updateGiftIsFavorite(isGuestMode, _gift.value.id, isFavorite) { result ->
+            if (!result) return@updateGiftIsFavorite
             viewModelScope.launch(Dispatchers.IO) {
-                giftRepository.updateGiftIsFavorite(_gift.value.id, _isFavorite.value)
+                giftRepository.updateGiftIsFavorite(_gift.value.id, isFavorite)
+                _isFavorite.value = isFavorite
             }
         }
     }
 
     fun updateGift(onComplete: (Boolean) -> Unit) {
+        if (!isGuestMode && !networkMonitor.isConnected()) {
+            onComplete(false)
+            _isShowNoInternetDialog.value = true
+            return
+        }
+
         _isShowIndicator.value = true
         val updateGift = if (_isCheckedCash.value) {
             Gift(
@@ -214,6 +232,12 @@ class DetailViewModel @Inject constructor(
     }
 
     fun setIsUsed(flag: Boolean, cash: Int? = null, onComplete: (Boolean) -> Unit) {
+        if (!isGuestMode && !networkMonitor.isConnected()) {
+            onComplete(false)
+            _isShowNoInternetDialog.value = true
+            return
+        }
+
         _isShowIndicator.value = true
         var nowDt = ""
         if ((flag && cash == null) || (flag && cash == 0)) {
@@ -247,6 +271,10 @@ class DetailViewModel @Inject constructor(
 
     fun changeDatePickerState() {
         _isShowDatePicker.value = !_isShowDatePicker.value
+    }
+
+    fun changeNoInternetDialogState() {
+        _isShowNoInternetDialog.value = !_isShowNoInternetDialog.value
     }
 
     fun isValid(): Int? {
