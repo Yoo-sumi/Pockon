@@ -10,10 +10,8 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.IntrinsicSize
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxHeight
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -21,7 +19,6 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
@@ -35,10 +32,8 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -56,16 +51,11 @@ import androidx.compose.ui.viewinterop.AndroidView
 import androidx.compose.ui.window.Dialog
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.sumi.pockon.R
-import com.sumi.pockon.util.DateTransformation
-import com.sumi.pockon.util.convertTo12HourFormat
 
 @Composable
 fun NotificationSettingScreen(onBack: () -> Unit) {
     val notificationSettingViewModel = hiltViewModel<NotificationSettingViewModel>()
     val day = notificationSettingViewModel.getDayList()
-
-    var selectedHour by rememberSaveable { mutableIntStateOf(0) }
-    var selectedMinute by rememberSaveable { mutableIntStateOf(0) }
 
     BackHandler {
         notificationSettingViewModel.changeNotiEndDt()
@@ -99,7 +89,7 @@ fun NotificationSettingScreen(onBack: () -> Unit) {
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(start = 15.dp, end = 15.dp, top = 10.dp, bottom = 10.dp),
-                text = "\uD83D\uDD52 ${notificationSettingViewModel.seletedTime.value}",
+                text = stringResource(id = R.string.txt_noti_end_dt_time, notificationSettingViewModel.seletedTime.value),
             )
         }
         Box(
@@ -164,11 +154,10 @@ fun NotificationSettingScreen(onBack: () -> Unit) {
                         notificationSettingViewModel.toggleIsShowTimePickerWheelDialog()
                     },
                     onChanged = { hour24, minute ->
-                        selectedHour = hour24
-                        selectedMinute = minute
+                        notificationSettingViewModel.selectedTime(hour24, minute)
                     },
                     onConfirm = {
-                        notificationSettingViewModel.saveNotiEndDtTime(selectedHour, selectedMinute)
+                        notificationSettingViewModel.toggleIsShowTimePickerWheelDialog()
                     }
                 )
             }
@@ -231,7 +220,7 @@ fun TimePickerWheelDialog(hour24: Int, minute: Int, onCancel: () -> Unit, onChan
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(10.dp),
-                text = "\uD83D\uDD52",
+                text = stringResource(id = R.string.title_select_time),
                 textAlign = TextAlign.Center,
                 fontSize = 16.sp,
                 color = MaterialTheme.colorScheme.onPrimary
@@ -324,27 +313,28 @@ fun TimePickerWheelDialog(hour24: Int, minute: Int, onCancel: () -> Unit, onChan
 
 @Composable
 fun TimePickerWithAmPmView(
-    initialHour: Int = 10,  // 24시간 기준
-    initialMinute: Int = 30,
-    initialIsAm: Boolean = true,
+    initialHour: Int,  // 24시간 기준
+    initialMinute: Int,
     onTimeChange: (hour24: Int, minute: Int) -> Unit
 ) {
     var hour by remember { mutableStateOf(if (initialHour == 0 || initialHour == 12) 12 else initialHour % 12) }
     var minute by remember { mutableStateOf(initialMinute) }
-    var isAm by remember { mutableStateOf(initialIsAm) }
+    var isAm by remember { mutableStateOf(initialHour < 12) }
 
     Row(
         modifier = Modifier.padding(16.dp),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.Center
     ) {
+        val txtAm = stringResource(id = R.string.txt_am)
+        val txtPm = stringResource(id = R.string.txt_pm)
         // AM/PM Picker
         AndroidView(
             factory = { context ->
                 NumberPicker(context).apply {
                     minValue = 0
                     maxValue = 1
-                    displayedValues = arrayOf("AM", "PM")
+                    displayedValues = arrayOf(txtAm, txtPm)
                     value = if (isAm) 0 else 1
                     setOnValueChangedListener { _, _, newVal ->
                         isAm = newVal == 0

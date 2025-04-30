@@ -57,9 +57,8 @@ class AlarmReceiver : BroadcastReceiver() {
                         // 알림 등록
                         myAlarmManager.cancel(tempGift.id)
                         if (isNotiEndDt) {
-                            val notiEndDay = preferenceRepository.getNotiEndDtDay()
                             alarmList.add(gift.id)
-                            myAlarmManager.schedule(tempGift, notiEndDay)
+                            myAlarmManager.schedule(tempGift, preferenceRepository.getNotiEndDtDay(), preferenceRepository.getNotiEndDtTime())
                         }
                     }
                     if (isNotiEndDt) {

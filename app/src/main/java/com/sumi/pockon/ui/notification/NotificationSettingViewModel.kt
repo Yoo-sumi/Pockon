@@ -14,7 +14,6 @@ import com.sumi.pockon.util.loadImageFromPath
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.collectLatest
-import kotlinx.coroutines.flow.take
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -25,9 +24,13 @@ class NotificationSettingViewModel @Inject constructor(
     private val myAlarmManager: MyAlarmManager
 ) : ViewModel() {
 
+    private var giftList = listOf<Gift>()
+    private var isLoading = true
+    private var selectedHour = 0
+    private var selectedMinute = 0
+
     private val dayList = listOf(0, 1, 3, 7, 14)
     private var isNotiEndDt = preferenceRepository.isNotiEndDt()
-    private val initialSelectedDay = preferenceRepository.getNotiEndDtDay()
 
     private val _seletedTime = mutableStateOf("")
     val seletedTime: State<String> = _seletedTime
@@ -41,35 +44,12 @@ class NotificationSettingViewModel @Inject constructor(
     init {
         val time = preferenceRepository.getNotiEndDtTime()
         _seletedTime.value = convertTo12HourFormat(time.first, time.second)
-    }
+        selectedHour = time.first
+        selectedMinute = time.second
 
-    fun getDayList() = dayList
-
-    fun setSeletedDay(day: Int) {
-        _seletedDay.intValue = day
-        preferenceRepository.saveNotiEndDtDay(day)
-    }
-
-    fun toggleIsShowTimePickerWheelDialog() {
-        _isShowTimePickerWheelDialog.value = !_isShowTimePickerWheelDialog.value
-    }
-
-    fun getNotiEndDtTime() = preferenceRepository.getNotiEndDtTime()
-
-    fun saveNotiEndDtTime(hour24: Int, minute: Int) {
-        preferenceRepository.saveNotiEndDtTime(hour24, minute)
-        _seletedTime.value = convertTo12HourFormat(hour24, minute)
-        toggleIsShowTimePickerWheelDialog()
-    }
-
-    fun changeNotiEndDt() {
-        if (!isNotiEndDt || initialSelectedDay == _seletedDay.intValue) return
-
-        preferenceRepository.saveAlarmList(mutableSetOf())
         viewModelScope.launch(Dispatchers.IO) {
-            giftRepository.getAllGift().take(1).collectLatest { allGift ->
-                val notiEndDay = preferenceRepository.getNotiEndDtDay()
-                val alarmList = mutableSetOf<String>()
+            giftRepository.getAllGift().collectLatest { allGift ->
+                val tempList = ArrayList<Gift>()
                 allGift.forEach { gift ->
                     val tempGift = Gift(
                         id = gift.id,
@@ -84,13 +64,44 @@ class NotificationSettingViewModel @Inject constructor(
                         cash = gift.cash,
                         isFavorite = gift.isFavorite
                     )
-                    // 알림 등록
-                    alarmList.add(gift.id)
-                    myAlarmManager.cancel(tempGift.id)
-                    myAlarmManager.schedule(tempGift, notiEndDay)
+                    tempList.add(tempGift)
                 }
-                preferenceRepository.saveAlarmList(alarmList)
+                giftList = tempList
+                isLoading = false
             }
         }
+    }
+
+    fun getDayList() = dayList
+
+    fun setSeletedDay(day: Int) {
+        _seletedDay.intValue = day
+    }
+    fun toggleIsShowTimePickerWheelDialog() {
+        _isShowTimePickerWheelDialog.value = !_isShowTimePickerWheelDialog.value
+    }
+
+    fun getNotiEndDtTime() = preferenceRepository.getNotiEndDtTime()
+
+    fun selectedTime(hour24: Int, minute: Int) {
+        _seletedTime.value = convertTo12HourFormat(hour24, minute)
+        selectedHour = hour24
+        selectedMinute = minute
+    }
+
+    fun changeNotiEndDt() {
+        if (!isNotiEndDt || isLoading) return
+
+        preferenceRepository.saveNotiEndDtDay(_seletedDay.intValue)
+        preferenceRepository.saveNotiEndDtTime(selectedHour, selectedMinute)
+        preferenceRepository.saveAlarmList(mutableSetOf())
+        val alarmList = mutableSetOf<String>()
+        giftList.forEach { gift ->
+            // 알림 등록
+            alarmList.add(gift.id)
+            myAlarmManager.cancel(gift.id)
+            myAlarmManager.schedule(gift, preferenceRepository.getNotiEndDtDay(), preferenceRepository.getNotiEndDtTime())
+        }
+        preferenceRepository.saveAlarmList(alarmList)
     }
 }

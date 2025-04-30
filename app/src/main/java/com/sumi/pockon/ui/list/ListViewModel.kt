@@ -200,7 +200,6 @@ class ListViewModel @Inject constructor(
                     giftRepository.insertGift(updateGift)
                 }
                 myAlarmManager.cancel(gift.id)
-
                 val alarmList = preferenceRepository.getAlarmList()
                 alarmList?.remove(gift.id)
                 preferenceRepository.saveAlarmList(alarmList)

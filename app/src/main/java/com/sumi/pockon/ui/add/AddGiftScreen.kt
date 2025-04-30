@@ -1,6 +1,7 @@
 package com.sumi.pockon.ui.add
 
 import android.app.DatePickerDialog
+import android.content.DialogInterface
 import android.graphics.Bitmap
 import android.net.Uri
 import androidx.activity.compose.ManagedActivityResultLauncher
@@ -388,9 +389,14 @@ fun CustomDatePickerDialog(
 
     // 취소 버튼 리스너
     datePickerDialog.setButton(
-        DatePickerDialog.BUTTON_NEGATIVE, "취소"
+        DatePickerDialog.BUTTON_NEGATIVE, stringResource(id = R.string.btn_cancel)
     ) { _, _ ->
         onCancel()
+    }
+
+    val txtConfirm = stringResource(id = R.string.btn_confirm)
+    datePickerDialog.setOnShowListener {
+        datePickerDialog.getButton(DialogInterface.BUTTON_POSITIVE).text = txtConfirm
     }
 
     // 다이얼로그 표시

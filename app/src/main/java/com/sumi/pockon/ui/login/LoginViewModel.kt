@@ -22,7 +22,7 @@ import javax.inject.Inject
 class LoginViewModel @Inject constructor(
     private val loginRepository: LoginRepository,
     private val preferenceRepository: PreferenceRepository
-    ) : ViewModel() {
+) : ViewModel() {
 
     private val _isLogin = MutableLiveData(false)
     val isLogin: LiveData<Boolean> = _isLogin
@@ -94,9 +94,5 @@ class LoginViewModel @Inject constructor(
             // 구글 사용자 인증 정보 유지X
             credentialManager.clearCredentialState(request = ClearCredentialStateRequest())
         }
-    }
-
-    private fun saveMyUid(uid: String) {
-        preferenceRepository.saveUid(uid)
     }
 }

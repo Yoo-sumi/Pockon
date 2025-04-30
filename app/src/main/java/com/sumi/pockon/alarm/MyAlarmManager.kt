@@ -11,7 +11,7 @@ class MyAlarmManager(private val context: Context) {
 
     private val alarmManager = context.getSystemService(AlarmManager::class.java)
 
-    fun schedule(gift: Gift, dDay: Int, hour: Int = 0, minute: Int = 0) {
+    fun schedule(gift: Gift, dDay: Int, time: Pair<Int, Int>) {
         val intent = Intent(context, AlarmReceiver::class.java).apply {
             putExtra("gift", gift.copy(photo = null))
             putExtra("dDay", dDay)
@@ -23,13 +23,15 @@ class MyAlarmManager(private val context: Context) {
             set(Calendar.YEAR, year.toInt())
             set(Calendar.MONTH, month.toInt() - 1) // 0이 1월
             set(Calendar.DATE, day.toInt())
-            set(Calendar.HOUR_OF_DAY, hour)
-            set(Calendar.MINUTE, minute)
+            set(Calendar.HOUR_OF_DAY, time.first)
+            set(Calendar.MINUTE, time.second)
             set(Calendar.SECOND, 0)
             set(Calendar.MILLISECOND, 0)
 
             add(Calendar.DATE, -dDay)
         }
+
+        if (calendar.timeInMillis <= Calendar.getInstance().timeInMillis) return
 
         alarmManager.setExactAndAllowWhileIdle(
             AlarmManager.RTC_WAKEUP,

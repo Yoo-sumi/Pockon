@@ -66,11 +66,11 @@ class PreferenceLocalDataSource(private val prefs: SharedPreferences) {
     }
 
     fun removePinNum() {
-        prefs.edit().remove("pin_num").apply()
+        prefs.edit().remove(SharedPrefKeys.PIN_NUM).apply()
     }
 
     fun removeAuthPin() {
-        prefs.edit().remove("auth_pin").apply()
+        prefs.edit().remove(SharedPrefKeys.AUTH_PIN).apply()
     }
 
     fun removeAll() {

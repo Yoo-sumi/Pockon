@@ -104,13 +104,12 @@ class HomeViewModel @Inject constructor(
 
             preferenceRepository.saveAlarmList(mutableSetOf())
             val alarmList = mutableSetOf<String>()
-            val notiEndDay = preferenceRepository.getNotiEndDtDay()
             giftList.forEach { gift ->
                 myAlarmManager.cancel(gift.id)
                 if (isNotiEndDt) {
                     // 알림 등록
                     alarmList.add(gift.id)
-                    myAlarmManager.schedule(gift, notiEndDay)
+                    myAlarmManager.schedule(gift, preferenceRepository.getNotiEndDtDay(), preferenceRepository.getNotiEndDtTime())
                 }
             }
             if (isNotiEndDt) {

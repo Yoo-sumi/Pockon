@@ -35,6 +35,9 @@
     <string name="txt_all_select">전체 선택</string>
     <string name="txt_today">당일</string>
     <string name="txt_day_before">%d일 전</string>
+    <string name="txt_am">오전</string>
+    <string name="txt_pm">오후</string>
+    <string name="txt_noti_end_dt_time">🕒 %s</string>
 
     <!--title-->
     <string name="title_add_gift">기프티콘 추가</string>
@@ -43,6 +46,7 @@
     <string name="top_app_bar_recent">최신순</string>
     <string name="top_app_bar_end_date">디데이순</string>
     <string name="chip_all">전체</string>
+    <string name="title_select_time">🕒</string>
 
     <!--msg-->
     <string name="msg_permission_photo">사진 접근 권한이 거부되었습니다.</string>

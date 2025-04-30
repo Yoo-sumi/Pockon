@@ -25,7 +25,7 @@ class DetailViewModel @Inject constructor(
     private val giftRepository: GiftRepository,
     private val myAlarmManager: MyAlarmManager,
     private val preferenceRepository: PreferenceRepository
-    ) : ViewModel() {
+) : ViewModel() {
 
     private val isNotiEndDt = preferenceRepository.isNotiEndDt()
     private val isGuestMode = preferenceRepository.isGuestMode()
@@ -198,9 +198,7 @@ class DetailViewModel @Inject constructor(
                     myAlarmManager.cancel(updateGift.id)
                     // 알림 등록
                     if (isNotiEndDt) {
-                        val notiEndDay = preferenceRepository.getNotiEndDtDay()
-                        myAlarmManager.schedule(updateGift, notiEndDay)
-
+                        myAlarmManager.schedule(updateGift, preferenceRepository.getNotiEndDtDay(), preferenceRepository.getNotiEndDtTime())
                         val alarmList = preferenceRepository.getAlarmList()
                         if (alarmList?.contains(updateGift.id) == false) alarmList.add(updateGift.id)
                     }

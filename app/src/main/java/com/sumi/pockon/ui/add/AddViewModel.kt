@@ -102,10 +102,9 @@ class AddViewModel @Inject constructor(
                     val alarmList = preferenceRepository.getAlarmList()
                     // 알림 등록
                     if (isNotiEndDt && alarmList?.contains(gift.id) == false) {
-                        val notiEndDay = preferenceRepository.getNotiEndDtDay()
                         alarmList.add(gift.id)
                         preferenceRepository.saveAlarmList(alarmList)
-                        myAlarmManager.schedule(gift, notiEndDay)
+                        myAlarmManager.schedule(gift, preferenceRepository.getNotiEndDtDay(), preferenceRepository.getNotiEndDtTime())
                     }
                 }
                 _isShowIndicator.value = false

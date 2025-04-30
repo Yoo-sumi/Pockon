@@ -40,7 +40,6 @@ class SettingsViewModel @Inject constructor(
 
         viewModelScope.launch(Dispatchers.IO) {
             giftRepository.getAllGift().take(1).collectLatest { allGift ->
-                val notiEndDay = preferenceRepository.getNotiEndDtDay()
                 val alarmList = mutableSetOf<String>()
                 allGift.forEach { gift ->
                     val tempGift = Gift(
@@ -60,7 +59,7 @@ class SettingsViewModel @Inject constructor(
                     if (isNotiEndDt) {
                         // 알림 등록
                         alarmList.add(gift.id)
-                        myAlarmManager.schedule(tempGift, notiEndDay)
+                        myAlarmManager.schedule(tempGift, preferenceRepository.getNotiEndDtDay(), preferenceRepository.getNotiEndDtTime())
                     }
                 }
                 if (isNotiEndDt) {
