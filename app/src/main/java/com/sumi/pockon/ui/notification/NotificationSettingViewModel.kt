@@ -31,6 +31,7 @@ class NotificationSettingViewModel @Inject constructor(
 
     private val dayList = listOf(0, 1, 3, 7, 14)
     private var isNotiEndDt = preferenceRepository.isNotiEndDt()
+    private var notiEndDtDay = preferenceRepository.getNotiEndDtDay()
 
     private val _seletedTime = mutableStateOf("")
     val seletedTime: State<String> = _seletedTime
@@ -94,14 +95,10 @@ class NotificationSettingViewModel @Inject constructor(
 
         preferenceRepository.saveNotiEndDtDay(_seletedDay.intValue)
         preferenceRepository.saveNotiEndDtTime(selectedHour, selectedMinute)
-        preferenceRepository.saveAlarmList(mutableSetOf())
-        val alarmList = mutableSetOf<String>()
         giftList.forEach { gift ->
             // 알림 등록
-            alarmList.add(gift.id)
-            alarmRepository.cancelAlarm(gift.id)
+            alarmRepository.cancelAlarm(gift.id, notiEndDtDay)
             alarmRepository.setAlarm(gift, preferenceRepository.getNotiEndDtDay(), preferenceRepository.getNotiEndDtTime())
         }
-        preferenceRepository.saveAlarmList(alarmList)
     }
 }

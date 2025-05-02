@@ -104,20 +104,12 @@ class HomeViewModel @Inject constructor(
                 )
             }
 
-            preferenceRepository.saveAlarmList(mutableSetOf())
-            val alarmList = mutableSetOf<String>()
             giftList.forEach { gift ->
-                alarmRepository.cancelAlarm(gift.id)
-                if (isNotiEndDt) {
+                alarmRepository.cancelAlarm(gift.id, preferenceRepository.getNotiEndDtDay())
+                if (isNotiEndDt && gift.usedDt.isEmpty()) {
                     // 알림 등록
-                    alarmList.add(gift.id)
                     alarmRepository.setAlarm(gift, preferenceRepository.getNotiEndDtDay(), preferenceRepository.getNotiEndDtTime())
                 }
-            }
-            if (isNotiEndDt) {
-                preferenceRepository.saveAlarmList(alarmList)
-            } else {
-                preferenceRepository.saveAlarmList(mutableSetOf())
             }
 
             // 즐겨찾기 기프티콘 목록

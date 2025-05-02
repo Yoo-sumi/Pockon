@@ -12,7 +12,7 @@ class AlarmRepository @Inject constructor(
         alarmDataSource.schedule(gift, dDay, time)
     }
 
-    fun cancelAlarm(id: String) {
-        alarmDataSource.cancel(id)
+    fun cancelAlarm(id: String, dDay: Int) {
+        alarmDataSource.cancel(id, dDay)
     }
 }

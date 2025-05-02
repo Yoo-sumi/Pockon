@@ -17,4 +17,10 @@ class LoginRepository @Inject constructor(
     fun logout() {
         loginDataSource.logout()
     }
+
+    fun removeAccount(onComplete: (Boolean) -> Unit) {
+        loginDataSource.removeAccount {
+            onComplete(it)
+        }
+    }
 }

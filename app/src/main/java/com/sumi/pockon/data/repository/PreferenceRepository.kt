@@ -1,56 +1,54 @@
 package com.sumi.pockon.data.repository
 
 import com.sumi.pockon.data.local.preference.PreferenceLocalDataSource
+import javax.inject.Inject
 
-class PreferenceRepository(private val localDataSource: PreferenceLocalDataSource) {
+class PreferenceRepository @Inject constructor(
+    private val preferenceLocalDataSource: PreferenceLocalDataSource
+) {
 
-    fun getUid() = localDataSource.getUid()
+    fun getUid() = preferenceLocalDataSource.getUid()
 
-    fun getPinNum() = localDataSource.getPinNum()
+    fun getPinNum() = preferenceLocalDataSource.getPinNum()
 
-    fun isAuthPin() = localDataSource.isAuthPin()
+    fun isAuthPin() = preferenceLocalDataSource.isAuthPin()
 
-    fun isGuestMode() = localDataSource.isGuestMode()
+    fun isGuestMode() = preferenceLocalDataSource.isGuestMode()
 
-    fun isFirstLogin() = localDataSource.isFirstLogin()
+    fun isFirstLogin() = preferenceLocalDataSource.isFirstLogin()
 
-    fun isNotiEndDt() = localDataSource.isNotiEndDt()
+    fun isNotiEndDt() = preferenceLocalDataSource.isNotiEndDt()
 
-    fun getNotiEndDtDay() = localDataSource.getNotiEndDtDay()
+    fun getNotiEndDtDay() = preferenceLocalDataSource.getNotiEndDtDay()
 
-    fun getNotiEndDtTime() = Pair(localDataSource.getNotiEndDtHour(), localDataSource.getNotiEndDtMinute())
+    fun getNotiEndDtTime() = Pair(preferenceLocalDataSource.getNotiEndDtHour(), preferenceLocalDataSource.getNotiEndDtMinute())
 
-    fun getAlarmList() = localDataSource.getAlarmList()
-
-    fun saveUid(uid: String) = localDataSource.saveUid(uid)
+    fun saveUid(uid: String) = preferenceLocalDataSource.saveUid(uid)
 
     fun savePinNum(pinNum: String) {
-        localDataSource.savePinNum(pinNum)
-        localDataSource.saveIsAuthPin(true)
+        preferenceLocalDataSource.savePinNum(pinNum)
+        preferenceLocalDataSource.saveIsAuthPin(true)
     }
 
-    fun saveIsGuestMode(isGuestMode: Boolean) = localDataSource.saveIsGuestMode(isGuestMode)
+    fun saveIsGuestMode(isGuestMode: Boolean) = preferenceLocalDataSource.saveIsGuestMode(isGuestMode)
 
-    fun saveIsFirstLogin(isFirstLogin: Boolean) = localDataSource.saveIsFirstLogin(isFirstLogin)
+    fun saveIsFirstLogin(isFirstLogin: Boolean) = preferenceLocalDataSource.saveIsFirstLogin(isFirstLogin)
 
-    fun saveNotiEndDtDay(day: Int) = localDataSource.saveNotiEndDtDay(day)
-
-    fun saveAlarmList(alarmList: MutableSet<String>?) = localDataSource.saveAlarmList(alarmList)
+    fun saveNotiEndDtDay(day: Int) = preferenceLocalDataSource.saveNotiEndDtDay(day)
 
     fun saveNotiEndDtTime(hour24: Int, minute: Int) {
-        localDataSource.saveNotiEndDtHour(hour24)
-        localDataSource.saveNotiEndDtMinute(minute)
+        preferenceLocalDataSource.saveNotiEndDtHour(hour24)
+        preferenceLocalDataSource.saveNotiEndDtMinute(minute)
     }
 
     fun onOffNotiEndDt(flag: Boolean) {
-        localDataSource.saveIsNotiEndDt(flag)
-        localDataSource.saveAlarmList(mutableSetOf())
+        preferenceLocalDataSource.saveIsNotiEndDt(flag)
     }
 
     fun offAuthPin() {
-        localDataSource.removePinNum()
-        localDataSource.removeAuthPin()
+        preferenceLocalDataSource.removePinNum()
+        preferenceLocalDataSource.removeAuthPin()
     }
 
-    fun removeAll() = localDataSource.removeAll()
+    fun removeAll() = preferenceLocalDataSource.removeAll()
 }

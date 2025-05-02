@@ -16,6 +16,7 @@ import com.sumi.pockon.data.repository.GiftRepository
 import com.sumi.pockon.data.model.Gift
 import com.sumi.pockon.data.repository.AlarmRepository
 import com.sumi.pockon.util.getDdayInt
+import com.sumi.pockon.util.loadImageFromPath
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -39,9 +40,7 @@ class AlarmReceiver : BroadcastReceiver() {
         if (intent.action == "android.intent.action.BOOT_COMPLETED") {
             CoroutineScope(Dispatchers.IO).launch {
                 val isNotiEndDt = preferenceRepository.isNotiEndDt()
-                preferenceRepository.saveAlarmList(mutableSetOf())
-                val alarmList = mutableSetOf<String>()
-                giftRepository.getAllGift().take(1).collectLatest { allGift ->
+                giftRepository.getAllGift(0).take(1).collectLatest { allGift ->
                     allGift.forEach { gift ->
                         val tempGift = Gift(
                             id = gift.id,
@@ -56,70 +55,83 @@ class AlarmReceiver : BroadcastReceiver() {
                             isFavorite = gift.isFavorite
                         )
                         // 알림 등록
-                        alarmRepository.cancelAlarm(tempGift.id)
+                        alarmRepository.cancelAlarm(tempGift.id, preferenceRepository.getNotiEndDtDay())
                         if (isNotiEndDt) {
-                            alarmList.add(gift.id)
                             alarmRepository.setAlarm(tempGift, preferenceRepository.getNotiEndDtDay(), preferenceRepository.getNotiEndDtTime())
                         }
-                    }
-                    if (isNotiEndDt) {
-                        preferenceRepository.saveAlarmList(alarmList)
-                    } else {
-                        preferenceRepository.saveAlarmList(mutableSetOf())
                     }
                 }
             }
         } else { // 등록된 알람 수신
-            val gift = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-                intent.getSerializableExtra("gift", Gift::class.java)
-            } else {
-                intent.getSerializableExtra("gift") as Gift
-            }
+            val giftId = intent.getStringExtra("gift") ?: return
             val dDay = intent.getIntExtra("dDay", 0)
 
-            val notificationManager =
-                context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
-
-            val myIntent = Intent(context, MainActivity::class.java).apply {
-                flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
-            }
-            val pendingIntent: PendingIntent =
-                PendingIntent.getActivity(context, 0, myIntent, PendingIntent.FLAG_IMMUTABLE)
-
-            val notificationBuilder = NotificationCompat.Builder(context, CHANNEL_ID)
-                .setSmallIcon(R.drawable.ic_noti_gift)
-                .setContentTitle("${gift?.brand} ${gift?.name}")
-                .setPriority(NotificationCompat.PRIORITY_HIGH)
-                .setCategory(NotificationCompat.CATEGORY_RECOMMENDATION)
-                .setContentIntent(pendingIntent)
-                .setAutoCancel(true)
-                .setGroup(GROUP_KEY) // 그룹 키 지정
-            if (dDay == 0) {
-                notificationBuilder.setContentText(context.getString(R.string.msg_noti_end_dt_today))
-            } else {
-                notificationBuilder.setContentText(
-                    context.getString(
-                        R.string.msg_noti_end_dt,
-                        dDay
+            CoroutineScope(Dispatchers.IO).launch {
+                giftRepository.getGift(giftId).take(1).collectLatest { giftEntity ->
+                    val gift = Gift(
+                        id = giftEntity.id,
+                        uid = giftEntity.uid,
+                        photo = loadImageFromPath(giftEntity.photoPath),
+                        name = giftEntity.name,
+                        brand = giftEntity.brand,
+                        endDt = giftEntity.endDt,
+                        addDt = giftEntity.addDt,
+                        memo = giftEntity.memo,
+                        usedDt = giftEntity.usedDt,
+                        cash = giftEntity.cash,
+                        isFavorite = giftEntity.isFavorite
                     )
-                )
+
+                    val notificationManager =
+                        context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+
+                    val myIntent = Intent(context, MainActivity::class.java).apply {
+                        flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+                    }
+                    val pendingIntent: PendingIntent =
+                        PendingIntent.getActivity(
+                            context,
+                            0,
+                            myIntent,
+                            PendingIntent.FLAG_IMMUTABLE
+                        )
+
+                    val notificationBuilder = NotificationCompat.Builder(context, CHANNEL_ID)
+                        .setSmallIcon(R.drawable.ic_noti_gift)
+                        .setContentTitle("${gift.brand} ${gift.name}")
+                        .setPriority(NotificationCompat.PRIORITY_HIGH)
+                        .setCategory(NotificationCompat.CATEGORY_RECOMMENDATION)
+                        .setContentIntent(pendingIntent)
+                        .setAutoCancel(true)
+                        .setGroup(GROUP_KEY) // 그룹 키 지정
+                    if (dDay == 0) {
+                        notificationBuilder.setContentText(context.getString(R.string.msg_noti_end_dt_today))
+                    } else {
+                        notificationBuilder.setContentText(
+                            context.getString(
+                                R.string.msg_noti_end_dt,
+                                dDay
+                            )
+                        )
+                    }
+
+                    notificationManager.notify(
+                        "${gift.id}${getDdayInt(gift.endDt)}".hashCode(),
+                        notificationBuilder.build()
+                    )
+
+                    // 그룹 요약 알림
+                    val summaryNotification = NotificationCompat.Builder(context, CHANNEL_ID)
+                        .setSmallIcon(R.drawable.ic_noti_gift)
+                        .setStyle(NotificationCompat.InboxStyle())
+                        .setGroup(GROUP_KEY)
+                        .setGroupSummary(true)
+                        .setAutoCancel(true)
+                        .build()
+
+                    notificationManager.notify(gift.id.hashCode(), summaryNotification)
+                }
             }
-
-            notificationManager.notify(
-                "${gift?.id}${getDdayInt(gift?.endDt ?: "0")}".hashCode(),
-                notificationBuilder.build()
-            )
-
-            // 그룹 요약 알림
-            val summaryNotification = NotificationCompat.Builder(context, CHANNEL_ID)
-                .setSmallIcon(R.drawable.ic_noti_gift)
-                .setStyle(NotificationCompat.InboxStyle())
-                .setGroup(GROUP_KEY)
-                .setGroupSummary(true)
-                .setAutoCancel(true)
-                .build()
-
-            notificationManager.notify(gift?.id.hashCode(), summaryNotification)
         }
     }
 }

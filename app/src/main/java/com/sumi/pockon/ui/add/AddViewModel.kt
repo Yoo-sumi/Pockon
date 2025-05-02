@@ -110,13 +110,6 @@ class AddViewModel @Inject constructor(
                     viewModelScope.launch(Dispatchers.IO) {
                         giftRepository.insertGift(gift.copy(id = id))
                     }
-                    val alarmList = preferenceRepository.getAlarmList()
-                    // 알림 등록
-                    if (isNotiEndDt && alarmList?.contains(gift.id) == false) {
-                        alarmList.add(gift.id)
-                        preferenceRepository.saveAlarmList(alarmList)
-                        alarmRepository.setAlarm(gift, preferenceRepository.getNotiEndDtDay(), preferenceRepository.getNotiEndDtTime())
-                    }
                 }
                 _isShowIndicator.value = false
                 onAddComplete(id != null)

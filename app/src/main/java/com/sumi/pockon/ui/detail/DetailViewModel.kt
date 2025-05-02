@@ -211,16 +211,7 @@ class DetailViewModel @Inject constructor(
                 viewModelScope.launch(Dispatchers.IO) {
                     giftRepository.insertGift(updateGift)
                 }
-                // 날짜 수정 했을때만 알람 수정
-                if (_gift.value.endDt != _endDate.value) {
-                    alarmRepository.cancelAlarm(updateGift.id)
-                    // 알림 등록
-                    if (isNotiEndDt) {
-                        alarmRepository.setAlarm(updateGift, preferenceRepository.getNotiEndDtDay(), preferenceRepository.getNotiEndDtTime())
-                        val alarmList = preferenceRepository.getAlarmList()
-                        if (alarmList?.contains(updateGift.id) == false) alarmList.add(updateGift.id)
-                    }
-                }
+                alarmRepository.cancelAlarm(updateGift.id, preferenceRepository.getNotiEndDtDay())
                 _gift.value = updateGift
                 _isEdit.value = false
                 onComplete(true)

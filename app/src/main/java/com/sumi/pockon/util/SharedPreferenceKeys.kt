@@ -1,6 +1,6 @@
 package com.sumi.pockon.util
 
-object SharedPrefKeys {
+object SharedPreferenceKeys {
     const val UID = "uid"
     const val PIN_NUM = "pin_num"
     const val AUTH_PIN = "auth_pin"
@@ -10,5 +10,4 @@ object SharedPrefKeys {
     const val NOTI_END_DT_DAY = "noti_end_dt_day"
     const val NOTI_END_DT_HOUR = "noti_end_dt_hour"
     const val NOTI_END_DT_MINUTE = "noti_end_dt_minute"
-    const val ALARM_LIST = "alarm_list"
 }

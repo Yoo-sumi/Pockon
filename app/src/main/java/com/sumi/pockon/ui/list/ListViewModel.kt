@@ -217,10 +217,7 @@ class ListViewModel @Inject constructor(
                 viewModelScope.launch(Dispatchers.IO) {
                     giftRepository.insertGift(updateGift)
                 }
-                alarmRepository.cancelAlarm(gift.id)
-                val alarmList = preferenceRepository.getAlarmList()
-                alarmList?.remove(gift.id)
-                preferenceRepository.saveAlarmList(alarmList)
+                alarmRepository.cancelAlarm(gift.id, preferenceRepository.getNotiEndDtDay())
                 onComplete(true)
             } else { // 수정 실패
                 onComplete(false)
@@ -240,6 +237,7 @@ class ListViewModel @Inject constructor(
         if (removeGift?.id?.isEmpty() == true) return
         val uid = removeGift!!.uid
         val id = removeGift!!.id
+        val gift = removeGift!!.copy()
         removeGift = null
         giftRepository.removeGift(isGuestMode, uid, id) { result ->
             if (result) {
@@ -247,10 +245,7 @@ class ListViewModel @Inject constructor(
                 viewModelScope.launch(Dispatchers.IO) {
                     giftRepository.deleteGift(id)
                 }
-                alarmRepository.cancelAlarm(id)
-                val alarmList = preferenceRepository.getAlarmList()
-                alarmList?.remove(id)
-                preferenceRepository.saveAlarmList(alarmList)
+                alarmRepository.cancelAlarm(gift.id, preferenceRepository.getNotiEndDtDay())
                 onComplete(true)
             } else { // 삭제 실패
                 onComplete(false)
@@ -308,13 +303,10 @@ class ListViewModel @Inject constructor(
                         onComplete(false)
                     } else {
                         val idList = ArrayList<String>()
-                        val alarmList = preferenceRepository.getAlarmList()
                         _checkedGiftList.value.forEach { id ->
                             idList.add(id)
-                            alarmRepository.cancelAlarm(id)
-                            alarmList?.remove(id)
+                            alarmRepository.cancelAlarm(id, preferenceRepository.getNotiEndDtDay())
                         }
-                        preferenceRepository.saveAlarmList(alarmList)
                         // 로컬 삭제
                         viewModelScope.launch(Dispatchers.IO) {
                             giftRepository.deleteGifts(idList)

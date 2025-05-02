@@ -18,7 +18,7 @@ class AlarmDataSource @Inject constructor(
 
     fun schedule(gift: Gift, dDay: Int, time: Pair<Int, Int>) {
         val intent = Intent(context, AlarmReceiver::class.java).apply {
-            putExtra("gift", gift.copy(photo = null))
+            putExtra("gift", gift.id)
             putExtra("dDay", dDay)
         }
         val year = gift.endDt.substring(0, 4)
@@ -50,12 +50,17 @@ class AlarmDataSource @Inject constructor(
         )
     }
 
-    fun cancel(id: String) {
+    fun cancel(id: String, dDay: Int) {
+        val intent = Intent(context, AlarmReceiver::class.java).apply {
+            putExtra("gift", id)
+            putExtra("dDay", dDay)
+        }
+
         alarmManager.cancel(
             PendingIntent.getBroadcast(
                 context,
                 id.hashCode(),
-                Intent(context, AlarmReceiver::class.java),
+                intent,
                 PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
             )
         )

@@ -399,7 +399,7 @@ fun CustomDatePickerDialog(
     // 문자열을 Date 객체로 변환
     val dateFormat = SimpleDateFormat("yyyyMMdd", Locale.getDefault())
     dateFormat.timeZone = TimeZone.getTimeZone("UTC") // UTC로 시간대 설정
-    val dateObj = if (dateString.isNotEmpty()) dateFormat.parse(dateString) else null
+    val dateObj = if (dateString.isNotEmpty() && dateString.length == 8) dateFormat.parse(dateString) else null
 
     val calendar = Calendar.getInstance()
     if (dateObj != null) {

@@ -47,7 +47,6 @@ class SettingsViewModel @Inject constructor(
 
         viewModelScope.launch(Dispatchers.IO) {
             giftRepository.getAllGift().take(1).collectLatest { allGift ->
-                val alarmList = mutableSetOf<String>()
                 allGift.forEach { gift ->
                     val tempGift = Gift(
                         id = gift.id,
@@ -62,17 +61,11 @@ class SettingsViewModel @Inject constructor(
                         cash = gift.cash,
                         isFavorite = gift.isFavorite
                     )
-                    alarmRepository.cancelAlarm(tempGift.id)
+                    alarmRepository.cancelAlarm(tempGift.id, preferenceRepository.getNotiEndDtDay())
                     if (isNotiEndDt) {
                         // 알림 등록
-                        alarmList.add(gift.id)
                         alarmRepository.setAlarm(tempGift, preferenceRepository.getNotiEndDtDay(), preferenceRepository.getNotiEndDtTime())
                     }
-                }
-                if (isNotiEndDt) {
-                    preferenceRepository.saveAlarmList(alarmList)
-                } else {
-                    preferenceRepository.saveAlarmList(mutableSetOf())
                 }
             }
         }
@@ -108,9 +101,15 @@ class SettingsViewModel @Inject constructor(
                             giftRepository.deleteAllGift()
                             brandSearchRepository.deleteAllBrands()
                         }
-                        if (!isGuestMode) loginRepository.logout()
-                        preferenceRepository.removeAll()
-                        onSuccess(true)
+                        if (!isGuestMode) {
+                            loginRepository.removeAccount {
+                                if (it) {
+                                    loginRepository.logout()
+                                    preferenceRepository.removeAll()
+                                }
+                                onSuccess(it)
+                            }
+                        }
                     } else {
                         onSuccess(false)
                     }
