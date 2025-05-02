@@ -22,7 +22,7 @@ class PreferenceLocalDataSource @Inject constructor(
 
     fun getNotiEndDtDay() = prefs.getInt(SharedPreferenceKeys.NOTI_END_DT_DAY, 0)
 
-    fun getNotiEndDtHour() = prefs.getInt(SharedPreferenceKeys.NOTI_END_DT_HOUR, 0)
+    fun getNotiEndDtHour() = prefs.getInt(SharedPreferenceKeys.NOTI_END_DT_HOUR, 10)
 
     fun getNotiEndDtMinute() = prefs.getInt(SharedPreferenceKeys.NOTI_END_DT_MINUTE, 0)
 

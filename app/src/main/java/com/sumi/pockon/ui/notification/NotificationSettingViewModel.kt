@@ -49,7 +49,7 @@ class NotificationSettingViewModel @Inject constructor(
         selectedMinute = time.second
 
         viewModelScope.launch(Dispatchers.IO) {
-            giftRepository.getAllGift().collectLatest { allGift ->
+            giftRepository.getAllGift(1).collectLatest { allGift ->
                 val tempList = ArrayList<Gift>()
                 allGift.forEach { gift ->
                     val tempGift = Gift(
@@ -98,7 +98,7 @@ class NotificationSettingViewModel @Inject constructor(
         giftList.forEach { gift ->
             // 알림 등록
             alarmRepository.cancelAlarm(gift.id, notiEndDtDay)
-            alarmRepository.setAlarm(gift, preferenceRepository.getNotiEndDtDay(), preferenceRepository.getNotiEndDtTime())
+            if (gift.usedDt.isEmpty()) alarmRepository.setAlarm(gift, preferenceRepository.getNotiEndDtDay(), preferenceRepository.getNotiEndDtTime())
         }
     }
 }

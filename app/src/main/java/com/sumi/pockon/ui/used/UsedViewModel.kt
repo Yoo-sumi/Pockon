@@ -83,21 +83,21 @@ class UsedViewModel @Inject constructor(
     fun deleteSelection(onComplete: (Boolean) -> Unit) {
         _isShowIndicator.value = true
         val resultList = ArrayList<Boolean>()
-        var isFail = false
         _checkedGiftList.value.forEach { giftId ->
             giftRepository.removeGift(isGuestMode, uid, giftId) { result ->
                 resultList.add(result)
-                if (!result) isFail = true
+                if (result) {
+                    // 로컬 삭제
+                    viewModelScope.launch(Dispatchers.IO) {
+                        giftRepository.deleteGift(giftId)
+                    }
+                }
                 // end
                 if (resultList.size == _checkedGiftList.value.size) {
-                    if (isFail) {
-                        onComplete(false)
-                    } else {
-                        // 로컬 삭제
-                        viewModelScope.launch(Dispatchers.IO) {
-                            giftRepository.deleteGifts(_checkedGiftList.value)
-                        }
+                    if (resultList.filter { it }.size == _checkedGiftList.value.size) {
                         onComplete(true)
+                    } else {
+                        onComplete(false)
                     }
                     _isShowIndicator.value = false
                 }

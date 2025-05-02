@@ -175,6 +175,8 @@ class HomeViewModel @Inject constructor(
                     }
                 }
             }
+        } else {
+            _nearGiftList.value = listOf()
         }
     }
 

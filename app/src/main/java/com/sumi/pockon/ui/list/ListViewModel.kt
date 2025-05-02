@@ -292,14 +292,12 @@ class ListViewModel @Inject constructor(
         }
 
         val resultList = ArrayList<Boolean>()
-        var isFail = false
         _checkedGiftList.value.forEach { giftId ->
             giftRepository.removeGift(isGuestMode, uid, giftId) { result ->
                 resultList.add(result)
-                if (!result) isFail = true
                 // end
                 if (resultList.size == _checkedGiftList.value.size) {
-                    if (isFail) {
+                    if (resultList.filter { it }.size != _checkedGiftList.value.size) {
                         onComplete(false)
                     } else {
                         val idList = ArrayList<String>()

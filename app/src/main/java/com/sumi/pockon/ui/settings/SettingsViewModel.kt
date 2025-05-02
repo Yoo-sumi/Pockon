@@ -46,7 +46,7 @@ class SettingsViewModel @Inject constructor(
         isNotiEndDt = flag
 
         viewModelScope.launch(Dispatchers.IO) {
-            giftRepository.getAllGift().take(1).collectLatest { allGift ->
+            giftRepository.getAllGift(1).take(1).collectLatest { allGift ->
                 allGift.forEach { gift ->
                     val tempGift = Gift(
                         id = gift.id,
@@ -62,7 +62,7 @@ class SettingsViewModel @Inject constructor(
                         isFavorite = gift.isFavorite
                     )
                     alarmRepository.cancelAlarm(tempGift.id, preferenceRepository.getNotiEndDtDay())
-                    if (isNotiEndDt) {
+                    if (isNotiEndDt && tempGift.usedDt.isEmpty()) {
                         // 알림 등록
                         alarmRepository.setAlarm(tempGift, preferenceRepository.getNotiEndDtDay(), preferenceRepository.getNotiEndDtTime())
                     }
@@ -79,8 +79,13 @@ class SettingsViewModel @Inject constructor(
         if (!isGuestMode) loginRepository.logout()
         preferenceRepository.removeAll()
         viewModelScope.launch(Dispatchers.IO) {
-            giftRepository.deleteAllGift()
-            brandSearchRepository.deleteAllBrands()
+            giftRepository.getAllGift(1).take(1).collectLatest { gifts ->
+                gifts.forEach { gift ->
+                    alarmRepository.cancelAlarm(gift.id, preferenceRepository.getNotiEndDtDay())
+                }
+                giftRepository.deleteAllGift()
+                brandSearchRepository.deleteAllBrands()
+            }
         }
     }
 
@@ -92,12 +97,15 @@ class SettingsViewModel @Inject constructor(
         }
 
         viewModelScope.launch(Dispatchers.IO) {
-            giftRepository.getAllGift().take(1).collectLatest { gifts ->
+            giftRepository.getAllGift(1).take(1).collectLatest { gifts ->
                 // remote 데이터 삭제
                 giftRepository.removeGifts(isGuestMode, uid, gifts.map { it.id }) { result ->
                     if (result) {
                         // local 데이터 삭제
                         viewModelScope.launch(Dispatchers.IO) {
+                            gifts.forEach { gift ->
+                                alarmRepository.cancelAlarm(gift.id, preferenceRepository.getNotiEndDtDay())
+                            }
                             giftRepository.deleteAllGift()
                             brandSearchRepository.deleteAllBrands()
                         }
@@ -109,6 +117,8 @@ class SettingsViewModel @Inject constructor(
                                 }
                                 onSuccess(it)
                             }
+                        } else {
+                            onSuccess(true)
                         }
                     } else {
                         onSuccess(false)

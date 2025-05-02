@@ -40,7 +40,7 @@ class AlarmReceiver : BroadcastReceiver() {
         if (intent.action == "android.intent.action.BOOT_COMPLETED") {
             CoroutineScope(Dispatchers.IO).launch {
                 val isNotiEndDt = preferenceRepository.isNotiEndDt()
-                giftRepository.getAllGift(0).take(1).collectLatest { allGift ->
+                giftRepository.getAllGift().take(1).collectLatest { allGift ->
                     allGift.forEach { gift ->
                         val tempGift = Gift(
                             id = gift.id,
@@ -68,6 +68,7 @@ class AlarmReceiver : BroadcastReceiver() {
 
             CoroutineScope(Dispatchers.IO).launch {
                 giftRepository.getGift(giftId).take(1).collectLatest { giftEntity ->
+                    if (giftEntity.id.isEmpty()) return@collectLatest
                     val gift = Gift(
                         id = giftEntity.id,
                         uid = giftEntity.uid,
@@ -98,7 +99,7 @@ class AlarmReceiver : BroadcastReceiver() {
 
                     val notificationBuilder = NotificationCompat.Builder(context, CHANNEL_ID)
                         .setSmallIcon(R.drawable.ic_noti_gift)
-                        .setContentTitle("${gift.brand} ${gift.name}")
+                        .setContentTitle("${gift.brand}\n${gift.name}")
                         .setPriority(NotificationCompat.PRIORITY_HIGH)
                         .setCategory(NotificationCompat.CATEGORY_RECOMMENDATION)
                         .setContentIntent(pendingIntent)
