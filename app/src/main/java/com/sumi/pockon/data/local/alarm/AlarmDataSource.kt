@@ -1,13 +1,18 @@
-package com.sumi.pockon.alarm
+package com.sumi.pockon.data.local.alarm
 
 import android.app.AlarmManager
 import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
+import com.sumi.pockon.receiver.AlarmReceiver
 import com.sumi.pockon.data.model.Gift
+import dagger.hilt.android.qualifiers.ApplicationContext
 import java.util.Calendar
+import javax.inject.Inject
 
-class MyAlarmManager(private val context: Context) {
+class AlarmDataSource @Inject constructor(
+    @ApplicationContext private val context: Context
+) {
 
     private val alarmManager = context.getSystemService(AlarmManager::class.java)
 

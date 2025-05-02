@@ -12,7 +12,7 @@ import com.sumi.pockon.data.repository.LoginRepository
 import com.google.android.libraries.identity.googleid.GoogleIdTokenCredential
 import com.google.android.libraries.identity.googleid.GoogleIdTokenParsingException
 import com.google.firebase.auth.GoogleAuthProvider
-import com.sumi.pockon.data.local.PreferenceRepository
+import com.sumi.pockon.data.repository.PreferenceRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
 import java.util.UUID

@@ -1,4 +1,6 @@
-package com.sumi.pockon.data.local
+package com.sumi.pockon.data.repository
+
+import com.sumi.pockon.data.local.preference.PreferenceLocalDataSource
 
 class PreferenceRepository(private val localDataSource: PreferenceLocalDataSource) {
 

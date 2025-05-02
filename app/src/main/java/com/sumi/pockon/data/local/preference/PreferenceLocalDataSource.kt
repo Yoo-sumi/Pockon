@@ -1,4 +1,4 @@
-package com.sumi.pockon.data.local
+package com.sumi.pockon.data.local.preference
 
 import android.content.SharedPreferences
 import com.sumi.pockon.util.SharedPrefKeys

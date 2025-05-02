@@ -1,4 +1,4 @@
-package com.sumi.pockon.alarm
+package com.sumi.pockon.receiver
 
 import android.app.NotificationManager
 import android.app.PendingIntent
@@ -11,9 +11,10 @@ import com.sumi.pockon.ui.main.MainActivity
 import com.sumi.pockon.MainApplication.Companion.CHANNEL_ID
 import com.sumi.pockon.MainApplication.Companion.GROUP_KEY
 import com.sumi.pockon.R
-import com.sumi.pockon.data.local.PreferenceRepository
+import com.sumi.pockon.data.repository.PreferenceRepository
 import com.sumi.pockon.data.repository.GiftRepository
 import com.sumi.pockon.data.model.Gift
+import com.sumi.pockon.data.repository.AlarmRepository
 import com.sumi.pockon.util.getDdayInt
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.CoroutineScope
@@ -31,7 +32,7 @@ class AlarmReceiver : BroadcastReceiver() {
     @Inject
     lateinit var preferenceRepository: PreferenceRepository
     @Inject
-    lateinit var myAlarmManager: MyAlarmManager
+    lateinit var alarmRepository: AlarmRepository
 
     override fun onReceive(context: Context, intent: Intent) {
         // 재부팅 후 알람 매니저 재등록
@@ -55,10 +56,10 @@ class AlarmReceiver : BroadcastReceiver() {
                             isFavorite = gift.isFavorite
                         )
                         // 알림 등록
-                        myAlarmManager.cancel(tempGift.id)
+                        alarmRepository.cancelAlarm(tempGift.id)
                         if (isNotiEndDt) {
                             alarmList.add(gift.id)
-                            myAlarmManager.schedule(tempGift, preferenceRepository.getNotiEndDtDay(), preferenceRepository.getNotiEndDtTime())
+                            alarmRepository.setAlarm(tempGift, preferenceRepository.getNotiEndDtDay(), preferenceRepository.getNotiEndDtTime())
                         }
                     }
                     if (isNotiEndDt) {

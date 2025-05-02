@@ -11,7 +11,7 @@ import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.res.colorResource
 import androidx.navigation.Navigation
 import com.sumi.pockon.R
-import com.sumi.pockon.data.local.PreferenceRepository
+import com.sumi.pockon.data.repository.PreferenceRepository
 import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
 
@@ -46,7 +46,6 @@ class MainFragment : Fragment() {
                 colorScheme = lightColorScheme  // Light Mode Color Scheme
             ) {
                 BottomNavigationBar(
-                    isGuestMode,
                     movePinScreen = {
                         val navController = Navigation.findNavController(requireView())
                         navController.popBackStack()
@@ -56,12 +55,6 @@ class MainFragment : Fragment() {
                         val navController = Navigation.findNavController(requireView())
                         navController.popBackStack()
                         navController.navigate(R.id.loginFragment)
-                    },
-                    onFinish = {
-                        activity?.supportFragmentManager
-                            ?.beginTransaction()
-                            ?.remove(this@MainFragment)
-                            ?.commit()
                     }
                 )
             }

@@ -4,12 +4,12 @@ import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.sumi.pockon.alarm.MyAlarmManager
-import com.sumi.pockon.data.local.PreferenceRepository
+import com.sumi.pockon.data.repository.PreferenceRepository
 import com.sumi.pockon.data.repository.BrandSearchRepository
 import com.sumi.pockon.data.repository.GiftRepository
 import com.sumi.pockon.data.repository.LoginRepository
 import com.sumi.pockon.data.model.Gift
+import com.sumi.pockon.data.repository.AlarmRepository
 import com.sumi.pockon.util.NetworkMonitor
 import com.sumi.pockon.util.loadImageFromPath
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -25,7 +25,7 @@ class SettingsViewModel @Inject constructor(
     private val giftRepository: GiftRepository,
     private val brandSearchRepository: BrandSearchRepository,
     private val preferenceRepository: PreferenceRepository,
-    private val myAlarmManager: MyAlarmManager,
+    private val alarmRepository: AlarmRepository,
     private val networkMonitor: NetworkMonitor
 ) : ViewModel() {
 
@@ -62,11 +62,11 @@ class SettingsViewModel @Inject constructor(
                         cash = gift.cash,
                         isFavorite = gift.isFavorite
                     )
-                    myAlarmManager.cancel(tempGift.id)
+                    alarmRepository.cancelAlarm(tempGift.id)
                     if (isNotiEndDt) {
                         // 알림 등록
                         alarmList.add(gift.id)
-                        myAlarmManager.schedule(tempGift, preferenceRepository.getNotiEndDtDay(), preferenceRepository.getNotiEndDtTime())
+                        alarmRepository.setAlarm(tempGift, preferenceRepository.getNotiEndDtDay(), preferenceRepository.getNotiEndDtTime())
                     }
                 }
                 if (isNotiEndDt) {

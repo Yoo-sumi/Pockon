@@ -5,10 +5,10 @@ import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.sumi.pockon.alarm.MyAlarmManager
-import com.sumi.pockon.data.local.PreferenceRepository
+import com.sumi.pockon.data.repository.PreferenceRepository
 import com.sumi.pockon.data.repository.GiftRepository
 import com.sumi.pockon.data.model.Gift
+import com.sumi.pockon.data.repository.AlarmRepository
 import com.sumi.pockon.util.convertTo12HourFormat
 import com.sumi.pockon.util.loadImageFromPath
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -21,7 +21,7 @@ import javax.inject.Inject
 class NotificationSettingViewModel @Inject constructor(
     private val giftRepository: GiftRepository,
     private val preferenceRepository: PreferenceRepository,
-    private val myAlarmManager: MyAlarmManager
+    private val alarmRepository: AlarmRepository
 ) : ViewModel() {
 
     private var giftList = listOf<Gift>()
@@ -99,8 +99,8 @@ class NotificationSettingViewModel @Inject constructor(
         giftList.forEach { gift ->
             // 알림 등록
             alarmList.add(gift.id)
-            myAlarmManager.cancel(gift.id)
-            myAlarmManager.schedule(gift, preferenceRepository.getNotiEndDtDay(), preferenceRepository.getNotiEndDtTime())
+            alarmRepository.cancelAlarm(gift.id)
+            alarmRepository.setAlarm(gift, preferenceRepository.getNotiEndDtDay(), preferenceRepository.getNotiEndDtTime())
         }
         preferenceRepository.saveAlarmList(alarmList)
     }

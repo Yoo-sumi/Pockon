@@ -6,9 +6,9 @@ import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.sumi.pockon.alarm.MyAlarmManager
-import com.sumi.pockon.data.local.PreferenceRepository
+import com.sumi.pockon.data.repository.PreferenceRepository
 import com.sumi.pockon.data.model.Gift
+import com.sumi.pockon.data.repository.AlarmRepository
 import com.sumi.pockon.data.repository.GiftRepository
 import com.sumi.pockon.util.NetworkMonitor
 import com.sumi.pockon.util.loadImageFromPath
@@ -26,7 +26,7 @@ import kotlin.collections.ArrayList
 class ListViewModel @Inject constructor(
     private val giftRepository: GiftRepository,
     private val preferenceRepository: PreferenceRepository,
-    private val myAlarmManager: MyAlarmManager,
+    private val alarmRepository: AlarmRepository,
     private val networkMonitor: NetworkMonitor
 ) : ViewModel() {
 
@@ -217,7 +217,7 @@ class ListViewModel @Inject constructor(
                 viewModelScope.launch(Dispatchers.IO) {
                     giftRepository.insertGift(updateGift)
                 }
-                myAlarmManager.cancel(gift.id)
+                alarmRepository.cancelAlarm(gift.id)
                 val alarmList = preferenceRepository.getAlarmList()
                 alarmList?.remove(gift.id)
                 preferenceRepository.saveAlarmList(alarmList)
@@ -247,7 +247,7 @@ class ListViewModel @Inject constructor(
                 viewModelScope.launch(Dispatchers.IO) {
                     giftRepository.deleteGift(id)
                 }
-                myAlarmManager.cancel(id)
+                alarmRepository.cancelAlarm(id)
                 val alarmList = preferenceRepository.getAlarmList()
                 alarmList?.remove(id)
                 preferenceRepository.saveAlarmList(alarmList)
@@ -311,7 +311,7 @@ class ListViewModel @Inject constructor(
                         val alarmList = preferenceRepository.getAlarmList()
                         _checkedGiftList.value.forEach { id ->
                             idList.add(id)
-                            myAlarmManager.cancel(id)
+                            alarmRepository.cancelAlarm(id)
                             alarmList?.remove(id)
                         }
                         preferenceRepository.saveAlarmList(alarmList)

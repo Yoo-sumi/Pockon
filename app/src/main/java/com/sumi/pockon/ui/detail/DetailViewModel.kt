@@ -6,10 +6,10 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.sumi.pockon.R
-import com.sumi.pockon.alarm.MyAlarmManager
-import com.sumi.pockon.data.local.PreferenceRepository
+import com.sumi.pockon.data.repository.PreferenceRepository
 import com.sumi.pockon.data.repository.GiftRepository
 import com.sumi.pockon.data.model.Gift
+import com.sumi.pockon.data.repository.AlarmRepository
 import com.sumi.pockon.util.NetworkMonitor
 import com.sumi.pockon.util.loadImageFromPath
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -24,7 +24,7 @@ import javax.inject.Inject
 @HiltViewModel
 class DetailViewModel @Inject constructor(
     private val giftRepository: GiftRepository,
-    private val myAlarmManager: MyAlarmManager,
+    private val alarmRepository: AlarmRepository,
     private val preferenceRepository: PreferenceRepository,
     private val networkMonitor: NetworkMonitor
 ) : ViewModel() {
@@ -213,10 +213,10 @@ class DetailViewModel @Inject constructor(
                 }
                 // 날짜 수정 했을때만 알람 수정
                 if (_gift.value.endDt != _endDate.value) {
-                    myAlarmManager.cancel(updateGift.id)
+                    alarmRepository.cancelAlarm(updateGift.id)
                     // 알림 등록
                     if (isNotiEndDt) {
-                        myAlarmManager.schedule(updateGift, preferenceRepository.getNotiEndDtDay(), preferenceRepository.getNotiEndDtTime())
+                        alarmRepository.setAlarm(updateGift, preferenceRepository.getNotiEndDtDay(), preferenceRepository.getNotiEndDtTime())
                         val alarmList = preferenceRepository.getAlarmList()
                         if (alarmList?.contains(updateGift.id) == false) alarmList.add(updateGift.id)
                     }

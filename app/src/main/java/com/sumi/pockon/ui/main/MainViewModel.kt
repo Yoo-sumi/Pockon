@@ -1,7 +1,7 @@
 package com.sumi.pockon.ui.main
 
 import androidx.lifecycle.ViewModel
-import com.sumi.pockon.data.local.PreferenceRepository
+import com.sumi.pockon.data.repository.PreferenceRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
 

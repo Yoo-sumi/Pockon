@@ -9,7 +9,6 @@ import com.sumi.pockon.data.local.gift.GiftDatabase
 import com.sumi.pockon.data.repository.GiftRepository
 import com.sumi.pockon.data.repository.LoginRepository
 import com.sumi.pockon.R
-import com.sumi.pockon.alarm.MyAlarmManager
 import com.sumi.pockon.data.repository.BrandSearchRepository
 import com.sumi.pockon.data.remote.brand.BrandSearchRemoteDataSource
 import com.sumi.pockon.data.local.gift.GiftLocalDataSource
@@ -25,8 +24,10 @@ import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.ktx.Firebase
 import com.google.firebase.storage.FirebaseStorage
 import com.google.firebase.storage.StorageReference
-import com.sumi.pockon.data.local.PreferenceLocalDataSource
-import com.sumi.pockon.data.local.PreferenceRepository
+import com.sumi.pockon.data.local.alarm.AlarmDataSource
+import com.sumi.pockon.data.local.preference.PreferenceLocalDataSource
+import com.sumi.pockon.data.repository.PreferenceRepository
+import com.sumi.pockon.data.repository.AlarmRepository
 import com.sumi.pockon.util.NetworkMonitor
 import dagger.Module
 import dagger.Provides
@@ -144,8 +145,11 @@ class DiModule {
 
     @Singleton
     @Provides
-    fun provideMyAlarmManager(@ApplicationContext context: Context): MyAlarmManager =
-        MyAlarmManager(context)
+    fun provideAlarmRepository(alarmDataSource: AlarmDataSource): AlarmRepository = AlarmRepository(alarmDataSource)
+
+    @Singleton
+    @Provides
+    fun provideAlarmDataSource(@ApplicationContext context: Context): AlarmDataSource = AlarmDataSource(context)
 
     @Singleton
     @Provides

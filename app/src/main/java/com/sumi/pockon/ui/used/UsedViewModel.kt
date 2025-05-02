@@ -4,7 +4,7 @@ import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.sumi.pockon.data.local.PreferenceRepository
+import com.sumi.pockon.data.repository.PreferenceRepository
 import com.sumi.pockon.data.repository.GiftRepository
 import com.sumi.pockon.data.model.Gift
 import com.sumi.pockon.util.loadImageFromPath
@@ -24,8 +24,6 @@ class UsedViewModel @Inject constructor(
 
     private var uid = preferenceRepository.getUid()
     private var isGuestMode = preferenceRepository.isGuestMode()
-
-    private var removeGift: Gift? = null
 
     private val _giftList = mutableStateOf<List<Gift>>(listOf())
     val giftList: State<List<Gift>> = _giftList

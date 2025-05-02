@@ -6,10 +6,10 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.sumi.pockon.R
-import com.sumi.pockon.alarm.MyAlarmManager
-import com.sumi.pockon.data.local.PreferenceRepository
+import com.sumi.pockon.data.repository.PreferenceRepository
 import com.sumi.pockon.data.repository.GiftRepository
 import com.sumi.pockon.data.model.Gift
+import com.sumi.pockon.data.repository.AlarmRepository
 import com.sumi.pockon.util.NetworkMonitor
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
@@ -23,7 +23,7 @@ import javax.inject.Inject
 class AddViewModel @Inject constructor(
     private val giftRepository: GiftRepository,
     private val preferenceRepository: PreferenceRepository,
-    private val myAlarmManager: MyAlarmManager,
+    private val alarmRepository: AlarmRepository,
     private val networkMonitor: NetworkMonitor
 ) : ViewModel() {
 
@@ -115,7 +115,7 @@ class AddViewModel @Inject constructor(
                     if (isNotiEndDt && alarmList?.contains(gift.id) == false) {
                         alarmList.add(gift.id)
                         preferenceRepository.saveAlarmList(alarmList)
-                        myAlarmManager.schedule(gift, preferenceRepository.getNotiEndDtDay(), preferenceRepository.getNotiEndDtTime())
+                        alarmRepository.setAlarm(gift, preferenceRepository.getNotiEndDtDay(), preferenceRepository.getNotiEndDtTime())
                     }
                 }
                 _isShowIndicator.value = false
