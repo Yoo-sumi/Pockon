@@ -18,7 +18,7 @@
     <string name="txt_brand">브랜드</string>
     <string name="txt_cash">잔액</string>
     <string name="txt_cash_certificate">금액권</string>
-    <string name="txt_end_date">유효기간</string>
+    <string name="txt_end_date">만료일</string>
     <string name="txt_memo">메모</string>
     <string name="txt_won">₩</string>
     <string name="txt_no_gift">사용 가능한 기프티콘이 없어요.</string>
@@ -52,7 +52,7 @@
     <string name="msg_no_photo">사진을 추가해 주세요.</string>
     <string name="msg_no_name">이름을 입력해 주세요.</string>
     <string name="msg_no_brand">브랜드를 입력해 주세요.</string>
-    <string name="msg_no_end_date">유효기간을 입력해 주세요.</string>
+    <string name="msg_no_end_date">만료일을 입력해 주세요.</string>
     <string name="msg_no_cash">금액을 입력해 주세요.</string>
     <string name="msg_no_register">기프티콘 추가에 실패했어요.</string>
     <string name="msg_no_delete">기프티콘 삭제에 실패했어요.</string>
@@ -64,7 +64,6 @@
     <string name="msg_noti_end_dt">기프티콘 만료일 %d일 전이에요.</string>
     <string name="msg_login_fail">로그인에 실패했어요.</string>
     <string name="msg_pin_auth_fail">PIN 번호가 일치하지 않아요.</string>
-    <string name="msg_no_permission">필요한 권한이 꺼져 있어요.\n설정에서 모두 허용해 주세요!</string>
     <string name="msg_no_photo_permission">사진을 불러오려면 권한이 필요해요.\n설정에서 권한을 허용해 주세요!</string>
     <string name="msg_no_notification_permission">알림을 받으려면 권한이 필요해요.\n설정에서 알림 권한을 허용해 주세요!</string>
     <string name="msg_no_internet">인터넷이 연결되어 있지 않아요.\nWi-Fi나 모바일 데이터를 켜 주세요!</string>

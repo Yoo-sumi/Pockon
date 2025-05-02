@@ -273,8 +273,14 @@ fun InputDataTextField(
             if (index in 0..1 && it.length > 20) return@OutlinedTextField
             if (index == 4 && it.length > 300) return@OutlinedTextField
             if (((it.length > 9 || it == "00") && index == 2) || (it.length > 8 && index == 3)) return@OutlinedTextField
-            onValueChange(index, it)
+            if (index == 2 || index == 3) {
+                val text = it.filter { char -> char.isDigit() }
+                onValueChange(index, text)
+            } else {
+                onValueChange(index, it)
+            }
         },
+        maxLines = if (index == 4) 50 else 1,
         label = {
             Text(
                 text = stringResource(id = label),

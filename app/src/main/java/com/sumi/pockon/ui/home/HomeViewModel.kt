@@ -61,11 +61,11 @@ class HomeViewModel @Inject constructor(
             return
         } // 게스트 모드 또는 최초 로그인이 아니면 서버 안탐
 
-        giftRepository.getAllGift(uid) { giftList ->
-            if (giftList.isNotEmpty()) {
+        giftRepository.getAllGift(uid) { gifts ->
+            if (gifts.isNotEmpty()) {
                 // 로컬 저장(기프티콘)
                 viewModelScope.launch(Dispatchers.IO) {
-                    giftRepository.deleteAllAndInsertGifts(giftList)
+                    giftRepository.deleteAllAndInsertGifts(gifts)
                     if (isFirstLogin) preferenceRepository.saveIsFirstLogin(false)
                 }
             } else {
@@ -113,7 +113,7 @@ class HomeViewModel @Inject constructor(
             }
 
             // 즐겨찾기 기프티콘 목록
-            _favoriteGiftList.value = giftList.filter { it.isFavorite }
+            _favoriteGiftList.value = giftList.filter { it.isFavorite }.sortedBy { it.brand }
             getBrandInfoList() // 브랜드 검색
         } else {
             _favoriteGiftList.value = listOf()
@@ -185,7 +185,7 @@ class HomeViewModel @Inject constructor(
         this.latitude = latitude
 
         if (giftList.isNotEmpty()) {
-            _favoriteGiftList.value = giftList.filter { it.isFavorite }
+            _favoriteGiftList.value = giftList.filter { it.isFavorite }.sortedBy { it.brand }
             getBrandInfoList()
         } else {
             _favoriteGiftList.value = listOf()

@@ -1,6 +1,6 @@
 package com.sumi.pockon.ui.notification
 
-import android.util.Log
+import android.view.ContextThemeWrapper
 import android.widget.NumberPicker
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.BorderStroke
@@ -51,6 +51,7 @@ import androidx.compose.ui.viewinterop.AndroidView
 import androidx.compose.ui.window.Dialog
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.sumi.pockon.R
+import java.util.Locale
 
 @Composable
 fun NotificationSettingScreen(onBack: () -> Unit) {
@@ -157,6 +158,7 @@ fun NotificationSettingScreen(onBack: () -> Unit) {
                         notificationSettingViewModel.selectedTime(hour24, minute)
                     },
                     onConfirm = {
+                        notificationSettingViewModel.confirmTime()
                         notificationSettingViewModel.toggleIsShowTimePickerWheelDialog()
                     }
                 )
@@ -331,7 +333,9 @@ fun TimePickerWithAmPmView(
         // AM/PM Picker
         AndroidView(
             factory = { context ->
-                NumberPicker(context).apply {
+                // Context에 테마를 입혀서 넘김
+                val themedContext = ContextThemeWrapper(context, R.style.AppTheme_NumberPicker)
+                NumberPicker(themedContext).apply {
                     minValue = 0
                     maxValue = 1
                     displayedValues = arrayOf(txtAm, txtPm)
@@ -359,7 +363,8 @@ fun TimePickerWithAmPmView(
         // Hour Picker (1~12)
         AndroidView(
             factory = { context ->
-                NumberPicker(context).apply {
+                val themedContext = ContextThemeWrapper(context, R.style.AppTheme_NumberPicker)
+                NumberPicker(themedContext).apply {
                     minValue = 1
                     maxValue = 12
                     value = hour
@@ -379,17 +384,19 @@ fun TimePickerWithAmPmView(
                     picker.value = hour
                 }
             },
-            modifier = Modifier.width(100.dp)
+            modifier = Modifier
+                .width(100.dp)
         )
 
         // Minute Picker (0~59)
         AndroidView(
             factory = { context ->
-                NumberPicker(context).apply {
+                val themedContext = ContextThemeWrapper(context, R.style.AppTheme_NumberPicker)
+                NumberPicker(themedContext).apply {
                     minValue = 0
                     maxValue = 59
                     value = minute
-                    setFormatter { String.format("%02d", it) }
+                    setFormatter { String.format(Locale.KOREA, "%02d", it) }
                     setOnValueChangedListener { _, _, newVal ->
                         minute = newVal
                         val hour24 = if (isAm) {

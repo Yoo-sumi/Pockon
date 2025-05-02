@@ -43,10 +43,7 @@ class NotificationSettingViewModel @Inject constructor(
     val isShowTimePickerWheelDialog: State<Boolean> = _isShowTimePickerWheelDialog
 
     init {
-        val time = preferenceRepository.getNotiEndDtTime()
-        _seletedTime.value = convertTo12HourFormat(time.first, time.second)
-        selectedHour = time.first
-        selectedMinute = time.second
+        initTime()
 
         viewModelScope.launch(Dispatchers.IO) {
             giftRepository.getAllGift(1).collectLatest { allGift ->
@@ -73,6 +70,13 @@ class NotificationSettingViewModel @Inject constructor(
         }
     }
 
+    private fun initTime() {
+        val time = preferenceRepository.getNotiEndDtTime()
+        _seletedTime.value = convertTo12HourFormat(time.first, time.second)
+        selectedHour = time.first
+        selectedMinute = time.second
+    }
+
     fun getDayList() = dayList
 
     fun setSeletedDay(day: Int) {
@@ -82,19 +86,24 @@ class NotificationSettingViewModel @Inject constructor(
         _isShowTimePickerWheelDialog.value = !_isShowTimePickerWheelDialog.value
     }
 
-    fun getNotiEndDtTime() = preferenceRepository.getNotiEndDtTime()
+    fun getNotiEndDtTime(): Pair<Int, Int> {
+        return Pair(selectedHour, selectedMinute)
+    }
 
     fun selectedTime(hour24: Int, minute: Int) {
-        _seletedTime.value = convertTo12HourFormat(hour24, minute)
         selectedHour = hour24
         selectedMinute = minute
+    }
+
+    fun confirmTime() {
+        _seletedTime.value = convertTo12HourFormat(selectedHour, selectedMinute)
+        preferenceRepository.saveNotiEndDtTime(selectedHour, selectedMinute)
     }
 
     fun changeNotiEndDt() {
         if (!isNotiEndDt || isLoading) return
 
         preferenceRepository.saveNotiEndDtDay(_seletedDay.intValue)
-        preferenceRepository.saveNotiEndDtTime(selectedHour, selectedMinute)
         giftList.forEach { gift ->
             // 알림 등록
             alarmRepository.cancelAlarm(gift.id, notiEndDtDay)
