@@ -357,7 +357,9 @@ fun HomeGiftItem(
                             style = MaterialTheme.typography.bodyMedium,
                             color = MaterialTheme.colorScheme.onPrimary,
                             textAlign = TextAlign.End,
-                            softWrap = true
+                            softWrap = true,
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis
                         )
                     }
                 }

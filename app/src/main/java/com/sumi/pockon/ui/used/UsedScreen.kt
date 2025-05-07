@@ -229,7 +229,8 @@ fun UsedGiftItem(
         .clip(shape = RoundedCornerShape(10.dp))
         .fillMaxWidth()
         .wrapContentHeight()
-        .clickable { onClick() }) {
+        .clickable { onClick() }
+    ) {
         Card(
             modifier = Modifier
                 .fillMaxWidth()
@@ -285,7 +286,9 @@ fun UsedGiftItem(
                             text = "~ $formattedEndDate",
                             style = MaterialTheme.typography.bodyMedium,
                             textAlign = TextAlign.End,
-                            color = MaterialTheme.colorScheme.onPrimary
+                            color = MaterialTheme.colorScheme.onPrimary,
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis
                         )
                     }
                 }

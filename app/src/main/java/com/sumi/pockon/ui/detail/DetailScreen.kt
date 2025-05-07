@@ -97,6 +97,7 @@ import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
+import androidx.compose.ui.window.DialogProperties
 import androidx.hilt.navigation.compose.hiltViewModel
 import coil.compose.AsyncImage
 import coil.compose.rememberAsyncImagePainter
@@ -485,7 +486,23 @@ fun DetailScreen(id: String, onBack: () -> Unit) {
     }
 
     if (detailViewModel.isShowIndicator.value) {
-        LoadingScreen()
+        Dialog(
+            onDismissRequest = {},
+            properties = DialogProperties(
+                dismissOnBackPress = false,
+                dismissOnClickOutside = false,
+                usePlatformDefaultWidth = false
+            )
+        ) {
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .background(Color.Transparent),
+                contentAlignment = Alignment.Center
+            ) {
+                LoadingScreen()
+            }
+        }
     }
 }
 
@@ -598,7 +615,8 @@ fun GiftImage(isEdit: Boolean, selectedImage: Bitmap?, usedDt: String, onClick: 
 fun UsedStamp(usedDate: String) {
     Box(
         modifier = Modifier
-            .size(200.dp)
+            .fillMaxWidth()
+            .height(200.dp)
             .background(Color.Black.copy(0.3f)),
         contentAlignment = Alignment.Center
     ) {

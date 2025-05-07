@@ -89,8 +89,12 @@ import com.google.accompanist.swiperefresh.rememberSwipeRefreshState
 import kotlinx.coroutines.launch
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Card
 import androidx.compose.material3.CheckboxDefaults
+import androidx.compose.ui.input.nestedscroll.nestedScroll
+import androidx.compose.ui.platform.rememberNestedScrollInteropConnection
 import androidx.compose.ui.text.style.TextOverflow
 
 @Composable
@@ -387,6 +391,8 @@ fun GiftItem(
     isCheck: Boolean,
     onClick: () -> Unit
 ) {
+    val scrollState = rememberScrollState()
+
     Box(
         modifier = Modifier
             .fillMaxSize()
@@ -424,6 +430,8 @@ fun GiftItem(
                         .fillMaxSize()
                         .padding(20.dp)
                         .align(Alignment.Bottom)
+                        .verticalScroll(scrollState)
+                        .nestedScroll(rememberNestedScrollInteropConnection())
                 ) {
                     Text(
                         modifier = Modifier.fillMaxWidth(),

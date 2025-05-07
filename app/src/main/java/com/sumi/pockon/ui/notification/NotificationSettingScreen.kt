@@ -324,7 +324,7 @@ fun TimePickerWithAmPmView(
     var isAm by remember { mutableStateOf(initialHour < 12) }
 
     Row(
-        modifier = Modifier.padding(16.dp),
+        modifier = Modifier.padding(16.dp).fillMaxWidth(),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.Center
     ) {

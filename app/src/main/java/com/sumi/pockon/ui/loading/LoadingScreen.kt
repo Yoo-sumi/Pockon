@@ -25,6 +25,7 @@ import androidx.compose.ui.graphics.drawscope.rotate
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.zIndex
 import com.sumi.pockon.R
 
 @Composable
@@ -44,6 +45,7 @@ fun LoadingScreen() {
 
     Box(
         modifier = Modifier
+            .zIndex(2f)
             .fillMaxSize()
             .background(colorResource(id = R.color.black_loading))
             .pointerInput(Unit) {
