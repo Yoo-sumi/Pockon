@@ -37,7 +37,7 @@ class LoginViewModel @Inject constructor(
 
     init {
         if (preferenceRepository.getUid().isNotEmpty()) {
-            _isLogin.value = true
+            _isLogin.postValue(true)
         }
     }
 
@@ -47,7 +47,7 @@ class LoginViewModel @Inject constructor(
 
     fun loginAsGuest() {
         isPinUse = true
-        _isLogin.value = true
+        _isLogin.postValue(true)
         preferenceRepository.saveUid(UUID.randomUUID().toString())
         preferenceRepository.saveIsGuestMode(true)
     }
@@ -57,7 +57,7 @@ class LoginViewModel @Inject constructor(
         // 구글 사용자 정보 가져오는 부분은 Repository 단에 androidx import 하고 싶지 않아서 여기서 처리
         when (val credential = result.credential) {
             is CustomCredential -> {
-                _isLoading.value = true
+                _isLoading.postValue(true)
                 if (credential.type == GoogleIdTokenCredential.TYPE_GOOGLE_ID_TOKEN_CREDENTIAL) {
                     try {
                         val googleIdTokenCredential =
@@ -66,28 +66,28 @@ class LoginViewModel @Inject constructor(
                         val firebaseCredential = GoogleAuthProvider.getCredential(idToken, null)
 
                         loginRepository.login(firebaseCredential) {
-                            _isLoading.value = false
+                            _isLoading.postValue(false)
                             if (it.isEmpty()) {
-                                _isLogin.value = false
-                                _isFail.value = true
+                                _isLogin.postValue(false)
+                                _isFail.postValue(true)
                             } else {
-                                _isLogin.value = true
+                                _isLogin.postValue(true)
                                 preferenceRepository.saveUid(it)
                             }
                         }
                     } catch (e: GoogleIdTokenParsingException) {
-                        _isLoading.value = false
-                        _isFail.value = true
+                        _isLoading.postValue(false)
+                        _isFail.postValue(true)
                     }
                 } else {
-                    _isLoading.value = false
-                    _isFail.value = true
+                    _isLoading.postValue(false)
+                    _isFail.postValue(true)
                 }
             }
 
             else -> {
-                _isLoading.value = false
-                _isFail.value = true
+                _isLoading.postValue(false)
+                _isFail.postValue(true)
             }
         }
         viewModelScope.launch {

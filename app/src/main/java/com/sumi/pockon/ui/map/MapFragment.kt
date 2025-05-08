@@ -62,66 +62,68 @@ class MapFragment(
 
     private fun show() {
         markerList.clear()
-        mapViewModel.displayInfoList.value.forEach {
-            // 마커 찍기
-            val marker = Marker()
-            marker.position = LatLng(it.first.y.toDouble(), it.first.x.toDouble())
-            marker.width = 70
-            marker.height = 100
-            marker.captionText = it.first.placeName
-            marker.captionTextSize = 9F
-            marker.captionRequestedWidth = 200
-            marker.map = naverMap
-            marker.tag = it.first
-            marker.icon = MarkerIcons.BLACK
-            marker.onClickListener = Overlay.OnClickListener { overlay ->
-                val document = overlay.tag as Document
-                markerList.forEach { (id, marker) ->
-                    if (id == document.id) {
+        mapViewModel.displayInfoList.observe(viewLifecycleOwner) { list ->
+            list.forEach {
+                // 마커 찍기
+                val marker = Marker()
+                marker.position = LatLng(it.first.y.toDouble(), it.first.x.toDouble())
+                marker.width = 70
+                marker.height = 100
+                marker.captionText = it.first.placeName
+                marker.captionTextSize = 9F
+                marker.captionRequestedWidth = 200
+                marker.map = naverMap
+                marker.tag = it.first
+                marker.icon = MarkerIcons.BLACK
+                marker.onClickListener = Overlay.OnClickListener { overlay ->
+                    val document = overlay.tag as Document
+                    markerList.forEach { (id, marker) ->
+                        if (id == document.id) {
+                            // 뷰페이저 셋팅
+                            onClick(it.second)
+
+                            marker.iconTintColor = Color.RED
+                            marker.width = 90
+                            marker.height = 120
+                        } else {
+                            marker.iconTintColor = Color.parseColor("#00db77")
+                            marker.width = 70
+                            marker.height = 100
+                        }
+                    }
+                    // 카메라 이동
+                    val cameraUpdate =
+                        CameraUpdate.scrollTo(LatLng(document.y.toDouble(), document.x.toDouble()))
+                            .animate(CameraAnimation.Easing)
+                    naverMap.moveCamera(cameraUpdate)
+                    false
+                }
+
+                // 가장 가까운 곳
+                mapViewModel.getNearestDoc()?.let { nearestDoc ->
+                    if (nearestDoc.x == it.first.x && nearestDoc.y == it.first.y) {
+                        // 초기엔 가장 가까운곳으로
                         // 뷰페이저 셋팅
                         onClick(it.second)
+
+                        // 카메라 이동
+                        val cameraUpdate = CameraUpdate.scrollTo(
+                            LatLng(
+                                nearestDoc.y.toDouble(),
+                                nearestDoc.x.toDouble()
+                            )
+                        )
+                        naverMap.moveCamera(cameraUpdate)
 
                         marker.iconTintColor = Color.RED
                         marker.width = 90
                         marker.height = 120
                     } else {
                         marker.iconTintColor = Color.parseColor("#00db77")
-                        marker.width = 70
-                        marker.height = 100
                     }
                 }
-                // 카메라 이동
-                val cameraUpdate =
-                    CameraUpdate.scrollTo(LatLng(document.y.toDouble(), document.x.toDouble()))
-                        .animate(CameraAnimation.Easing)
-                naverMap.moveCamera(cameraUpdate)
-                false
+                markerList[it.first.id] = marker
             }
-
-            // 가장 가까운 곳
-            mapViewModel.getNearestDoc()?.let { nearestDoc ->
-                if (nearestDoc.x == it.first.x && nearestDoc.y == it.first.y) {
-                    // 초기엔 가장 가까운곳으로
-                    // 뷰페이저 셋팅
-                    onClick(it.second)
-
-                    // 카메라 이동
-                    val cameraUpdate = CameraUpdate.scrollTo(
-                        LatLng(
-                            nearestDoc.y.toDouble(),
-                            nearestDoc.x.toDouble()
-                        )
-                    )
-                    naverMap.moveCamera(cameraUpdate)
-
-                    marker.iconTintColor = Color.RED
-                    marker.width = 90
-                    marker.height = 120
-                } else {
-                    marker.iconTintColor = Color.parseColor("#00db77")
-                }
-            }
-            markerList[it.first.id] = marker
         }
     }
 }

@@ -29,7 +29,6 @@ class DetailViewModel @Inject constructor(
     private val networkMonitor: NetworkMonitor
 ) : ViewModel() {
 
-    private val isNotiEndDt = preferenceRepository.isNotiEndDt()
     private val isGuestMode = preferenceRepository.isGuestMode()
 
     private val _gift = mutableStateOf(Gift())

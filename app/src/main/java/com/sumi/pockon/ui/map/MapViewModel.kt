@@ -1,7 +1,7 @@
 package com.sumi.pockon.ui.map
 
-import androidx.compose.runtime.State
-import androidx.compose.runtime.mutableStateOf
+import androidx.lifecycle.LiveData
+import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.sumi.pockon.data.repository.BrandSearchRepository
@@ -22,8 +22,8 @@ class MapViewModel @Inject constructor(
     private val giftRepository: GiftRepository
 ) : ViewModel() {
 
-    private val _displayInfoList = mutableStateOf<List<Pair<Document, List<Gift>>>>(listOf())
-    val displayInfoList: State<List<Pair<Document, List<Gift>>>> = _displayInfoList
+    private val _displayInfoList = MutableLiveData<List<Pair<Document, List<Gift>>>>(listOf())
+    val displayInfoList: LiveData<List<Pair<Document, List<Gift>>>> = _displayInfoList
 
     private var giftList = listOf<Gift>()
     private var brandInfoList = mutableMapOf<String, List<Document>>()
@@ -94,7 +94,7 @@ class MapViewModel @Inject constructor(
             markerInGiftList.add(Pair(document, filterGiftList))
         }
 
-        _displayInfoList.value = markerInGiftList
+        _displayInfoList.postValue(markerInGiftList)
     }
 
     fun getNearestDoc() = this.nearestDoc
