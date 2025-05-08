@@ -55,9 +55,11 @@ fun MapScreen(onBack: () -> Unit) {
                 val fragmentManager = (baseContext as FragmentActivity).supportFragmentManager
 
                 fragmentManager.commit {
-                    replace(R.id.fragment_container_view, MapFragment(mapViewmodel) { giftList ->
-                        point = giftList
-                    })
+                    replace(
+                        R.id.fragment_container_view, MapFragment(mapViewmodel) { giftList ->
+                            point = giftList
+                        }
+                    )
                     addToBackStack(null) // 백 스택에 추가하여 뒤로가기 처리
                 }
 

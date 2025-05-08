@@ -28,6 +28,7 @@ class MapViewModel @Inject constructor(
     private var giftList = listOf<Gift>()
     private var brandInfoList = mutableMapOf<String, List<Document>>()
     private var nearestDoc: Document? = null
+    private var slectedDoc: Document? = null
 
     init {
         observeGiftList()
@@ -80,8 +81,7 @@ class MapViewModel @Inject constructor(
             documents.forEach { document ->
                 // 가장 가까운곳 뽑아내기
                 if (nearestDoc == null) nearestDoc = document
-                else if (nearestDoc!!.distance.toDouble() > document.distance.toDouble()) nearestDoc =
-                    document
+                else if (nearestDoc!!.distance.toDouble() > document.distance.toDouble()) nearestDoc = document
 
                 if (mappingList.keys.contains(document)) mappingList[document]?.add(keyword)
                 else mappingList[document] = mutableSetOf(keyword)
@@ -91,11 +91,24 @@ class MapViewModel @Inject constructor(
         val markerInGiftList = ArrayList<Pair<Document, List<Gift>>>()
         mappingList.forEach { (document, keywordList) ->
             val filterGiftList = giftList.filter { keywordList.contains(it.brand) }
-            markerInGiftList.add(Pair(document, filterGiftList))
+            val sortedList = filterGiftList.sortedWith(
+                compareBy(
+                    { it.brand },     // 브랜드명 순
+                    { it.name },      // 상품명 순
+                    { it.endDt ?: "99991231" } // null 또는 빈 값은 가장 마지막으로 정렬
+                )
+            )
+            markerInGiftList.add(Pair(document, sortedList))
         }
 
         _displayInfoList.postValue(markerInGiftList)
     }
 
     fun getNearestDoc() = this.nearestDoc
+
+    fun getSlectedDoc() = this.slectedDoc
+
+    fun setSlectedDoc(slectedDoc: Document) {
+        this.slectedDoc = slectedDoc
+    }
 }

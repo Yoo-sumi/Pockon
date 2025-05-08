@@ -8,6 +8,7 @@ import com.sumi.pockon.R
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.detectHorizontalDragGestures
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.IntrinsicSize
@@ -234,11 +235,18 @@ fun ListScreen(onDetail: (String) -> Unit, onAdd: () -> Unit, isLoading: (Boolea
                     ) {
                         // empty screen
                         if (listViewModel.giftList.value.isEmpty()) {
-                            Text(
-                                modifier = Modifier.align(Alignment.Center),
-                                fontSize = 18.sp,
-                                text = stringResource(id = R.string.txt_no_gift),
-                            )
+                            Column(
+                                modifier = Modifier
+                                    .fillMaxSize()
+                                    .verticalScroll(rememberScrollState()),
+                                verticalArrangement = Arrangement.Center,
+                                horizontalAlignment = Alignment.CenterHorizontally
+                            ) {
+                                Text(
+                                    fontSize = 18.sp,
+                                    text = stringResource(id = R.string.txt_no_gift),
+                                )
+                            }
                         } else {
                             Column(
                                 modifier = Modifier.padding(end = 20.dp, start = 20.dp, top = 10.dp)
@@ -555,6 +563,24 @@ fun TopAppBarDropDownMenu(topTitle: Int, setTopTitle: (Int) -> Unit) {
                     modifier = Modifier.fillMaxWidth(),
                     textAlign = TextAlign.Center,
                     text = stringResource(id = dDayTitle),
+                    color = MaterialTheme.colorScheme.onPrimary
+                )
+            }
+        )
+
+        HorizontalDivider(color = MaterialTheme.colorScheme.background)
+
+        val alphabetTitle = R.string.top_app_bar_alphabet
+        DropdownMenuItem(
+            onClick = {
+                expanded.value = false
+                setTopTitle(alphabetTitle)
+            },
+            text = {
+                Text(
+                    modifier = Modifier.fillMaxWidth(),
+                    textAlign = TextAlign.Center,
+                    text = stringResource(id = alphabetTitle),
                     color = MaterialTheme.colorScheme.onPrimary
                 )
             }

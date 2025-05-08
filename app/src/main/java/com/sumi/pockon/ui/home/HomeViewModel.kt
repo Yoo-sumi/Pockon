@@ -12,6 +12,7 @@ import com.sumi.pockon.data.model.Document
 import com.sumi.pockon.data.model.Gift
 import com.sumi.pockon.data.repository.AlarmRepository
 import com.sumi.pockon.util.NetworkMonitor
+import com.sumi.pockon.util.getDdayInt
 import com.sumi.pockon.util.loadImageFromPath
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
@@ -113,7 +114,13 @@ class HomeViewModel @Inject constructor(
             }
 
             // 즐겨찾기 기프티콘 목록
-            _favoriteGiftList.value = giftList.filter { it.isFavorite }.sortedBy { it.brand }
+            _favoriteGiftList.value = giftList.filter { it.isFavorite }.sortedWith(
+                compareBy(
+                    { it.brand },
+                    { it.name },
+                    { it.endDt ?: "99991231" } // null 또는 빈 값은 가장 마지막으로 정렬
+                )
+            )
             getBrandInfoList() // 브랜드 검색
         } else {
             _favoriteGiftList.value = listOf()
@@ -129,7 +136,8 @@ class HomeViewModel @Inject constructor(
         val allList: ArrayList<Pair<Gift, Document>> = arrayListOf()
 
         val brandNames = ArrayList<String>()
-        giftList.filter { it.usedDt.isEmpty() }.forEach {
+        val tempList = giftList.filter { it.usedDt.isEmpty() && getDdayInt(it.endDt) >= 0 }
+        tempList.forEach {
             if (!brandNames.contains(it.brand)) brandNames.add(it.brand)
         }
         if (brandNames.isNotEmpty() && longitude != null && latitude != null) {
@@ -138,7 +146,7 @@ class HomeViewModel @Inject constructor(
                 latitude!!,
                 brandNames
             ) { brandInfoList ->
-                giftList.forEach { gift ->
+                tempList.forEach { gift ->
                     // 가장 가까운 첫번째 위치만 보여준다(여러개의 스타벅스 중 가장 가까이 있는 한 곳)
                     if (brandInfoList[gift.brand]?.isEmpty() == true) return@forEach // 검색 결과가 없는 경우 스킵
                     val filterList = brandInfoList[gift.brand]
@@ -161,8 +169,16 @@ class HomeViewModel @Inject constructor(
                     }
                 }
                 // 거리순으로 정렬(스타벅스, 투썸..)
-                allList.sortBy { it.second.distance.toDouble() }
-                _nearGiftList.value = allList
+                val sortedList = allList.sortedWith(
+                    compareBy(
+                        { it.second.distance.toDouble() }, // 거리순
+                        { it.first.brand },     // 브랜드명 순
+                        { it.first.name },      // 상품명 순
+                        { it.first.endDt ?: "99991231" } // null 또는 빈 값은 가장 마지막으로 정렬
+                    )
+                )
+
+                _nearGiftList.value = sortedList
 
                 // 로컬 저장
                 viewModelScope.launch(Dispatchers.IO) {
@@ -185,7 +201,13 @@ class HomeViewModel @Inject constructor(
         this.latitude = latitude
 
         if (giftList.isNotEmpty()) {
-            _favoriteGiftList.value = giftList.filter { it.isFavorite }.sortedBy { it.brand }
+            _favoriteGiftList.value = giftList.filter { it.isFavorite }.sortedWith(
+                compareBy(
+                    { it.brand },
+                    { it.name },
+                    { it.endDt ?: "99991231" } // null 또는 빈 값은 가장 마지막으로 정렬
+                )
+            )
             getBrandInfoList()
         } else {
             _favoriteGiftList.value = listOf()

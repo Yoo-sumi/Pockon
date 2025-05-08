@@ -184,16 +184,24 @@ class ListViewModel @Inject constructor(
     }
 
     fun orderBy() {
-        if (_topTitle.intValue == R.string.top_app_bar_recent) {
+        if (_topTitle.intValue == R.string.top_app_bar_recent) { // 최신순
             _copyGiftList.value = _copyGiftList.value.sortedByDescending {
                 val dateFormat = SimpleDateFormat("yyyyMMddHHmmss", Locale.KOREA)
                 dateFormat.parse(it.addDt)?.time
             }
-        } else { // 디데이순
+        } else if (_topTitle.intValue == R.string.top_app_bar_end_date) { // 만료일순
             val dateFormat = SimpleDateFormat("yyyyMMdd", Locale.KOREA)
             _copyGiftList.value = _copyGiftList.value.sortedBy {
                 dateFormat.parse(it.endDt)?.time
             }
+        } else { // 가나다순
+            _copyGiftList.value = _copyGiftList.value.sortedWith(
+                compareBy(
+                    { it.brand },
+                    { it.name },
+                    { it.endDt ?: "99991231" } // null 또는 빈 값은 가장 마지막으로 정렬
+                )
+            )
         }
     }
 

@@ -44,7 +44,8 @@
     <string name="title_detail_gift">상세정보</string>
     <string name="title_used_gift">사용완료 기프티콘</string>
     <string name="top_app_bar_recent">최신순</string>
-    <string name="top_app_bar_end_date">디데이순</string>
+    <string name="top_app_bar_end_date">만료일순</string>
+    <string name="top_app_bar_alphabet">가나다순</string>
     <string name="chip_all">전체</string>
     <string name="title_select_time">🕒</string>
 
