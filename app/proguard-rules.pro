@@ -24,8 +24,6 @@
 -keep class com.sumi.pockon.data.model.** { *; }
 -keepattributes Signature
 -keepattributes RuntimeVisibleAnnotations
-
-# Gson 관련 어노테이션을 유지
 -keepattributes *Annotation*
 
 # Gson 역직렬화/직렬화 클래스 보호
@@ -70,4 +68,26 @@
 -keepclassmembers class * {
     void onResponse(...);
     void onFailure(...);
+}
+
+# Firebase Firestore / Realtime Database
+-keepclassmembers class * {
+    @com.google.firebase.firestore.PropertyName <fields>;
+}
+-keepclassmembers class * {
+    @com.google.firebase.firestore.Exclude <fields>;
+}
+
+# Room
+-keepclassmembers class * extends androidx.room.RoomDatabase {
+    *;
+}
+-keepclassmembers class * extends androidx.room.Entity {
+    *;
+}
+-keepclassmembers class * extends androidx.room.Dao {
+    *;
+}
+-keepclassmembers class * {
+    @androidx.room.* <methods>;
 }

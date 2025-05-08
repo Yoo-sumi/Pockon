@@ -46,7 +46,8 @@ class UsedViewModel @Inject constructor(
         viewModelScope.launch(Dispatchers.IO) {
             giftRepository.getAllGift(2).collectLatest { allGift ->
                 if (allGift.isNotEmpty()) {
-                    val dateFormat = SimpleDateFormat("yyyyMMdd", Locale.KOREA)
+                    val dateFormat = SimpleDateFormat("yyyy.MM.dd", Locale.getDefault())
+
                     _giftList.value = allGift.map { gift ->
                         Gift(
                             id = gift.id,
@@ -61,7 +62,7 @@ class UsedViewModel @Inject constructor(
                             cash = gift.cash,
                             isFavorite = gift.isFavorite
                         )
-                    }.sortedByDescending { gift -> dateFormat.parse(gift.endDt)?.time }
+                    }.sortedByDescending { gift -> dateFormat.parse(gift.usedDt)?.time ?: Long.MIN_VALUE }
                 } else {
                     // 기프티콘 없음
                     _giftList.value = listOf()
