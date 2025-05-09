@@ -33,6 +33,9 @@ class LoginViewModel @Inject constructor(
     private val _isLoading = MutableLiveData(false)
     val isLoading: LiveData<Boolean> = _isLoading
 
+    private val _isFirstLogin = MutableLiveData(preferenceRepository.getUid().isEmpty())
+    val isFirstLogin: LiveData<Boolean> = _isFirstLogin
+
     private var isPinUse = preferenceRepository.isAuthPin()
 
     init {

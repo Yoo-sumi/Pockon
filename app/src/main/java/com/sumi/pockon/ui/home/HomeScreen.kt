@@ -130,7 +130,9 @@ fun HomeScreen(
                             IconButton(
                                 onClick = {
                                     // 권한 체크
-                                    if (checkLocationPermission(context)) {
+                                    if (!homeViewModel.isNetworkConnected()) {
+                                        isShowNoInternetDialog = true
+                                    } else if (checkLocationPermission(context)) {
                                         getLocation(context, fusedLocationClient) { // 위치 동기화
                                             longitude = it?.longitude
                                             latitude = it?.latitude
@@ -169,9 +171,7 @@ fun HomeScreen(
                         color = MaterialTheme.colorScheme.onPrimary,
                         modifier = Modifier
                             .clickable {
-                                if (!homeViewModel.isNetworkConnected()) {
-                                    isShowNoInternetDialog = true
-                                } else if (homeViewModel.nearGiftList.value.isNotEmpty()) {
+                                if (homeViewModel.nearGiftList.value.isNotEmpty()) {
                                     showMap()
                                 }
                             },

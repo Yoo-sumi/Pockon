@@ -32,9 +32,8 @@ class ListViewModel @Inject constructor(
 
     private var uid = preferenceRepository.getUid()
     private var isGuestMode = preferenceRepository.isGuestMode()
-
+    private var isAllChip = false
     private var removeGift: Gift? = null
-    private var isScrollTop = false
 
     private val _giftList = mutableStateOf<List<Gift>>(listOf())
     val giftList: State<List<Gift>> = _giftList
@@ -58,6 +57,9 @@ class ListViewModel @Inject constructor(
 
     private val _isShowNoInternetDialog = mutableStateOf(false)
     val isShowNoInternetDialog: State<Boolean> = _isShowNoInternetDialog
+
+    private val _isScrollTop = mutableStateOf(false)
+    val isScrollTop: State<Boolean> = _isScrollTop
 
     init {
         observeGiftList() // 관찰자 등록
@@ -103,6 +105,10 @@ class ListViewModel @Inject constructor(
                     _copyGiftList.value = listOf()
                     filterList = listOf()
                 }
+                if (isAllChip) {
+                    toggleIsScrollTop()
+                    isAllChip = false
+                }
             }
         }
     }
@@ -111,7 +117,11 @@ class ListViewModel @Inject constructor(
     fun getGiftList(onComplete: () -> Unit) {
         filterList = listOf()
         if (isGuestMode) {
+            sortChips()
+            filterList()
+            orderBy()
             onComplete()
+            toggleIsScrollTop()
             return
         } // 게스트 모드는 서버 안탐
 
@@ -132,6 +142,7 @@ class ListViewModel @Inject constructor(
                 _copyGiftList.value = listOf()
                 filterList = listOf()
             }
+            isAllChip = true
             onComplete()
         }
     }
@@ -143,11 +154,8 @@ class ListViewModel @Inject constructor(
         }
         val beforeElements = mutableMapOf<String, Boolean>()
         val chips = element.toList().sortedWith(compareBy { it.first }).toMap()
-        if (filterList.size == 1) {
-            if (!chips.containsKey(filterList[0])) {
-                filterList = listOf()
-            }
-        }
+        filterList = filterList.filter { chips.containsKey(it) }
+        isAllChip = filterList.isEmpty()
         chips.keys.forEach { key ->
             beforeElements[key] = filterList.contains(key)
         }
@@ -197,26 +205,31 @@ class ListViewModel @Inject constructor(
         _copyGiftList.value = filtered
     }
 
-    fun orderBy() {
-        if (_topTitle.intValue == R.string.top_app_bar_recent) { // 최신순
-            _copyGiftList.value = _copyGiftList.value.sortedByDescending {
-                val dateFormat = SimpleDateFormat("yyyyMMddHHmmss", Locale.KOREA)
-                dateFormat.parse(it.addDt)?.time
+    fun orderBy(flag: Boolean = false) {
+        when (_topTitle.intValue) {
+            R.string.top_app_bar_recent -> { // 최신순
+                _copyGiftList.value = _copyGiftList.value.sortedByDescending {
+                    val dateFormat = SimpleDateFormat("yyyyMMddHHmmss", Locale.KOREA)
+                    dateFormat.parse(it.addDt)?.time
+                }
             }
-        } else if (_topTitle.intValue == R.string.top_app_bar_end_date) { // 만료일순
-            val dateFormat = SimpleDateFormat("yyyyMMdd", Locale.KOREA)
-            _copyGiftList.value = _copyGiftList.value.sortedBy {
-                dateFormat.parse(it.endDt)?.time
+            R.string.top_app_bar_end_date -> { // 만료일순
+                val dateFormat = SimpleDateFormat("yyyyMMdd", Locale.KOREA)
+                _copyGiftList.value = _copyGiftList.value.sortedBy {
+                    dateFormat.parse(it.endDt)?.time
+                }
             }
-        } else { // 가나다순
-            _copyGiftList.value = _copyGiftList.value.sortedWith(
-                compareBy(
-                    { it.brand },
-                    { it.name },
-                    { it.endDt ?: "99991231" } // null 또는 빈 값은 가장 마지막으로 정렬
+            else -> { // 가나다순
+                _copyGiftList.value = _copyGiftList.value.sortedWith(
+                    compareBy(
+                        { it.brand },
+                        { it.name },
+                        { it.endDt ?: "99991231" } // null 또는 빈 값은 가장 마지막으로 정렬
+                    )
                 )
-            )
+            }
         }
+        if (flag) toggleIsScrollTop()
     }
 
     // 기프티콘 수정
@@ -343,8 +356,8 @@ class ListViewModel @Inject constructor(
     }
 
     fun toggleIsScrollTop() {
-        this.isScrollTop = !this.isScrollTop
+        _isScrollTop.value = !_isScrollTop.value
     }
 
-    fun getIsScrollTop() = this.isScrollTop
+    fun getFilterList() = this.filterList
 }

@@ -124,16 +124,16 @@ fun ListScreen(onDetail: (String) -> Unit, onAdd: () -> Unit, isLoading: (Boolea
                 isRefreshing = false // 새로 고침 완료
                 isEdit = false
                 listViewModel.clearCheckedGiftList()
-                listViewModel.toggleIsScrollTop()
             }
         }
     }
 
-    // 새로고침 후 스크롤 맨 위로 이동
-    LaunchedEffect(listViewModel.copyGiftList.value) {
-        if (listViewModel.getIsScrollTop()) {
+    LaunchedEffect(listViewModel.isScrollTop.value) {
+        if (listViewModel.isScrollTop.value) {
+            if (listViewModel.getFilterList().isEmpty()) {
+                chipState.scrollToItem(0)
+            }
             listState.scrollToItem(0)
-            chipState.scrollToItem(0)
             listViewModel.toggleIsScrollTop()
         }
     }
@@ -212,7 +212,7 @@ fun ListScreen(onDetail: (String) -> Unit, onAdd: () -> Unit, isLoading: (Boolea
                     actionText = title,
                     onDropDown = {
                         listViewModel.setTopTitle(it)
-                        listViewModel.orderBy()
+                        listViewModel.orderBy(true)
                         scope.launch {
                             listState.scrollToItem(listState.firstVisibleItemIndex)
                         }
@@ -267,16 +267,17 @@ fun ListScreen(onDetail: (String) -> Unit, onAdd: () -> Unit, isLoading: (Boolea
                                     state = chipState
                                 ) {
                                     listViewModel.chipElement.value?.let { chips ->
-                                        val keys = chips.keys.toList()
-                                        items(chips.size) { idx ->
-                                            val key = keys[idx]
+                                        items(
+                                            items = chips.keys.toList(),
+                                            key = { chip -> chip }
+                                        ) { key ->
                                             FilterChip(
                                                 onClick = {
                                                     listViewModel.setIsAllSelect(false)
                                                     listViewModel.changeChipState(listOf(key))
                                                 },
                                                 label = {
-                                                    if (idx == 0) {
+                                                    if (key == "") {
                                                         Text(
                                                             color = Color.White,
                                                             text = stringResource(id = R.string.chip_all),
@@ -285,7 +286,7 @@ fun ListScreen(onDetail: (String) -> Unit, onAdd: () -> Unit, isLoading: (Boolea
                                                     } else {
                                                         Text(
                                                             color = Color.White,
-                                                            text = keys[idx],
+                                                            text = key,
                                                             fontWeight = FontWeight.Bold
                                                         )
                                                     }

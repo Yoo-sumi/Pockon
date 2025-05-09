@@ -72,6 +72,10 @@ class LoginFragment : Fragment() {
             }
         }
 
+        loginViewModel.isFirstLogin.observe(viewLifecycleOwner) {
+            binding.lyLogin.visibility = if (it) View.VISIBLE else View.INVISIBLE
+        }
+
         loginViewModel.isLogin.observe(viewLifecycleOwner) {
             if (it) {
                 // 로그인 성공 > 메인 화면으로 이동
