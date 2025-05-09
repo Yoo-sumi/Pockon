@@ -114,6 +114,7 @@ fun ListScreen(onDetail: (String) -> Unit, onAdd: () -> Unit, isLoading: (Boolea
     val swipeRefreshState = rememberSwipeRefreshState(isRefreshing)
 
     val listState = rememberLazyListState()
+    val chipState = rememberLazyListState()
 
     // LaunchedEffect를 사용하여 새로 고침 처리
     LaunchedEffect(isRefreshing) {
@@ -123,7 +124,17 @@ fun ListScreen(onDetail: (String) -> Unit, onAdd: () -> Unit, isLoading: (Boolea
                 isRefreshing = false // 새로 고침 완료
                 isEdit = false
                 listViewModel.clearCheckedGiftList()
+                listViewModel.toggleIsScrollTop()
             }
+        }
+    }
+
+    // 새로고침 후 스크롤 맨 위로 이동
+    LaunchedEffect(listViewModel.copyGiftList.value) {
+        if (listViewModel.getIsScrollTop()) {
+            listState.scrollToItem(0)
+            chipState.scrollToItem(0)
+            listViewModel.toggleIsScrollTop()
         }
     }
 
@@ -252,7 +263,9 @@ fun ListScreen(onDetail: (String) -> Unit, onAdd: () -> Unit, isLoading: (Boolea
                                 modifier = Modifier.padding(end = 20.dp, start = 20.dp, top = 10.dp)
                             ) {
                                 // chip
-                                LazyRow {
+                                LazyRow(
+                                    state = chipState
+                                ) {
                                     listViewModel.chipElement.value?.let { chips ->
                                         val keys = chips.keys.toList()
                                         items(chips.size) { idx ->

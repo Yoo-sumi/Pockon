@@ -28,7 +28,6 @@ class MapViewModel @Inject constructor(
     private var giftList = listOf<Gift>()
     private var brandInfoList = mutableMapOf<String, List<Document>>()
     private var nearestDoc: Document? = null
-    private var slectedDoc: Document? = null
 
     init {
         observeGiftList()
@@ -105,10 +104,4 @@ class MapViewModel @Inject constructor(
     }
 
     fun getNearestDoc() = this.nearestDoc
-
-    fun getSlectedDoc() = this.slectedDoc
-
-    fun setSlectedDoc(slectedDoc: Document) {
-        this.slectedDoc = slectedDoc
-    }
 }

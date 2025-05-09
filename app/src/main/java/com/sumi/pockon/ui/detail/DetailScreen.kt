@@ -113,7 +113,7 @@ import com.sumi.pockon.util.thousandSeparatorTransformation
 import kotlinx.coroutines.launch
 
 @Composable
-fun DetailScreen(id: String, onBack: () -> Unit) {
+fun DetailScreen(id: String, isEditMode: Boolean = true, onBack: () -> Unit) {
     val detailViewModel = hiltViewModel<DetailViewModel>()
 
     // 중복호출 방지
@@ -204,7 +204,7 @@ fun DetailScreen(id: String, onBack: () -> Unit) {
                         )
 
                     }
-                    if (detailViewModel.gift.value.usedDt.isEmpty()) {
+                    if (detailViewModel.gift.value.usedDt.isEmpty() && isEditMode) {
                         IconButton(
                             onClick = {
                                 detailViewModel.setIsEdit(true)

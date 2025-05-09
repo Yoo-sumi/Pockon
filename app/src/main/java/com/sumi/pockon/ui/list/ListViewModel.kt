@@ -34,6 +34,7 @@ class ListViewModel @Inject constructor(
     private var isGuestMode = preferenceRepository.isGuestMode()
 
     private var removeGift: Gift? = null
+    private var isScrollTop = false
 
     private val _giftList = mutableStateOf<List<Gift>>(listOf())
     val giftList: State<List<Gift>> = _giftList
@@ -95,6 +96,7 @@ class ListViewModel @Inject constructor(
                     _giftList.value = tempList
                     _copyGiftList.value = _giftList.value
                     sortChips()
+                    filterList()
                     orderBy()
                 } else {
                     _giftList.value = listOf()
@@ -107,6 +109,7 @@ class ListViewModel @Inject constructor(
 
     // 서버에서 기프티콘 리스트 가져오기
     fun getGiftList(onComplete: () -> Unit) {
+        filterList = listOf()
         if (isGuestMode) {
             onComplete()
             return
@@ -138,7 +141,18 @@ class ListViewModel @Inject constructor(
         _giftList.value.forEach {
             if (!element.containsKey(it.brand)) element[it.brand] = false
         }
-        _chipElement.value = element.toList().sortedWith(compareBy { it.first }).toMap()
+        val beforeElements = mutableMapOf<String, Boolean>()
+        val chips = element.toList().sortedWith(compareBy { it.first }).toMap()
+        if (filterList.size == 1) {
+            if (!chips.containsKey(filterList[0])) {
+                filterList = listOf()
+            }
+        }
+        chips.keys.forEach { key ->
+            beforeElements[key] = filterList.contains(key)
+        }
+        if (filterList.isEmpty()) beforeElements[""] = true
+        _chipElement.value = beforeElements
     }
 
     fun setRemoveGift(gift: Gift) {
@@ -327,4 +341,10 @@ class ListViewModel @Inject constructor(
     fun changeNoInternetDialogState() {
         _isShowNoInternetDialog.value = !_isShowNoInternetDialog.value
     }
+
+    fun toggleIsScrollTop() {
+        this.isScrollTop = !this.isScrollTop
+    }
+
+    fun getIsScrollTop() = this.isScrollTop
 }

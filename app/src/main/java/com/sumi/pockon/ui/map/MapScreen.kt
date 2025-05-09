@@ -95,7 +95,7 @@ fun MapScreen(onBack: () -> Unit) {
 
         detailGift?.let {
             Box(modifier = Modifier.fillMaxSize()) {
-                DetailScreen(id = it.id) {
+                DetailScreen(id = it.id, false) {
                     detailGift = null
                 }
             }
