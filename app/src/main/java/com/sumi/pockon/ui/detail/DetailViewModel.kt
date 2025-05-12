@@ -113,7 +113,7 @@ class DetailViewModel @Inject constructor(
     fun setGift(index: Int, value: String) {
         when (index) {
             0 -> _name.value = value
-            1 -> _brand.value = value.trim()
+            1 -> _brand.value = value
             2 -> _cash.value = value
             3 -> _endDate.value = value
             4 -> _memo.value = value
@@ -179,8 +179,8 @@ class DetailViewModel @Inject constructor(
                 id = _gift.value.id,
                 uid = _gift.value.uid,
                 photo = _photo.value,
-                name = _name.value,
-                brand = _brand.value,
+                name = _name.value.trim(),
+                brand = _brand.value.trim(),
                 endDt = _endDate.value,
                 addDt = _gift.value.addDt,
                 memo = _memo.value,
@@ -193,8 +193,8 @@ class DetailViewModel @Inject constructor(
                 id = _gift.value.id,
                 uid = _gift.value.uid,
                 photo = _photo.value,
-                name = _name.value,
-                brand = _brand.value,
+                name = _name.value.trim(),
+                brand = _brand.value.trim(),
                 endDt = _endDate.value,
                 addDt = _gift.value.addDt,
                 memo = _memo.value,

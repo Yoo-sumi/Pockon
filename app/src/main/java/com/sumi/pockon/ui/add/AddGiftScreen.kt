@@ -273,6 +273,8 @@ fun InputDataTextField(
             if (index in 0..1 && it.length > 20) return@OutlinedTextField
             if (index == 4 && it.length > 300) return@OutlinedTextField
             if (((it.length > 9 || it == "00") && index == 2) || (it.length > 8 && index == 3)) return@OutlinedTextField
+            // 공백만 입력했는지 확인 (중간 공백 허용, 전체 공백은 차단)
+            if (it.isNotEmpty() && it.all { it.isWhitespace() }) return@OutlinedTextField
             if (index == 2 || index == 3) {
                 val text = it.filter { char -> char.isDigit() }
                 onValueChange(index, text)

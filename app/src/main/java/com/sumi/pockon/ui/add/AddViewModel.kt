@@ -59,7 +59,7 @@ class AddViewModel @Inject constructor(
     fun setGift(index: Int, value: String) {
         when (index) {
             0 -> _name.value = value
-            1 -> _brand.value = value.trim()
+            1 -> _brand.value = value
             2 -> _cash.value = value
             3 -> _endDate.value = value
             4 -> _memo.value = value
@@ -82,9 +82,9 @@ class AddViewModel @Inject constructor(
         val gift = if (_isCheckedCash.value) {
             Gift(
                 uid = uid,
-                name = _name.value,
+                name = _name.value.trim(),
                 photo = _photo.value,
-                brand = _brand.value,
+                brand = _brand.value.trim(),
                 endDt = _endDate.value,
                 addDt = addDate,
                 memo = _memo.value,
@@ -94,9 +94,9 @@ class AddViewModel @Inject constructor(
         } else {
             Gift(
                 uid = uid,
-                name = _name.value,
+                name = _name.value.trim(),
                 photo = _photo.value,
-                brand = _brand.value,
+                brand = _brand.value.trim(),
                 endDt = _endDate.value,
                 addDt = addDate,
                 memo = _memo.value,

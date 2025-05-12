@@ -275,6 +275,9 @@ fun ListScreen(onDetail: (String) -> Unit, onAdd: () -> Unit, isLoading: (Boolea
                                                 onClick = {
                                                     listViewModel.setIsAllSelect(false)
                                                     listViewModel.changeChipState(listOf(key))
+                                                    scope.launch {
+                                                        listState.scrollToItem(0)
+                                                    }
                                                 },
                                                 label = {
                                                     if (key == "") {

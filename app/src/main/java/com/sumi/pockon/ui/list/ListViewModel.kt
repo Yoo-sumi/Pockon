@@ -155,7 +155,7 @@ class ListViewModel @Inject constructor(
         val beforeElements = mutableMapOf<String, Boolean>()
         val chips = element.toList().sortedWith(compareBy { it.first }).toMap()
         filterList = filterList.filter { chips.containsKey(it) }
-        isAllChip = filterList.isEmpty()
+        isAllChip = filterList.isEmpty() && _isScrollTop.value
         chips.keys.forEach { key ->
             beforeElements[key] = filterList.contains(key)
         }
