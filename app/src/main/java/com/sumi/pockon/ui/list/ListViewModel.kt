@@ -117,6 +117,7 @@ class ListViewModel @Inject constructor(
     fun getGiftList(onComplete: () -> Unit) {
         filterList = listOf()
         if (isGuestMode) {
+            isAllChip = true
             sortChips()
             filterList()
             orderBy()

@@ -62,7 +62,12 @@ class UsedViewModel @Inject constructor(
                             cash = gift.cash,
                             isFavorite = gift.isFavorite
                         )
-                    }.sortedByDescending { gift -> dateFormat.parse(gift.usedDt)?.time ?: Long.MIN_VALUE }
+                    }.sortedWith(
+                        compareByDescending<Gift> { dateFormat.parse(it.usedDt)?.time ?: Long.MIN_VALUE }
+                            .thenBy { it.brand }
+                            .thenBy { it.name }
+                            .thenBy { it.endDt ?: "99991231" }
+                    )
                 } else {
                     // 기프티콘 없음
                     _giftList.value = listOf()

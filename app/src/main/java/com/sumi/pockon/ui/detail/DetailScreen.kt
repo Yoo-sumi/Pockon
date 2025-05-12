@@ -752,8 +752,10 @@ fun UseCashDialog(remainCash: String, onCancel: () -> Unit, onConfirm: (Int) -> 
                         .alignByBaseline(),
                     value = inputCash,
                     onValueChange = {
-                        val input = if (it.isEmpty()) 0 else it.toInt()
-                        inputCash = if (input >= remainCash.toInt()) remainCash else it
+                        if (it.length > 9 || it == "00") return@BasicTextField
+                        val text = it.filter { char -> char.isDigit() }
+                        val input = if (text.isEmpty()) 0 else text.toInt()
+                        inputCash = if (input >= remainCash.toInt()) remainCash else text
                     },
                     visualTransformation = thousandSeparatorTransformation(false),
                     textStyle = TextStyle(
