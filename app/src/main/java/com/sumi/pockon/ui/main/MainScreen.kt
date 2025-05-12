@@ -242,9 +242,14 @@ fun BottomNavigationBar(
                 }
             }
             composable(Screen.Map.route) {
-                MapScreen {
-                    navController.popBackStack()
-                }
+                MapScreen (
+                    onBack = {
+                        navController.popBackStack()
+                    },
+                    onDetail = { id ->
+                        navController.navigate(route = "${Screen.Detail.route}/${id}")
+                    }
+                )
             }
             composable(Screen.Used.route) {
                 UsedScreen(

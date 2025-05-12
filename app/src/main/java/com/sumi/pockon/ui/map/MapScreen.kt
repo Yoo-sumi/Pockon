@@ -28,17 +28,15 @@ import androidx.fragment.app.commit
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.sumi.pockon.R
 import com.sumi.pockon.data.model.Gift
-import com.sumi.pockon.ui.detail.DetailScreen
 import com.sumi.pockon.ui.list.GiftItem
 import com.sumi.pockon.util.formatString
 import com.sumi.pockon.util.getDday
 
 @Composable
-fun MapScreen(onBack: () -> Unit) {
+fun MapScreen(onBack: () -> Unit, onDetail: (String) -> Unit) {
     val mapViewmodel = hiltViewModel<MapViewModel>()
     val context = LocalContext.current
     var point by rememberSaveable { mutableStateOf<List<Gift>>(listOf()) }
-    var detailGift by rememberSaveable { mutableStateOf<Gift?>(null) }
     val hasFragmentBeenSet = remember { mutableStateOf(false) }
     val fragmentContainerView = remember {
         FragmentContainerView(context).apply {
@@ -88,16 +86,8 @@ fun MapScreen(onBack: () -> Unit) {
                     isCheck = false,
                     onClick = {
                         // 상세보기 이동
-                        detailGift = gift
+                        onDetail(gift.id)
                     })
-            }
-        }
-
-        detailGift?.let {
-            Box(modifier = Modifier.fillMaxSize()) {
-                DetailScreen(id = it.id, false) {
-                    detailGift = null
-                }
             }
         }
     }
