@@ -32,7 +32,8 @@ class ListViewModel @Inject constructor(
 
     private var uid = preferenceRepository.getUid()
     private var isGuestMode = preferenceRepository.isGuestMode()
-    private var isAllChip = false
+    private var isRefresh = false
+    private var isDelete = false
     private var removeGift: Gift? = null
 
     private val _giftList = mutableStateOf<List<Gift>>(listOf())
@@ -105,10 +106,6 @@ class ListViewModel @Inject constructor(
                     _copyGiftList.value = listOf()
                     filterList = listOf()
                 }
-                if (isAllChip) {
-                    toggleIsScrollTop()
-                    isAllChip = false
-                }
             }
         }
     }
@@ -117,12 +114,10 @@ class ListViewModel @Inject constructor(
     fun getGiftList(onComplete: () -> Unit) {
         filterList = listOf()
         if (isGuestMode) {
-            isAllChip = true
             sortChips()
             filterList()
-            orderBy()
+            orderBy(true)
             onComplete()
-            toggleIsScrollTop()
             return
         } // 게스트 모드는 서버 안탐
 
@@ -133,6 +128,7 @@ class ListViewModel @Inject constructor(
         }
 
         giftRepository.getAllGift(uid) { giftList ->
+            isRefresh = true
             if (giftList.isNotEmpty()) {
                 // 로컬 저장(기프티콘)
                 viewModelScope.launch(Dispatchers.IO) {
@@ -143,7 +139,6 @@ class ListViewModel @Inject constructor(
                 _copyGiftList.value = listOf()
                 filterList = listOf()
             }
-            isAllChip = true
             onComplete()
         }
     }
@@ -156,7 +151,6 @@ class ListViewModel @Inject constructor(
         val beforeElements = mutableMapOf<String, Boolean>()
         val chips = element.toList().sortedWith(compareBy { it.first }).toMap()
         filterList = filterList.filter { chips.containsKey(it) }
-        isAllChip = filterList.isEmpty() && _isScrollTop.value
         chips.keys.forEach { key ->
             beforeElements[key] = filterList.contains(key)
         }
@@ -194,7 +188,7 @@ class ListViewModel @Inject constructor(
         _chipElement.value = beforeElements
         filterList = beforeFilters
         filterList()
-        orderBy()
+        orderBy(true)
         clearCheckedGiftList()
     }
 
@@ -230,7 +224,11 @@ class ListViewModel @Inject constructor(
                 )
             }
         }
-        if (flag) toggleIsScrollTop()
+        if (isRefresh || flag || (isDelete && filterList.isEmpty())) {
+            toggleIsScrollTop()
+            isRefresh = false
+            isDelete = false
+        }
     }
 
     // 기프티콘 수정
@@ -250,6 +248,7 @@ class ListViewModel @Inject constructor(
             // 수정 성공
             if (result) {
                 // 로컬 수정
+                isDelete = true
                 viewModelScope.launch(Dispatchers.IO) {
                     giftRepository.insertGift(updateGift)
                 }
@@ -278,6 +277,7 @@ class ListViewModel @Inject constructor(
         giftRepository.removeGift(isGuestMode, uid, id) { result ->
             if (result) {
                 // 로컬 삭제
+                isDelete = true
                 viewModelScope.launch(Dispatchers.IO) {
                     giftRepository.deleteGift(id)
                 }
@@ -342,6 +342,7 @@ class ListViewModel @Inject constructor(
                             alarmRepository.cancelAlarm(id, preferenceRepository.getNotiEndDtDay())
                         }
                         // 로컬 삭제
+                        isDelete = true
                         viewModelScope.launch(Dispatchers.IO) {
                             giftRepository.deleteGifts(idList)
                         }
