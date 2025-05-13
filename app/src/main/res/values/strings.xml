@@ -81,8 +81,8 @@
     <string name="btn_use_complete">사용 완료</string>
     <string name="btn_use_cancel">사용 취소</string>
     <string name="btn_open_map">지도보기</string>
-    <string name="btn_goggle_login">Sign In With Google</string>
-    <string name="btn_guest_login">"Sign In As Guest</string>
+    <string name="btn_goggle_login">Google 계정으로 로그인</string>
+    <string name="btn_guest_login">게스트로 시작하기</string>
     <string name="btn_delete">삭제</string>
     <string name="btn_edit">편집</string>
     <string name="btn_pin_setting">설정</string>
@@ -106,9 +106,10 @@
     <string name="txt_use_pwd">비밀번호 사용</string>
     <string name="txt_user">사용자</string>
     <string name="txt_logout">로그아웃</string>
+    <string name="txt_logout_in_guest">게스트 모드 종료</string>
     <string name="txt_remove_account">회원 탈퇴</string>
     <string name="dlg_msg_logout">로그아웃하시겠어요?</string>
-    <string name="dlg_msg_logout_in_guest">로그아웃하시겠어요?\n저장된 데이터가 모두 삭제돼요.</string>
+    <string name="dlg_msg_logout_in_guest">게스트 모드를 종료하시겠어요?\n임시로 저장된 데이터가 모두 삭제돼요.</string>
     <string name="dlg_msg_remove_account">회원 탈퇴하시겠어요?\n저장된 데이터가 모두 삭제돼요.</string>
 
     <!--copyright-->

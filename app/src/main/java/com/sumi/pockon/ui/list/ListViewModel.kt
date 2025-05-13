@@ -248,7 +248,7 @@ class ListViewModel @Inject constructor(
             // 수정 성공
             if (result) {
                 // 로컬 수정
-                isDelete = true
+                isDelete = filterList.isNotEmpty()
                 viewModelScope.launch(Dispatchers.IO) {
                     giftRepository.insertGift(updateGift)
                 }
@@ -277,7 +277,7 @@ class ListViewModel @Inject constructor(
         giftRepository.removeGift(isGuestMode, uid, id) { result ->
             if (result) {
                 // 로컬 삭제
-                isDelete = true
+                isDelete = filterList.isNotEmpty()
                 viewModelScope.launch(Dispatchers.IO) {
                     giftRepository.deleteGift(id)
                 }
@@ -342,7 +342,7 @@ class ListViewModel @Inject constructor(
                             alarmRepository.cancelAlarm(id, preferenceRepository.getNotiEndDtDay())
                         }
                         // 로컬 삭제
-                        isDelete = true
+                        isDelete = filterList.isNotEmpty()
                         viewModelScope.launch(Dispatchers.IO) {
                             giftRepository.deleteGifts(idList)
                         }

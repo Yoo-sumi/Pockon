@@ -110,7 +110,7 @@ class SettingsViewModel @Inject constructor(
                             brandSearchRepository.deleteAllBrands()
                         }
                         if (!isGuestMode) {
-                            loginRepository.removeAccount {
+                            loginRepository.removeAccount(preferenceRepository.getIdToken()) {
                                 if (it) {
                                     loginRepository.logout()
                                     preferenceRepository.removeAll()

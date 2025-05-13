@@ -18,8 +18,8 @@ class LoginRepository @Inject constructor(
         loginDataSource.logout()
     }
 
-    fun removeAccount(onComplete: (Boolean) -> Unit) {
-        loginDataSource.removeAccount {
+    fun removeAccount(idToken: String, onComplete: (Boolean) -> Unit) {
+        loginDataSource.removeGoogleAccount(idToken) {
             onComplete(it)
         }
     }

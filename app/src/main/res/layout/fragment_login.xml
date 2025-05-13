@@ -62,7 +62,10 @@
             android:drawableTint="@color/primary"
             android:textAllCaps="false"
             style="@style/CustomButtonStyle"
-            android:layout_marginTop="5dp" />
+            android:layout_marginTop="5dp"
+            android:textStyle="bold"
+            android:textColor="#757575"
+            android:drawablePadding="10dp" />
     </LinearLayout>
 
     <androidx.compose.ui.platform.ComposeView

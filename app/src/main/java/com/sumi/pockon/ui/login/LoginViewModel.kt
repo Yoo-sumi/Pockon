@@ -68,6 +68,7 @@ class LoginViewModel @Inject constructor(
                         val idToken = googleIdTokenCredential.idToken
                         val firebaseCredential = GoogleAuthProvider.getCredential(idToken, null)
 
+                        preferenceRepository.saveIdToken(idToken)
                         loginRepository.login(firebaseCredential) {
                             _isLoading.postValue(false)
                             if (it.isEmpty()) {

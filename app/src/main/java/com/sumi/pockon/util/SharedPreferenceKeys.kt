@@ -2,6 +2,7 @@ package com.sumi.pockon.util
 
 object SharedPreferenceKeys {
     const val UID = "uid"
+    const val ID_TOKEN = "id_token"
     const val PIN_NUM = "pin_num"
     const val AUTH_PIN = "auth_pin"
     const val GUEST_MODE = "guest_mode"

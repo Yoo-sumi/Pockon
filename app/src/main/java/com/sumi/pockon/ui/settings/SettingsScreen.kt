@@ -154,7 +154,11 @@ fun SettingsScreen(
                     )
 
                     SettingItem(
-                        text = stringResource(id = R.string.txt_logout),
+                        text = if (settingViewModel.getIsGuestMode()) {
+                            stringResource(id = R.string.txt_logout_in_guest)
+                        } else {
+                            stringResource(id = R.string.txt_logout)
+                        },
                         onClick = {
                             showLogoutDlg = true
                         }
