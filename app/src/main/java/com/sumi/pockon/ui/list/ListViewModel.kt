@@ -203,16 +203,20 @@ class ListViewModel @Inject constructor(
     fun orderBy(flag: Boolean = false) {
         when (_topTitle.intValue) {
             R.string.top_app_bar_recent -> { // 최신순
-                _copyGiftList.value = _copyGiftList.value.sortedByDescending {
-                    val dateFormat = SimpleDateFormat("yyyyMMddHHmmss", Locale.KOREA)
-                    dateFormat.parse(it.addDt)?.time
-                }
+                val dateFormat = SimpleDateFormat("yyyyMMddHHmmss", Locale.KOREA)
+                _copyGiftList.value = _copyGiftList.value.sortedWith(
+                    compareByDescending<Gift> {
+                        dateFormat.parse(it.addDt)?.time
+                    }.thenBy { it.brand }.thenBy { it.name }
+                )
             }
             R.string.top_app_bar_end_date -> { // 만료일순
                 val dateFormat = SimpleDateFormat("yyyyMMdd", Locale.KOREA)
-                _copyGiftList.value = _copyGiftList.value.sortedBy {
-                    dateFormat.parse(it.endDt)?.time
-                }
+                _copyGiftList.value = _copyGiftList.value.sortedWith(
+                    compareBy<Gift> {
+                        dateFormat.parse(it.endDt)?.time
+                    }.thenBy { it.brand }.thenBy { it.name }
+                )
             }
             else -> { // 가나다순
                 _copyGiftList.value = _copyGiftList.value.sortedWith(

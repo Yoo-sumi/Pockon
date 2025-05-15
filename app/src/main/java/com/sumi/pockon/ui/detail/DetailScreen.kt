@@ -985,7 +985,7 @@ fun GiftBottomSheet(image: Bitmap?, isVisible: Boolean, onDismiss: (Boolean) -> 
                         .background(MaterialTheme.colorScheme.primary),
                     shape = RectangleShape,
                     onClick = {
-                        onDismiss(true)
+                        if (!isFullScreen) onDismiss(true)
                     }
                 ) {
                     Text(

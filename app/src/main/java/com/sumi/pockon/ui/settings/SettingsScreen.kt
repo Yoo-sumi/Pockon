@@ -110,7 +110,7 @@ fun SettingsScreen(
                         isSwitch = true,
                         checked = checkedAlarm,
                         onCheck = {
-                            if (checkNotificationPermission(context)) {
+                            if (checkNotificationPermission(context) || checkedAlarm) {
                                 checkedAlarm = !checkedAlarm
                                 settingViewModel.onOffNotiEndDt(checkedAlarm)
                             } else {
