@@ -1,5 +1,6 @@
 package com.sumi.pockon.ui.settings
 
+import android.content.Intent
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
@@ -89,7 +90,20 @@ class SettingsViewModel @Inject constructor(
         }
     }
 
-    fun removeAccount(onSuccess: (Boolean) -> Unit) {
+    fun getSignInIntent(onComplete: (Intent) -> Unit) {
+        loginRepository.getSignInIntent {
+            onComplete(it)
+        }
+    }
+
+    fun getIdToken(onComplete: (String?) -> Unit) {
+        viewModelScope.launch {
+            val idToken = loginRepository.getTokenForApiHigher()
+            onComplete(idToken)
+        }
+    }
+
+    fun removeAccount(idToken: String?, onSuccess: (Boolean) -> Unit) {
         if (!isGuestMode && !networkMonitor.isConnected()) {
             onSuccess(false)
             _isShowNoInternetDialog.value = true
@@ -110,7 +124,7 @@ class SettingsViewModel @Inject constructor(
                             brandSearchRepository.deleteAllBrands()
                         }
                         if (!isGuestMode) {
-                            loginRepository.removeAccount(preferenceRepository.getIdToken()) {
+                            loginRepository.removeAccount(idToken) {
                                 if (it) {
                                     loginRepository.logout()
                                     preferenceRepository.removeAll()

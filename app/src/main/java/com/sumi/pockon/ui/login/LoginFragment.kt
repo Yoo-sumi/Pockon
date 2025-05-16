@@ -1,31 +1,40 @@
 package com.sumi.pockon.ui.login
 
+import android.os.Build
 import android.os.Bundle
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
-import androidx.credentials.CredentialManager
-import androidx.credentials.GetCredentialRequest
-import androidx.credentials.exceptions.GetCredentialException
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.fragment.app.viewModels
-import androidx.lifecycle.lifecycleScope
 import androidx.navigation.Navigation
-import com.sumi.pockon.BuildConfig
+import com.google.android.gms.auth.api.signin.GoogleSignIn
+import com.google.android.gms.common.api.ApiException
 import com.sumi.pockon.R
 import com.sumi.pockon.databinding.FragmentLoginBinding
 import com.sumi.pockon.ui.loading.LoadingScreen
-import com.google.android.libraries.identity.googleid.GetGoogleIdOption
 import com.google.android.material.snackbar.Snackbar
 import dagger.hilt.android.AndroidEntryPoint
-import kotlinx.coroutines.launch
 
 @AndroidEntryPoint
 class LoginFragment : Fragment() {
 
     private lateinit var binding: FragmentLoginBinding
     private val loginViewModel: LoginViewModel by viewModels()
+    private val signInLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
+        val task = GoogleSignIn.getSignedInAccountFromIntent(result.data)
+        try {
+            val account = task.getResult(ApiException::class.java)
+            val idToken = account?.idToken ?: throw Exception("No ID token")
+            loginViewModel.loginForApiLower(idToken)
+        } catch (e: ApiException) {
+            loginViewModel.loginForApiLower(null)
+        } catch (e: Exception) {
+            loginViewModel.loginForApiLower(null)
+        }
+    }
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -36,38 +45,16 @@ class LoginFragment : Fragment() {
         val btnGoogle: TextView = binding.btnGoogleLogin.getChildAt(0) as TextView
         btnGoogle.text = getString(R.string.btn_goggle_login)
 
-        val credentialManager = CredentialManager.create(requireContext())
-
-        val googleIdOption = GetGoogleIdOption
-            .Builder()
-            .setFilterByAuthorizedAccounts(false)
-            .setServerClientId(BuildConfig.GOOGLE_CLIENT_ID)
-            .setAutoSelectEnabled(false)
-            .build()
-
-        val request = GetCredentialRequest
-            .Builder()
-            .addCredentialOption(googleIdOption)
-            .build()
-
         binding.btnGuestLogin.setOnClickListener {
             loginViewModel.loginAsGuest() // 게스트로 로그인
         }
 
         btnGoogle.setOnClickListener {
-            lifecycleScope.launch {
-                try {
-                    val result = credentialManager.getCredential(
-                        request = request,
-                        context = requireContext()
-                    )
-                    loginViewModel.login(credentialManager, result) // 구글 로그인 이어서 진행
-                } catch (e: GetCredentialException) { // 구글 로그인 실패
-                    Snackbar.make(
-                        binding.root,
-                        getString(R.string.msg_login_fail),
-                        Snackbar.LENGTH_SHORT
-                    ).show()
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
+                loginViewModel.loginForApiHigher()
+            } else {
+                loginViewModel.getSignInIntent { signInIntent ->
+                    signInLauncher.launch(signInIntent)
                 }
             }
         }

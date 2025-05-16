@@ -10,8 +10,6 @@ class PreferenceLocalDataSource @Inject constructor(
 
     fun getUid(): String = prefs.getString(SharedPreferenceKeys.UID, "") ?: ""
 
-    fun getIdToken(): String = prefs.getString(SharedPreferenceKeys.ID_TOKEN, "") ?: ""
-
     fun getPinNum(): String = prefs.getString(SharedPreferenceKeys.PIN_NUM, "") ?: ""
 
     fun isAuthPin() = prefs.getBoolean(SharedPreferenceKeys.AUTH_PIN, false)
@@ -30,10 +28,6 @@ class PreferenceLocalDataSource @Inject constructor(
 
     fun saveUid(uid: String) {
         prefs.edit().putString(SharedPreferenceKeys.UID, uid).apply()
-    }
-
-    fun saveIdToken(idToken: String) {
-        prefs.edit().putString(SharedPreferenceKeys.ID_TOKEN, idToken).apply()
     }
 
     fun savePinNum(pinNum: String) {

@@ -1,15 +1,23 @@
 package com.sumi.pockon.data.repository
 
+import android.content.Intent
 import com.sumi.pockon.data.remote.login.LoginDataSource
-import com.google.firebase.auth.AuthCredential
 import javax.inject.Inject
 
 class LoginRepository @Inject constructor(
     private val loginDataSource: LoginDataSource
 ) {
 
-    fun login(firebaseCredential: AuthCredential, onComplete: (String) -> Unit) {
-        loginDataSource.login(firebaseCredential) { uid ->
+    suspend fun getTokenForApiHigher() = loginDataSource.getIdToken()
+
+    fun getSignInIntent(onComplete: (Intent) -> Unit) {
+        loginDataSource.getSignInIntent {
+            onComplete(it)
+        }
+    }
+
+    fun login(idToken: String, onComplete: (String) -> Unit) {
+        loginDataSource.login(idToken) { uid ->
             onComplete(uid)
         }
     }
@@ -18,8 +26,8 @@ class LoginRepository @Inject constructor(
         loginDataSource.logout()
     }
 
-    fun removeAccount(idToken: String, onComplete: (Boolean) -> Unit) {
-        loginDataSource.removeGoogleAccount(idToken) {
+    fun removeAccount(idToken: String?, onComplete: (Boolean) -> Unit) {
+        loginDataSource.removeAccount(idToken) {
             onComplete(it)
         }
     }

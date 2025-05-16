@@ -59,8 +59,8 @@ class DiModule {
 
     @Singleton
     @Provides
-    fun provideLoginDataSource(auth: FirebaseAuth): LoginDataSource {
-        return LoginDataSource(auth)
+    fun provideLoginDataSource(auth: FirebaseAuth, @ApplicationContext context: Context): LoginDataSource {
+        return LoginDataSource(auth, context)
     }
 
     @Singleton

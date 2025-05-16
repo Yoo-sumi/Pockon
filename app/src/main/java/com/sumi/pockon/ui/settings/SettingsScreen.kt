@@ -7,6 +7,8 @@ import android.content.pm.PackageManager
 import android.net.Uri
 import android.os.Build
 import android.provider.Settings
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AlertDialog
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -45,6 +47,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.content.ContextCompat
 import androidx.hilt.navigation.compose.hiltViewModel
+import com.google.android.gms.auth.api.signin.GoogleSignIn
+import com.google.android.gms.common.api.ApiException
 import com.sumi.pockon.R
 import com.sumi.pockon.ui.list.ConfirmDialog
 import kotlinx.coroutines.launch
@@ -69,6 +73,38 @@ fun SettingsScreen(
     val snackbarHostState = remember { SnackbarHostState() }
     val scope = rememberCoroutineScope()
     val context = LocalContext.current
+
+    val launcher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.StartActivityForResult()
+    ) { result ->
+        val task = GoogleSignIn.getSignedInAccountFromIntent(result.data)
+        try {
+            val account = task.getResult(ApiException::class.java)
+            val idToken = account?.idToken
+            if (idToken != null) {
+                settingViewModel.removeAccount(idToken) { isSuccess ->
+                    isLoading(false)
+                    if (isSuccess) { // 로그인 화면으로 이동
+                        moveLogInScreen()
+                    } else { // "회원탈퇴에 실패했습니다."
+                        scope.launch {
+                            snackbarHostState.showSnackbar(message = context.getString(R.string.msg_remove_account_fail))
+                        }
+                    }
+                }
+            } else {
+                isLoading(false)
+                scope.launch {
+                    snackbarHostState.showSnackbar(message = context.getString(R.string.msg_remove_account_fail))
+                }
+            }
+        } catch (e: Exception) {
+            isLoading(false)
+            scope.launch {
+                snackbarHostState.showSnackbar(message = context.getString(R.string.msg_remove_account_fail))
+            }
+        }
+    }
 
     Scaffold(
         snackbarHost = {
@@ -210,14 +246,22 @@ fun SettingsScreen(
                 onConfirm = {
                     showRemoveDlg = false
                     isLoading(true)
-                    settingViewModel.removeAccount { result ->
-                        isLoading(false)
-                        if (result) { // 로그인 화면으로 이동
-                            moveLogInScreen()
-                        } else { // "회원탈퇴에 실패했습니다."
-                            scope.launch {
-                                snackbarHostState.showSnackbar(message = context.getString(R.string.msg_remove_account_fail))
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
+                        settingViewModel.getIdToken { idToken ->
+                            settingViewModel.removeAccount(idToken) { result ->
+                                isLoading(false)
+                                if (result) { // 로그인 화면으로 이동
+                                    moveLogInScreen()
+                                } else { // "회원탈퇴에 실패했습니다."
+                                    scope.launch {
+                                        snackbarHostState.showSnackbar(message = context.getString(R.string.msg_remove_account_fail))
+                                    }
+                                }
                             }
+                        }
+                    } else {
+                        settingViewModel.getSignInIntent { signInIntent ->
+                            launcher.launch(signInIntent)
                         }
                     }
                 },
