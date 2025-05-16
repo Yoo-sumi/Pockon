@@ -1,6 +1,7 @@
 package com.sumi.pockon.data.repository
 
 import android.content.Intent
+import com.google.android.libraries.identity.googleid.GoogleIdTokenCredential
 import com.sumi.pockon.data.remote.login.LoginDataSource
 import javax.inject.Inject
 
@@ -10,8 +11,8 @@ class LoginRepository @Inject constructor(
 
     suspend fun getTokenForApiHigher() = loginDataSource.getIdToken()
 
-    fun getSignInIntent(onComplete: (Intent) -> Unit) {
-        loginDataSource.getSignInIntent {
+    fun getSignInIntent(accountName: String?, onComplete: (Intent) -> Unit) {
+        loginDataSource.getSignInIntent(accountName) {
             onComplete(it)
         }
     }
@@ -26,8 +27,8 @@ class LoginRepository @Inject constructor(
         loginDataSource.logout()
     }
 
-    fun removeAccount(idToken: String?, onComplete: (Boolean) -> Unit) {
-        loginDataSource.removeAccount(idToken) {
+    fun removeAccount(idToken: String?, credential: GoogleIdTokenCredential? = null, onComplete: (Boolean) -> Unit) {
+        loginDataSource.removeAccount(idToken, credential) {
             onComplete(it)
         }
     }

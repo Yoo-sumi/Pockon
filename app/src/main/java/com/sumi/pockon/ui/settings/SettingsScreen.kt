@@ -247,14 +247,21 @@ fun SettingsScreen(
                     showRemoveDlg = false
                     isLoading(true)
                     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
-                        settingViewModel.getIdToken { idToken ->
-                            settingViewModel.removeAccount(idToken) { result ->
+                        settingViewModel.getIdToken { credential ->
+                            if (credential == null) {
                                 isLoading(false)
-                                if (result) { // 로그인 화면으로 이동
-                                    moveLogInScreen()
-                                } else { // "회원탈퇴에 실패했습니다."
-                                    scope.launch {
-                                        snackbarHostState.showSnackbar(message = context.getString(R.string.msg_remove_account_fail))
+                                scope.launch {
+                                    snackbarHostState.showSnackbar(message = context.getString(R.string.msg_remove_account_fail))
+                                }
+                            } else {
+                                settingViewModel.removeAccount(null, credential) { result ->
+                                    isLoading(false)
+                                    if (result) { // 로그인 화면으로 이동
+                                        moveLogInScreen()
+                                    } else { // "회원탈퇴에 실패했습니다."
+                                        scope.launch {
+                                            snackbarHostState.showSnackbar(message = context.getString(R.string.msg_remove_account_fail))
+                                        }
                                     }
                                 }
                             }

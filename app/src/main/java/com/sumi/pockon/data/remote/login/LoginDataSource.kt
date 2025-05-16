@@ -23,13 +23,6 @@ class LoginDataSource @Inject constructor(
     @ApplicationContext private val context: Context
 ) {
 
-    private val gso = GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
-        .requestIdToken(BuildConfig.GOOGLE_CLIENT_ID)
-        .requestEmail()
-        .build()
-
-    private val googleSignInClient = GoogleSignIn.getClient(context, gso)
-
     private val credentialManager = CredentialManager.create(context)
 
     private val googleIdOption = GetGoogleIdOption
@@ -44,16 +37,30 @@ class LoginDataSource @Inject constructor(
         .addCredentialOption(googleIdOption)
         .build()
 
-    fun getSignInIntent(onComplete: (Intent) -> Unit) {
+    fun getSignInIntent(accountName: String?, onComplete: (Intent) -> Unit) {
         // 반드시 signOut을 먼저 호출해줘야 다중 계정 선택 가능
+        val gso = if (accountName.isNullOrEmpty()) {
+            GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
+                .requestIdToken(BuildConfig.GOOGLE_CLIENT_ID)
+                .requestEmail()
+                .build()
+        } else {
+            GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
+                .requestIdToken(BuildConfig.GOOGLE_CLIENT_ID)
+                .requestEmail()
+                .setAccountName(accountName) // 현재 로그인된 계정 고정
+                .build()
+        }
+
+        val googleSignInClient = GoogleSignIn.getClient(context, gso)
         googleSignInClient.signOut().addOnCompleteListener {
             val signInIntent = googleSignInClient.signInIntent
             onComplete(signInIntent)
         }
     }
 
-    suspend fun getIdToken(): String? {
-        var result: String? = null
+    suspend fun getIdToken(): GoogleIdTokenCredential? {
+        var result: GoogleIdTokenCredential? = null
         try {
             val credential = credentialManager.getCredential(
                 request = request,
@@ -63,7 +70,7 @@ class LoginDataSource @Inject constructor(
                 is CustomCredential -> {
                     result = if (credential.type == GoogleIdTokenCredential.TYPE_GOOGLE_ID_TOKEN_CREDENTIAL) {
                         try {
-                            GoogleIdTokenCredential.createFrom(credential.data).idToken
+                            GoogleIdTokenCredential.createFrom(credential.data)
                         } catch (e: GoogleIdTokenParsingException) {
                             null
                         }
@@ -94,15 +101,27 @@ class LoginDataSource @Inject constructor(
         auth.signOut()
     }
 
-    fun removeAccount(idToken: String?, onComplete: (Boolean) -> Unit) {
+    fun removeAccount(idToken: String?, selectedCredential: GoogleIdTokenCredential? = null, onComplete: (Boolean) -> Unit) {
         if (idToken.isNullOrEmpty()) {
             onComplete(false)
             return
         }
+
         val user = auth.currentUser
         if (user != null) {
-            val credential = GoogleAuthProvider.getCredential(idToken, null)
+            // 이메일 비교
+            if (selectedCredential != null) {
+                if (selectedCredential.id != idToken) {
+                    onComplete(false)
+                    return
+                }
+            }
 
+            val credential = if (selectedCredential != null) {
+                GoogleAuthProvider.getCredential(selectedCredential.idToken, null)
+            } else {
+                GoogleAuthProvider.getCredential(idToken, null)
+            }
             user.reauthenticate(credential)
                 .addOnCompleteListener { reauthTask ->
                     if (reauthTask.isSuccessful) {

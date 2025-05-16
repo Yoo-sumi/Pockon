@@ -5,6 +5,7 @@ import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.google.android.libraries.identity.googleid.GoogleIdTokenCredential
 import com.sumi.pockon.data.repository.PreferenceRepository
 import com.sumi.pockon.data.repository.BrandSearchRepository
 import com.sumi.pockon.data.repository.GiftRepository
@@ -91,19 +92,18 @@ class SettingsViewModel @Inject constructor(
     }
 
     fun getSignInIntent(onComplete: (Intent) -> Unit) {
-        loginRepository.getSignInIntent {
+        loginRepository.getSignInIntent(preferenceRepository.getEmail()) {
             onComplete(it)
         }
     }
 
-    fun getIdToken(onComplete: (String?) -> Unit) {
+    fun getIdToken(onComplete: (GoogleIdTokenCredential?) -> Unit) {
         viewModelScope.launch {
-            val idToken = loginRepository.getTokenForApiHigher()
-            onComplete(idToken)
+            onComplete(loginRepository.getTokenForApiHigher())
         }
     }
 
-    fun removeAccount(idToken: String?, onSuccess: (Boolean) -> Unit) {
+    fun removeAccount(idToken: String?, credential: GoogleIdTokenCredential? = null, onSuccess: (Boolean) -> Unit) {
         if (!isGuestMode && !networkMonitor.isConnected()) {
             onSuccess(false)
             _isShowNoInternetDialog.value = true
@@ -124,12 +124,22 @@ class SettingsViewModel @Inject constructor(
                             brandSearchRepository.deleteAllBrands()
                         }
                         if (!isGuestMode) {
-                            loginRepository.removeAccount(idToken) {
-                                if (it) {
-                                    loginRepository.logout()
-                                    preferenceRepository.removeAll()
+                            if (credential == null) {
+                                loginRepository.removeAccount(idToken) {
+                                    if (it) {
+                                        loginRepository.logout()
+                                        preferenceRepository.removeAll()
+                                    }
+                                    onSuccess(it)
                                 }
-                                onSuccess(it)
+                            } else {
+                                loginRepository.removeAccount(preferenceRepository.getEmail(), credential) {
+                                    if (it) {
+                                        loginRepository.logout()
+                                        preferenceRepository.removeAll()
+                                    }
+                                    onSuccess(it)
+                                }
                             }
                         } else {
                             onSuccess(true)

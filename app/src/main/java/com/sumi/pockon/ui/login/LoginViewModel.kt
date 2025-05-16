@@ -43,7 +43,7 @@ class LoginViewModel @Inject constructor(
     }
 
     fun getSignInIntent(onComplete: (Intent) -> Unit) {
-        loginRepository.getSignInIntent {
+        loginRepository.getSignInIntent(preferenceRepository.getEmail()) {
             onComplete(it)
         }
     }
@@ -54,8 +54,8 @@ class LoginViewModel @Inject constructor(
         preferenceRepository.saveIsGuestMode(true)
     }
 
-    fun loginForApiLower(idToken: String?) {
-        if (idToken.isNullOrEmpty()) {
+    fun loginForApiLower(idToken: String?, email: String?) {
+        if (idToken.isNullOrEmpty() || email.isNullOrEmpty()) {
             _isLogin.postValue(false)
             _isFail.postValue(true)
             return
@@ -69,6 +69,7 @@ class LoginViewModel @Inject constructor(
             } else {
                 _isLogin.postValue(true)
                 preferenceRepository.saveUid(it)
+                preferenceRepository.saveEmail(email)
             }
             _isLoading.postValue(false)
         }
@@ -77,21 +78,22 @@ class LoginViewModel @Inject constructor(
     fun loginForApiHigher() {
         _isLoading.postValue(true)
         viewModelScope.launch {
-            val idToken = loginRepository.getTokenForApiHigher()
-            if (idToken.isNullOrEmpty()) {
+            val credential = loginRepository.getTokenForApiHigher()
+            if (credential == null) {
                 _isLogin.postValue(false)
                 _isFail.postValue(true)
                 _isLoading.postValue(false)
                 return@launch
             }
 
-            loginRepository.login(idToken) {
+            loginRepository.login(credential.idToken) {
                 if (it.isEmpty()) {
                     _isLogin.postValue(false)
                     _isFail.postValue(true)
                 } else {
                     _isLogin.postValue(true)
                     preferenceRepository.saveUid(it)
+                    preferenceRepository.saveEmail(credential.id)
                 }
                 _isLoading.postValue(false)
             }

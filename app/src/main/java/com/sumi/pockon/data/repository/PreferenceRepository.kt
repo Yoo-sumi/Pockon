@@ -9,6 +9,8 @@ class PreferenceRepository @Inject constructor(
 
     fun getUid() = preferenceLocalDataSource.getUid()
 
+    fun getEmail() = preferenceLocalDataSource.getEmail()
+
     fun getPinNum() = preferenceLocalDataSource.getPinNum()
 
     fun isAuthPin() = preferenceLocalDataSource.isAuthPin()
@@ -24,6 +26,8 @@ class PreferenceRepository @Inject constructor(
     fun getNotiEndDtTime() = Pair(preferenceLocalDataSource.getNotiEndDtHour(), preferenceLocalDataSource.getNotiEndDtMinute())
 
     fun saveUid(uid: String) = preferenceLocalDataSource.saveUid(uid)
+
+    fun saveEmail(email: String) = preferenceLocalDataSource.saveEmail(email)
 
     fun savePinNum(pinNum: String) {
         preferenceLocalDataSource.savePinNum(pinNum)

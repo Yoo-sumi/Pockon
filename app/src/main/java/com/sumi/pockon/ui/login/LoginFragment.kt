@@ -27,12 +27,13 @@ class LoginFragment : Fragment() {
         val task = GoogleSignIn.getSignedInAccountFromIntent(result.data)
         try {
             val account = task.getResult(ApiException::class.java)
-            val idToken = account?.idToken ?: throw Exception("No ID token")
-            loginViewModel.loginForApiLower(idToken)
+            val idToken = account?.idToken
+            val email = account?.email
+            loginViewModel.loginForApiLower(idToken, email)
         } catch (e: ApiException) {
-            loginViewModel.loginForApiLower(null)
+            loginViewModel.loginForApiLower(null, null)
         } catch (e: Exception) {
-            loginViewModel.loginForApiLower(null)
+            loginViewModel.loginForApiLower(null, null)
         }
     }
 
