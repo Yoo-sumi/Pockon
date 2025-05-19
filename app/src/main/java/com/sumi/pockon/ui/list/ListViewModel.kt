@@ -114,10 +114,10 @@ class ListViewModel @Inject constructor(
     fun getGiftList(onComplete: () -> Unit) {
         filterList = listOf()
         if (isGuestMode) {
+            onComplete()
             sortChips()
             filterList()
             orderBy(true)
-            onComplete()
             return
         } // 게스트 모드는 서버 안탐
 
@@ -129,6 +129,7 @@ class ListViewModel @Inject constructor(
 
         giftRepository.getAllGift(uid) { giftList ->
             isRefresh = true
+            onComplete()
             if (giftList.isNotEmpty()) {
                 // 로컬 저장(기프티콘)
                 viewModelScope.launch(Dispatchers.IO) {
@@ -139,7 +140,6 @@ class ListViewModel @Inject constructor(
                 _copyGiftList.value = listOf()
                 filterList = listOf()
             }
-            onComplete()
         }
     }
 

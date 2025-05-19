@@ -109,7 +109,7 @@
     <string name="txt_logout_in_guest">게스트 모드 종료</string>
     <string name="txt_remove_account">회원 탈퇴</string>
     <string name="dlg_msg_logout">로그아웃하시겠어요?</string>
-    <string name="dlg_msg_logout_in_guest">게스트 모드를 종료하시겠어요?\n임시로 저장된 데이터가 모두 삭제돼요.</string>
+    <string name="dlg_msg_logout_in_guest">게스트 모드를 종료하시겠어요?\n저장된 데이터가 모두 삭제돼요.</string>
     <string name="dlg_msg_remove_account">회원 탈퇴하시겠어요?\n저장된 데이터가 모두 삭제돼요.</string>
 
     <!--copyright-->
