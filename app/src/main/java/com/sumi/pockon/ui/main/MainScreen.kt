@@ -97,7 +97,7 @@ fun BottomNavigationBar(
             val notificationGranted = permissionsMap[Manifest.permission.POST_NOTIFICATIONS] ?: true
 
             if (!notificationGranted) {
-                // 알림 권한이 거부된 경우 사용 임박 알림 off
+                // 알림 권한이 거부된 경우 만료 임박 알림 off
                 mainViewModel.disableNotification()
             }
         }
