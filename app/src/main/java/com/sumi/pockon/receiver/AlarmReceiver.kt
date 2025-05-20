@@ -5,7 +5,6 @@ import android.app.PendingIntent
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
-import android.os.Build
 import androidx.core.app.NotificationCompat
 import com.sumi.pockon.ui.main.MainActivity
 import com.sumi.pockon.MainApplication.Companion.CHANNEL_ID
@@ -83,8 +82,7 @@ class AlarmReceiver : BroadcastReceiver() {
                         isFavorite = giftEntity.isFavorite
                     )
 
-                    val notificationManager =
-                        context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+                    val notificationManager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
 
                     val myIntent = Intent(context, MainActivity::class.java).apply {
                         flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
@@ -122,15 +120,20 @@ class AlarmReceiver : BroadcastReceiver() {
                     )
 
                     // 그룹 요약 알림
+                    val inboxStyle = NotificationCompat.InboxStyle()
+                    repeat(preferenceRepository.getNotiGroupCount()) {
+                        inboxStyle.addLine("${gift.brand}\n${gift.name}")
+                    }
                     val summaryNotification = NotificationCompat.Builder(context, CHANNEL_ID)
                         .setSmallIcon(R.drawable.ic_noti_gift)
-                        .setStyle(NotificationCompat.InboxStyle())
+                        .setStyle(inboxStyle)
                         .setGroup(GROUP_KEY)
+                        .setPriority(NotificationCompat.PRIORITY_LOW)
                         .setGroupSummary(true)
                         .setAutoCancel(true)
                         .build()
 
-                    notificationManager.notify(gift.id.hashCode(), summaryNotification)
+                    notificationManager.notify(0, summaryNotification)
                 }
             }
         }
