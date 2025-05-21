@@ -75,14 +75,13 @@ fun rotateBitmapIfRequired(contentResolver: ContentResolver, uri: Uri, bitmap: B
     }
 }
 
-fun Bitmap.toByteArray(): ByteArray {
+fun Bitmap.toByteArray(uid: String): ByteArray {
     val stream = ByteArrayOutputStream()
-    this.compress(Bitmap.CompressFormat.JPEG, 80, stream) // 압축률 80
-    return stream.toByteArray()
-}
+    this.compress(Bitmap.CompressFormat.PNG, 100, stream)
+    val byteArray = stream.toByteArray()
+    val key = CryptoManager.generateKeyFromUID(uid)
 
-fun ByteArray.toBitmap(): Bitmap {
-    return BitmapFactory.decodeByteArray(this, 0, this.size)
+    return CryptoManager.encrypt(byteArray, key)
 }
 
 fun saveBitmapToFile(bitmap: Bitmap?, context: Context): String {

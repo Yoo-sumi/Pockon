@@ -1,11 +1,11 @@
 package com.sumi.pockon.data.remote.gift
 
 import android.graphics.Bitmap
-import com.sumi.pockon.util.toBitmap
+import android.graphics.BitmapFactory
 import com.sumi.pockon.util.toByteArray
-import com.google.android.gms.tasks.Task
 import com.google.android.gms.tasks.Tasks
 import com.google.firebase.storage.StorageReference
+import com.sumi.pockon.util.CryptoManager
 import javax.inject.Inject
 
 class GiftPhotoRemoteDataSource @Inject constructor(
@@ -13,8 +13,8 @@ class GiftPhotoRemoteDataSource @Inject constructor(
 ) {
 
     fun uploadData(data: Bitmap, uid: String, id: String, onComplete: (Boolean) -> Unit) {
-        storageRef.child("${uid}/${id}.jpeg")
-            .putBytes(data.toByteArray())
+        storageRef.child("${uid}/${id}.enc")
+            .putBytes(data.toByteArray(uid))
             .addOnCompleteListener { task ->
                 onComplete(task.isSuccessful)
             }
@@ -25,23 +25,35 @@ class GiftPhotoRemoteDataSource @Inject constructor(
         ids: List<String>,
         onComplete: (Map<String, Bitmap?>) -> Unit
     ) {
-        val tasks: List<Task<ByteArray>> = ids.map { id ->
-            storageRef.child("${uid}/${id}.jpeg").getBytes(Long.MAX_VALUE)
+        val key = CryptoManager.generateKeyFromUID(uid)
+
+        val tasks = ids.map { id ->
+            val fileRef = storageRef.child("${uid}/${id}.enc")
+            fileRef.getBytes(Long.MAX_VALUE)
+                .continueWith { task ->
+                    val encrypted = task.result
+                    try {
+                        val decrypted = CryptoManager.decrypt(encrypted, key)
+                        val bitmap = BitmapFactory.decodeByteArray(decrypted, 0, decrypted.size)
+                        id to bitmap
+                    } catch (e: Exception) {
+                        id to null
+                    }
+                }
         }
 
-        // 모든 다운로드가 완료될 때까지 기다린 후 결과를 처리
-        Tasks.whenAllSuccess<ByteArray>(*tasks.toTypedArray()).addOnSuccessListener { results ->
-            val bitmaps = ids.zip(results) { id, bytes ->
-                id to bytes.toBitmap()
-            }.toMap() // id와 비트맵을 Map으로 변환
-            onComplete(bitmaps)  // 결과를 Map 형태로 전달
-        }.addOnFailureListener {
-            onComplete(emptyMap())  // 다운로드 실패시 빈 Map 반환
-        }
+        Tasks.whenAllSuccess<Pair<String, Bitmap?>>(*tasks.toTypedArray())
+            .addOnSuccessListener { results ->
+                val resultMap = results.toMap()
+                onComplete(resultMap)
+            }
+            .addOnFailureListener { e ->
+                onComplete(emptyMap())
+            }
     }
 
     fun removeData(uid: String, id: String, onComplete: (Boolean) -> Unit) {
-        storageRef.child("${uid}/${id}.jpeg")
+        storageRef.child("${uid}/${id}.enc")
             .delete()
             .addOnCompleteListener { task ->
                 onComplete(task.isSuccessful)
@@ -50,7 +62,7 @@ class GiftPhotoRemoteDataSource @Inject constructor(
 
     fun removeMultipleData(uid: String, ids: List<String>, onComplete: (Boolean) -> Unit) {
         val deleteTasks = ids.map { id ->
-            storageRef.child("${uid}/${id}.jpeg")
+            storageRef.child("${uid}/${id}.enc")
                 .delete()
         }
 
