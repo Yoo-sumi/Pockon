@@ -6,6 +6,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.ViewModelProvider
 import com.sumi.pockon.databinding.FragmentMapBinding
 import com.sumi.pockon.data.model.Document
 import com.sumi.pockon.data.model.Gift
@@ -21,17 +22,20 @@ import com.naver.maps.map.overlay.Overlay
 import com.naver.maps.map.util.FusedLocationSource
 import com.naver.maps.map.util.MarkerIcons
 
-class MapFragment(
-    private val mapViewModel: MapViewModel,
-    val onClick: (List<Gift>) -> Unit
-) : Fragment(), OnMapReadyCallback {
+class MapFragment : Fragment(), OnMapReadyCallback {
 
     private val LOCATION_PERMISSION_REQUEST_CODE = 1000
     private lateinit var binding: FragmentMapBinding
     private lateinit var mapView: MapView
     private lateinit var naverMap: NaverMap
     private lateinit var locationSource: FusedLocationSource
+    private lateinit var mapViewModel: MapViewModel
     private val markerList = mutableMapOf<String, Marker>()
+    private var onClick: ((List<Gift>) -> Unit)? = null
+
+    fun setOnClickCallback(callback: (List<Gift>) -> Unit) {
+        onClick = callback
+    }
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -42,6 +46,7 @@ class MapFragment(
         mapView = binding.mapView
         mapView.getMapAsync(this)
         locationSource = FusedLocationSource(this, LOCATION_PERMISSION_REQUEST_CODE)
+        mapViewModel = ViewModelProvider(requireActivity())[MapViewModel::class.java]
 
         return binding.root
     }
@@ -80,7 +85,7 @@ class MapFragment(
                     markerList.forEach { (id, marker) ->
                         if (id == document.id) {
                             // 뷰페이저 셋팅
-                            onClick(it.second)
+                            onClick?.invoke(it.second)
 
                             marker.iconTintColor = Color.RED
                             marker.width = 90
@@ -104,7 +109,7 @@ class MapFragment(
                     if (nearestDoc.x == it.first.x && nearestDoc.y == it.first.y) {
                         // 초기엔 가장 가까운곳으로
                         // 뷰페이저 셋팅
-                        onClick(it.second)
+                        onClick?.invoke(it.second)
 
                         // 카메라 이동
                         val cameraUpdate = CameraUpdate.scrollTo(

@@ -34,7 +34,6 @@ import com.sumi.pockon.util.getDday
 
 @Composable
 fun MapScreen(onBack: () -> Unit, onDetail: (String) -> Unit) {
-    val mapViewmodel = hiltViewModel<MapViewModel>()
     val context = LocalContext.current
     var point by rememberSaveable { mutableStateOf<List<Gift>>(listOf()) }
     val hasFragmentBeenSet = remember { mutableStateOf(false) }
@@ -45,25 +44,30 @@ fun MapScreen(onBack: () -> Unit, onDetail: (String) -> Unit) {
     }
 
     Box(modifier = Modifier.fillMaxSize()) {
-        AndroidView(modifier = Modifier.fillMaxSize(), factory = {
-            fragmentContainerView
-        }, update = {
-            if (!hasFragmentBeenSet.value) {
-                val baseContext = (it.context as ContextWrapper).baseContext
-                val fragmentManager = (baseContext as FragmentActivity).supportFragmentManager
+        AndroidView(
+            modifier = Modifier.fillMaxSize(),
+            factory = {
+                fragmentContainerView
+            },
+            update = {
+                if (!hasFragmentBeenSet.value) {
+                    val baseContext = (it.context as ContextWrapper).baseContext
+                    val fragmentManager = (baseContext as FragmentActivity).supportFragmentManager
 
-                fragmentManager.commit {
-                    replace(
-                        R.id.fragment_container_view, MapFragment(mapViewmodel) { giftList ->
+                    val fragment = MapFragment().apply {
+                        setOnClickCallback { giftList ->
                             point = giftList
                         }
-                    )
-                    addToBackStack(null) // 백 스택에 추가하여 뒤로가기 처리
-                }
+                    }
 
-                hasFragmentBeenSet.value = true
+                    fragmentManager.commit {
+                        replace(R.id.fragment_container_view, fragment)
+                        addToBackStack(null)
+                    }
+                    hasFragmentBeenSet.value = true
+                }
             }
-        })
+        )
 
         if (point.isNotEmpty()) {
             val pagerState = rememberPagerState(pageCount = { point.size })

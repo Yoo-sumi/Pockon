@@ -11,5 +11,4 @@ object SharedPreferenceKeys {
     const val NOTI_END_DT_DAY = "noti_end_dt_day"
     const val NOTI_END_DT_HOUR = "noti_end_dt_hour"
     const val NOTI_END_DT_MINUTE = "noti_end_dt_minute"
-    const val NOTI_GROUP_COUNT = "noti_group_count"
 }

@@ -28,8 +28,6 @@ class PreferenceLocalDataSource @Inject constructor(
 
     fun getNotiEndDtMinute() = prefs.getInt(SharedPreferenceKeys.NOTI_END_DT_MINUTE, 0)
 
-    fun getNotiGroupCount() = prefs.getInt(SharedPreferenceKeys.NOTI_GROUP_COUNT, 0)
-
     fun saveUid(uid: String) {
         prefs.edit().putString(SharedPreferenceKeys.UID, uid).apply()
     }
@@ -70,20 +68,12 @@ class PreferenceLocalDataSource @Inject constructor(
         prefs.edit().putInt(SharedPreferenceKeys.NOTI_END_DT_MINUTE, minute).apply()
     }
 
-    fun saveNotiGroupCount(count: Int) {
-        prefs.edit().putInt(SharedPreferenceKeys.NOTI_GROUP_COUNT, count).apply()
-    }
-
     fun removePinNum() {
         prefs.edit().remove(SharedPreferenceKeys.PIN_NUM).apply()
     }
 
     fun removeAuthPin() {
         prefs.edit().remove(SharedPreferenceKeys.AUTH_PIN).apply()
-    }
-
-    fun removeNotiGroupCount() {
-        prefs.edit().remove(SharedPreferenceKeys.NOTI_GROUP_COUNT).apply()
     }
 
     fun removeAll() {

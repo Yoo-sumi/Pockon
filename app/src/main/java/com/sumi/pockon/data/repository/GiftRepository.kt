@@ -168,6 +168,8 @@ class GiftRepository @Inject constructor(
 
     fun getGift(id: String) = giftLocalDataSource.getGift(id)
 
+    fun getGiftCountByEndDate(endDt: String) = giftLocalDataSource.getGiftCountByEndDate(endDt)
+
     fun deleteGift(id: String) = giftLocalDataSource.deleteGift(id)
 
     fun deleteGifts(ids: List<String>) = giftLocalDataSource.deleteGifts(ids)

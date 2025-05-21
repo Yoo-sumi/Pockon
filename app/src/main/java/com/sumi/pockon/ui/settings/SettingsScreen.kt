@@ -22,6 +22,8 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
@@ -74,6 +76,8 @@ fun SettingsScreen(
     val scope = rememberCoroutineScope()
     val context = LocalContext.current
 
+    val scrollState = rememberScrollState()
+
     val launcher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.StartActivityForResult()
     ) { result ->
@@ -113,109 +117,115 @@ fun SettingsScreen(
     ) { innerPadding ->
         Column {
             SettingScreenTopBar()
-            Box(
+            Column(
                 modifier = Modifier
-                    .padding(innerPadding)
                     .fillMaxSize()
-                    .background(MaterialTheme.colorScheme.background)
+                    .verticalScroll(scrollState)
             ) {
-                Column(
-                    horizontalAlignment = Alignment.Start
+                Box(
+                    modifier = Modifier
+                        .padding(innerPadding)
+                        .fillMaxSize()
+                        .background(MaterialTheme.colorScheme.background)
                 ) {
-                    // 사용내역
-                    SettingItem(
-                        text = stringResource(id = R.string.txt_usage_history),
-                        isTitle = true
-                    )
-
-                    SettingItem(
-                        text = stringResource(id = R.string.txt_usage_history),
-                        onClick = {
-                            onUsedGift()
-                        }
-                    )
-
-                    // 설정
-                    SettingItem(
-                        text = stringResource(id = R.string.setting),
-                        isTitle = true
-                    )
-
-                    SettingItem(
-                        text = stringResource(id = R.string.txt_noti_of_imminent_use),
-                        isSwitch = true,
-                        checked = checkedAlarm,
-                        onCheck = {
-                            if (checkNotificationPermission(context) || checkedAlarm) {
-                                checkedAlarm = !checkedAlarm
-                                settingViewModel.onOffNotiEndDt(checkedAlarm)
-                            } else {
-                                AlertDialog.Builder(context)
-                                    .setTitle(context.getString(R.string.txt_alert))
-                                    .setMessage(context.getString(R.string.msg_no_notification_permission))
-                                    .setPositiveButton(context.getString(R.string.btn_confirm)) { dialog, which ->
-                                        // 긍정 버튼 클릭 동작 처리
-                                        val intent = Intent(
-                                            Settings.ACTION_APPLICATION_DETAILS_SETTINGS,
-                                            Uri.fromParts("package", context.packageName, null)
-                                        )
-                                        context.startActivity(intent)
-                                    }
-                                    .show()
-                            }
-                        },
-                        onClick = {
-                            if (checkedAlarm) moveNotiImminentUseScreen()
-                        }
-                    )
-
-                    SettingItem(
-                        text = stringResource(id = R.string.txt_use_pwd),
-                        isSwitch = true,
-                        checked = checkedPwd,
-                        onCheck = {
-                            checkedPwd = !checkedPwd
-                            if (checkedPwd) {
-                                movePinScreen()
-                            } else {
-                                settingViewModel.offAuthPin()
-                            }
-                        },
-                    )
-
-                    // 사용자
-                    SettingItem(
-                        text = stringResource(id = R.string.txt_user),
-                        isTitle = true
-                    )
-
-                    SettingItem(
-                        text = if (settingViewModel.getIsGuestMode()) {
-                            stringResource(id = R.string.txt_logout_in_guest)
-                        } else {
-                            stringResource(id = R.string.txt_logout)
-                        },
-                        onClick = {
-                            showLogoutDlg = true
-                        }
-                    )
-
-                    if (!settingViewModel.getIsGuestMode()) {
+                    Column(
+                        horizontalAlignment = Alignment.Start
+                    ) {
+                        // 사용내역
                         SettingItem(
-                            text = stringResource(id = R.string.txt_remove_account),
+                            text = stringResource(id = R.string.txt_usage_history),
+                            isTitle = true
+                        )
+
+                        SettingItem(
+                            text = stringResource(id = R.string.txt_usage_history),
                             onClick = {
-                                showRemoveDlg = true
+                                onUsedGift()
+                            }
+                        )
+
+                        // 설정
+                        SettingItem(
+                            text = stringResource(id = R.string.setting),
+                            isTitle = true
+                        )
+
+                        SettingItem(
+                            text = stringResource(id = R.string.txt_noti_of_imminent_use),
+                            isSwitch = true,
+                            checked = checkedAlarm,
+                            onCheck = {
+                                if (checkNotificationPermission(context) || checkedAlarm) {
+                                    checkedAlarm = !checkedAlarm
+                                    settingViewModel.onOffNotiEndDt(checkedAlarm)
+                                } else {
+                                    AlertDialog.Builder(context)
+                                        .setTitle(context.getString(R.string.txt_alert))
+                                        .setMessage(context.getString(R.string.msg_no_notification_permission))
+                                        .setPositiveButton(context.getString(R.string.btn_confirm)) { dialog, which ->
+                                            // 긍정 버튼 클릭 동작 처리
+                                            val intent = Intent(
+                                                Settings.ACTION_APPLICATION_DETAILS_SETTINGS,
+                                                Uri.fromParts("package", context.packageName, null)
+                                            )
+                                            context.startActivity(intent)
+                                        }
+                                        .show()
+                                }
+                            },
+                            onClick = {
+                                if (checkedAlarm) moveNotiImminentUseScreen()
+                            }
+                        )
+
+                        SettingItem(
+                            text = stringResource(id = R.string.txt_use_pwd),
+                            isSwitch = true,
+                            checked = checkedPwd,
+                            onCheck = {
+                                checkedPwd = !checkedPwd
+                                if (checkedPwd) {
+                                    movePinScreen()
+                                } else {
+                                    settingViewModel.offAuthPin()
+                                }
+                            },
+                        )
+
+                        // 사용자
+                        SettingItem(
+                            text = stringResource(id = R.string.txt_user),
+                            isTitle = true
+                        )
+
+                        SettingItem(
+                            text = if (settingViewModel.getIsGuestMode()) {
+                                stringResource(id = R.string.txt_logout_in_guest)
+                            } else {
+                                stringResource(id = R.string.txt_logout)
+                            },
+                            onClick = {
+                                showLogoutDlg = true
+                            }
+                        )
+
+                        if (!settingViewModel.getIsGuestMode()) {
+                            SettingItem(
+                                text = stringResource(id = R.string.txt_remove_account),
+                                onClick = {
+                                    showRemoveDlg = true
+                                }
+                            )
+                        }
+
+                        // 저작권 표기
+                        SettingItem(
+                            text = stringResource(id = R.string.txt_copyright),
+                            onClick = {
+                                moveCopyrightScreen()
                             }
                         )
                     }
-
-                    // 저작권 표기
-                    SettingItem(
-                        text = stringResource(id = R.string.txt_copyright),
-                        onClick = {
-                            moveCopyrightScreen()
-                        }
-                    )
                 }
             }
         }

@@ -25,8 +25,6 @@ class PreferenceRepository @Inject constructor(
 
     fun getNotiEndDtTime() = Pair(preferenceLocalDataSource.getNotiEndDtHour(), preferenceLocalDataSource.getNotiEndDtMinute())
 
-    fun getNotiGroupCount() = preferenceLocalDataSource.getNotiGroupCount()
-
     fun saveUid(uid: String) = preferenceLocalDataSource.saveUid(uid)
 
     fun saveEmail(email: String) = preferenceLocalDataSource.saveEmail(email)

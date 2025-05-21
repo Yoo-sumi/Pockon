@@ -16,6 +16,8 @@ class GiftLocalDataSource @Inject constructor(
 
     fun getGift(id: String) = giftDao.getGift(id)
 
+    fun getGiftCountByEndDate(endDt: String) = giftDao.getGiftCountByEndDate(endDt)
+
     fun getAllUsedGift() = giftDao.getAllUsedGift()
 
     fun updateGiftIsFavorite(id: String, isFavorite: Boolean) = giftDao.updateGiftIsFavorite(id, isFavorite)

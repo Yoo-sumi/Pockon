@@ -25,6 +25,9 @@ interface GiftDao {
     @Query("SELECT * FROM GiftEntity WHERE id = :id")
     fun getGift(id: String): Flow<GiftEntity>
 
+    @Query("SELECT COUNT(*) FROM GiftEntity WHERE endDt = :endDt")
+    fun getGiftCountByEndDate(endDt: String): Int
+
     @Query("SELECT * FROM GiftEntity WHERE NULLIF(usedDt, '') IS NOT NULL")
     fun getAllUsedGift(): Flow<List<GiftEntity>>
 

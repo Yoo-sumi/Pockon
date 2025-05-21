@@ -121,7 +121,7 @@ class AlarmReceiver : BroadcastReceiver() {
 
                     // 그룹 요약 알림
                     val inboxStyle = NotificationCompat.InboxStyle()
-                    repeat(preferenceRepository.getNotiGroupCount()) {
+                    repeat(giftRepository.getGiftCountByEndDate(gift.endDt)) {
                         inboxStyle.addLine("${gift.brand}\n${gift.name}")
                     }
                     val summaryNotification = NotificationCompat.Builder(context, CHANNEL_ID)
