@@ -13,7 +13,7 @@ class MainActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT // 화면 고정
+//        requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT // 화면 고정
         val binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
 

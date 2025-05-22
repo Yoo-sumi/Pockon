@@ -1,9 +1,13 @@
 package com.sumi.pockon.ui.map
 
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.naver.maps.map.CameraPosition
 import com.sumi.pockon.data.repository.BrandSearchRepository
 import com.sumi.pockon.data.repository.GiftRepository
 import com.sumi.pockon.data.model.Document
@@ -28,6 +32,7 @@ class MapViewModel @Inject constructor(
     private var giftList = listOf<Gift>()
     private var brandInfoList = mutableMapOf<String, List<Document>>()
     private var nearestDoc: Document? = null
+    var cameraPosition by mutableStateOf<CameraPosition?>(null)
 
     init {
         observeGiftList()
