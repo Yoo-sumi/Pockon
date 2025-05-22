@@ -1,6 +1,7 @@
 package com.sumi.pockon.ui.login
 
 import android.content.Intent
+import android.net.Uri
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
@@ -54,7 +55,7 @@ class LoginViewModel @Inject constructor(
         preferenceRepository.saveIsGuestMode(true)
     }
 
-    fun loginForApiLower(idToken: String?, email: String?) {
+    fun loginForApiLower(idToken: String?, email: String?, name: String?, profileImg: Uri?) {
         if (idToken.isNullOrEmpty() || email.isNullOrEmpty()) {
             _isLogin.postValue(false)
             _isFail.postValue(true)
@@ -70,6 +71,8 @@ class LoginViewModel @Inject constructor(
                 _isLogin.postValue(true)
                 preferenceRepository.saveUid(it)
                 preferenceRepository.saveEmail(email)
+                name?.let { preferenceRepository.saveName(name) }
+                profileImg?.let { preferenceRepository.saveProfileImage(profileImg.toString()) }
             }
             _isLoading.postValue(false)
         }
@@ -94,6 +97,8 @@ class LoginViewModel @Inject constructor(
                     _isLogin.postValue(true)
                     preferenceRepository.saveUid(it)
                     preferenceRepository.saveEmail(credential.id)
+                    credential.displayName?.let { name -> preferenceRepository.saveName(name) }
+                    credential.profilePictureUri?.let { uri -> preferenceRepository.saveProfileImage(uri.toString()) }
                 }
                 _isLoading.postValue(false)
             }

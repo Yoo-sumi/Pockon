@@ -35,6 +35,9 @@ class SettingsViewModel @Inject constructor(
     private var isAuthPin = preferenceRepository.isAuthPin()
     private var isNotiEndDt = preferenceRepository.isNotiEndDt()
     private var isGuestMode = preferenceRepository.isGuestMode()
+    private var profileImage = preferenceRepository.getProfileImage()
+    private var name = preferenceRepository.getName()
+    private var email = preferenceRepository.getEmail()
 
     private val _isShowNoInternetDialog = mutableStateOf(false)
     val isShowNoInternetDialog: State<Boolean> = _isShowNoInternetDialog
@@ -151,6 +154,12 @@ class SettingsViewModel @Inject constructor(
             }
         }
     }
+
+    fun getName() = this.name
+
+    fun getProfileImage() = this.profileImage
+
+    fun getEmail() = this.email
 
     fun getIsGuestMode() = this.isGuestMode
 

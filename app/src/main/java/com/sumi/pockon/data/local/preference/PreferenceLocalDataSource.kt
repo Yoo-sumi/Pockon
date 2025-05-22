@@ -12,6 +12,10 @@ class PreferenceLocalDataSource @Inject constructor(
 
     fun getEmail(): String = prefs.getString(SharedPreferenceKeys.EMAIL, "") ?: ""
 
+    fun getName(): String? = prefs.getString(SharedPreferenceKeys.NAME, null)
+
+    fun getProfileImage(): String? = prefs.getString(SharedPreferenceKeys.PROFILE_IMAGE, null)
+
     fun getPinNum(): String = prefs.getString(SharedPreferenceKeys.PIN_NUM, "") ?: ""
 
     fun isAuthPin() = prefs.getBoolean(SharedPreferenceKeys.AUTH_PIN, false)
@@ -34,6 +38,14 @@ class PreferenceLocalDataSource @Inject constructor(
 
     fun saveEmail(email: String) {
         prefs.edit().putString(SharedPreferenceKeys.EMAIL, email).apply()
+    }
+
+    fun saveName(name: String?) {
+        prefs.edit().putString(SharedPreferenceKeys.NAME, name).apply()
+    }
+
+    fun saveProfileImage(profileImage: String?) {
+        prefs.edit().putString(SharedPreferenceKeys.PROFILE_IMAGE, profileImage).apply()
     }
 
     fun savePinNum(pinNum: String) {

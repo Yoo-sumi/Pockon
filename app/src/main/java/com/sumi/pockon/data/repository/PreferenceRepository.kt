@@ -11,6 +11,10 @@ class PreferenceRepository @Inject constructor(
 
     fun getEmail() = preferenceLocalDataSource.getEmail()
 
+    fun getName() = preferenceLocalDataSource.getName()
+
+    fun getProfileImage() = preferenceLocalDataSource.getProfileImage()
+
     fun getPinNum() = preferenceLocalDataSource.getPinNum()
 
     fun isAuthPin() = preferenceLocalDataSource.isAuthPin()
@@ -28,6 +32,10 @@ class PreferenceRepository @Inject constructor(
     fun saveUid(uid: String) = preferenceLocalDataSource.saveUid(uid)
 
     fun saveEmail(email: String) = preferenceLocalDataSource.saveEmail(email)
+
+    fun saveName(name: String?) = preferenceLocalDataSource.saveName(name)
+
+    fun saveProfileImage(profileImage: String) = preferenceLocalDataSource.saveProfileImage(profileImage)
 
     fun savePinNum(pinNum: String) {
         preferenceLocalDataSource.savePinNum(pinNum)
