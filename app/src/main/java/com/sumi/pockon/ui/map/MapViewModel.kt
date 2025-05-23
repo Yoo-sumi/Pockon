@@ -1,12 +1,13 @@
 package com.sumi.pockon.ui.map
 
-import androidx.compose.runtime.getValue
+import android.util.Log
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.setValue
+import androidx.compose.runtime.State
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.naver.maps.geometry.LatLng
 import com.naver.maps.map.CameraPosition
 import com.sumi.pockon.data.repository.BrandSearchRepository
 import com.sumi.pockon.data.repository.GiftRepository
@@ -28,11 +29,18 @@ class MapViewModel @Inject constructor(
 
     private val _displayInfoList = MutableLiveData<List<Pair<Document, List<Gift>>>>(listOf())
     val displayInfoList: LiveData<List<Pair<Document, List<Gift>>>> = _displayInfoList
+    private val _cameraPosition = mutableStateOf<CameraPosition?>(null)
+    val cameraPosition: State<CameraPosition?> = _cameraPosition
+
+    private val _currentLocation = mutableStateOf<LatLng?>(null)
+    val currentLocation: State<LatLng?> = _currentLocation
+    // 선택된 마커 index
+    private val _selectedMarkerIndex = mutableStateOf<Int?>(null)
+    val selectedMarkerIndex: State<Int?> = _selectedMarkerIndex
 
     private var giftList = listOf<Gift>()
     private var brandInfoList = mutableMapOf<String, List<Document>>()
     private var nearestDoc: Document? = null
-    var cameraPosition by mutableStateOf<CameraPosition?>(null)
 
     init {
         observeGiftList()
@@ -109,4 +117,37 @@ class MapViewModel @Inject constructor(
     }
 
     fun getNearestDoc() = this.nearestDoc
+
+    fun updateCameraPosition(position: CameraPosition) {
+//        if (isCameraPositionEqual(position)) return
+        _cameraPosition.value = position
+    }
+
+    fun updateCurrentLocation(location: LatLng) {
+        Log.d("위치위치", "${location.latitude} / ${location.longitude}")
+//        if (isCurrentLocationEqual(location)) return
+        _currentLocation.value = location
+    }
+
+    private fun isCameraPositionEqual(a: CameraPosition?): Boolean {
+        val b = _cameraPosition.value
+        if (a == null || b == null) return false
+
+        return a.target.latitude == b.target.latitude &&
+                a.target.longitude == b.target.longitude &&
+                a.zoom == b.zoom &&
+                a.tilt == b.tilt &&
+                a.bearing == b.bearing
+    }
+
+    private fun isCurrentLocationEqual(a: LatLng?): Boolean {
+        val b = _currentLocation.value
+        if (a == null || b == null) return false
+
+        return a.latitude == b.latitude && a.longitude == b.longitude
+    }
+
+    fun selectMarker(index: Int) {
+        _selectedMarkerIndex.value = index
+    }
 }

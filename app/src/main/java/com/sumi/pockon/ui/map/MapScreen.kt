@@ -2,7 +2,7 @@ package com.sumi.pockon.ui.map
 
 import android.annotation.SuppressLint
 import android.os.Bundle
-import android.util.Log
+import android.os.Looper
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
@@ -24,6 +24,7 @@ import androidx.compose.material3.IconButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
@@ -31,6 +32,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
@@ -39,16 +41,26 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.DefaultLifecycleObserver
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.compose.LocalLifecycleOwner
+import com.google.android.gms.location.FusedLocationProviderClient
+import com.google.android.gms.location.LocationCallback
+import com.google.android.gms.location.LocationRequest
+import com.google.android.gms.location.LocationResult
 import com.google.android.gms.location.LocationServices
+import com.google.android.gms.location.Priority
 import com.naver.maps.geometry.LatLng
 import com.naver.maps.map.CameraAnimation
 import com.naver.maps.map.CameraPosition
 import com.naver.maps.map.CameraUpdate
 import com.naver.maps.map.LocationTrackingMode
 import com.naver.maps.map.MapView
+import com.naver.maps.map.overlay.CircleOverlay
+import com.naver.maps.map.overlay.Marker
+import com.naver.maps.map.util.MarkerIcons
 import com.sumi.pockon.R
+import com.sumi.pockon.data.model.Document
 import com.sumi.pockon.data.model.Gift
 import com.sumi.pockon.ui.list.GiftItem
+import com.sumi.pockon.ui.loading.LoadingScreen
 import com.sumi.pockon.util.formatString
 import com.sumi.pockon.util.getDday
 
@@ -64,10 +76,24 @@ fun MapScreen(onBack: () -> Unit, onDetail: (String) -> Unit) {
         }
     }
 
+    val fusedLocationClient = remember {
+        LocationServices.getFusedLocationProviderClient(context)
+    }
+
     Box(modifier = Modifier.fillMaxSize()) {
-        NaverMapWithCustomControls(mapViewModel.cameraPosition) {
-            mapViewModel.cameraPosition = it
-        }
+        NaverMapWithLiveLocation(
+            fusedLocationClient = fusedLocationClient,
+            displayInfoList = mapViewModel.displayInfoList.value,
+            nearestDoc = mapViewModel.getNearestDoc(),
+            cameraPosition = mapViewModel.cameraPosition.value,
+            currentLocation = mapViewModel.currentLocation.value,
+            onCameraChanged = {
+                mapViewModel.updateCameraPosition(it)
+            },
+            onLocationUpdate = {
+                mapViewModel.updateCurrentLocation(it)
+            }
+        )
 //        AndroidView(
 //            modifier = Modifier.fillMaxSize(),
 //            factory = {
@@ -127,38 +153,133 @@ fun MapScreen(onBack: () -> Unit, onDetail: (String) -> Unit) {
 
 @SuppressLint("MissingPermission")
 @Composable
-fun NaverMapWithCustomControls(
+fun NaverMapWithLiveLocation(
+    fusedLocationClient: FusedLocationProviderClient,
+    displayInfoList: List<Pair<Document, List<Gift>>>?,
+    nearestDoc: Document?,
     cameraPosition: CameraPosition?,
-    onChangeCamera: (CameraPosition) -> Unit
+    currentLocation: LatLng?,
+    onCameraChanged: (CameraPosition) -> Unit,
+    onLocationUpdate: (LatLng) -> Unit
 ) {
-    val context = LocalContext.current
     val mapView = rememberMapViewWithLifecycle()
-    val fusedLocationClient = remember {
-        LocationServices.getFusedLocationProviderClient(context)
+    var isInitialCameraMoved by remember { mutableStateOf(false) }
+    val locationRef = remember { mutableStateOf<CircleOverlay?>(null) }
+    val markerRefs = remember { mutableStateListOf<Marker?>() }
+//    val markerList = remember { mutableStateListOf<Marker>() }
+
+    // 위치 업데이트를 DisposableEffect로 관리
+    DisposableEffect(Unit) {
+        val locationRequest = LocationRequest.Builder(
+            Priority.PRIORITY_HIGH_ACCURACY,
+            2000L
+        ).build()
+
+        val callback = object : LocationCallback() {
+            override fun onLocationResult(result: LocationResult) {
+                result.lastLocation?.let {
+                    onLocationUpdate(LatLng(it.latitude, it.longitude))
+                    if (!isInitialCameraMoved) {
+                        onCameraChanged(
+                            CameraPosition(
+                                LatLng(it.latitude, it.longitude),
+                                15.0
+                            )
+                        )
+                    }
+                    isInitialCameraMoved = true
+                }
+            }
+        }
+
+        fusedLocationClient.requestLocationUpdates(
+            locationRequest,
+            callback,
+            Looper.getMainLooper()
+        )
+
+        onDispose {
+            fusedLocationClient.removeLocationUpdates(callback)
+        }
     }
 
     Box(Modifier.fillMaxSize()) {
         AndroidView(factory = { mapView }) { view ->
             view.getMapAsync { naverMap ->
-                // 기본 UI 비활성화
                 naverMap.uiSettings.isLocationButtonEnabled = false
                 naverMap.uiSettings.isZoomControlEnabled = false
 
-                // 저장된 상태 복원
-                cameraPosition?.let {
-                    val update = CameraUpdate.toCameraPosition(it)
+                if (cameraPosition != null) {
+                    val update = CameraUpdate.toCameraPosition(cameraPosition)
                     naverMap.moveCamera(update)
                 }
 
-                // 상태 변경 감지 및 저장
                 naverMap.addOnCameraChangeListener { _, _ ->
-                    onChangeCamera(naverMap.cameraPosition)
+                    onCameraChanged(naverMap.cameraPosition)
                 }
 
-                // 최초에 한번만 Follow 모드 설정
-                if (naverMap.locationTrackingMode != LocationTrackingMode.Follow) {
-                    naverMap.locationTrackingMode = LocationTrackingMode.Follow
+                // 실시간 내 위치 마커 - 도형으로 표시
+                currentLocation?.let { latLng ->
+                    if (locationRef.value == null) {
+                        locationRef.value = CircleOverlay().apply {
+                            center = latLng
+                            radius = 10.0 // 반지름 (미터 단위)
+                            color = Color.Blue.copy(alpha = 0.8f).toArgb()
+                            outlineColor = Color.Blue.toArgb()
+                            outlineWidth = 2
+                            map = naverMap
+                        }
+                    } else {
+                        (locationRef.value)?.center = latLng
+                    }
+//                    if (markerRef.value == null) {
+//                        markerRef.value = Marker().apply {
+//                            position = latLng
+//                            iconTintColor = Color.BLUE.hashCode()
+//                            width = 80
+//                            height = 80
+//                            map = naverMap
+//                        }
+//                    } else {
+//                        markerRef.value?.position = latLng
+//                    }
                 }
+
+                // 마커 초기화
+                if (markerRefs.size != displayInfoList?.size) {
+                    markerRefs.clear()
+                    if (displayInfoList != null) {
+                        markerRefs.addAll(List(displayInfoList.size) { null })
+                    }
+                }
+
+                // 마커 표시
+                displayInfoList?.forEachIndexed { index, info ->
+                    val marker = markerRefs[index] ?: Marker().apply {
+                        position = LatLng(info.first.y.toDouble(), info.first.x.toDouble())
+                        width = 70
+                        height = 100
+                        captionText = info.first.placeName
+                        captionTextSize = 9F
+                        captionRequestedWidth = 200
+                        map = naverMap
+                        tag = info.first
+                        icon = MarkerIcons.BLACK
+//                        iconTintColor = if (index == selectedIndex) Color.Red.hashCode() else Color.Blue.hashCode()
+                        setOnClickListener {
+//                            mapViewModel.selectMarker(index)
+                            true
+                        }
+                    }
+                    if (markerRefs[index] == null) {
+                        markerRefs[index] = marker
+                    } else {
+                        markerRefs[index]?.position = LatLng(info.first.y.toDouble(), info.first.x.toDouble())
+//                        markerRefs[index]?.iconTintColor = if (index == selectedIndex) Color.Red.hashCode() else Color.Blue.hashCode()
+                    }
+                }
+
+                naverMap.locationTrackingMode = LocationTrackingMode.NoFollow
             }
         }
 
@@ -168,16 +289,13 @@ fun NaverMapWithCustomControls(
                 mapView.getMapAsync { map ->
                     fusedLocationClient.lastLocation.addOnSuccessListener { location ->
                         location?.let {
-                            val latLng = LatLng(it.latitude, it.longitude)
-
-                            // 1. Follow 모드 해제
-                            map.locationTrackingMode = LocationTrackingMode.None
-
-                            // 2. 카메라 이동
-                            val cameraUpdate = CameraUpdate.scrollTo(latLng)
-                                .animate(CameraAnimation.Easing)
-
-                            map.moveCamera(cameraUpdate)
+                            onLocationUpdate(LatLng(it.latitude, it.longitude))
+                            onCameraChanged(
+                                CameraPosition(
+                                    LatLng(it.latitude, it.longitude),
+                                    15.0
+                                )
+                            )
                         }
                     }
                 }
@@ -222,6 +340,8 @@ fun NaverMapWithCustomControls(
         ) {
             Icon(Icons.Default.Remove, contentDescription = "축소", tint = Color.Black)
         }
+
+        if (currentLocation == null) LoadingScreen()
     }
 }
 
