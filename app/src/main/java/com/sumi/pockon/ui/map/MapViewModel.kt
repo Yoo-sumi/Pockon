@@ -113,6 +113,11 @@ class MapViewModel @Inject constructor(
             markerInGiftList.add(Pair(document, sortedList))
         }
 
+        nearestDoc?.let { doc ->
+            val index = markerInGiftList.indexOfFirst { it.first.id == doc.id }
+            selectMarker(index)
+        }
+
         _displayInfoList.postValue(markerInGiftList)
     }
 
