@@ -43,12 +43,14 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.draw.drawWithContent
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
@@ -245,10 +247,20 @@ fun UsedGiftItem(
                     .fillMaxWidth()
             ) {
                 Box {
+                    val lightGray = colorResource(id = R.color.light_gray)
                     AsyncImage(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .height(200.dp),
+                            .height(200.dp)
+                            .drawBehind {
+                                val strokeWidth = 1.5.dp.toPx()
+                                drawLine(
+                                    color = lightGray,
+                                    start = Offset(0f, size.height),
+                                    end = Offset(size.width, size.height),
+                                    strokeWidth = strokeWidth
+                                )
+                            },
                         model = gift.photo,
                         contentDescription = "add photo",
                         contentScale = ContentScale.Crop

@@ -1,6 +1,5 @@
 package com.sumi.pockon.ui.map
 
-import android.util.Log
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.State
 import androidx.lifecycle.LiveData
@@ -41,6 +40,8 @@ class MapViewModel @Inject constructor(
     private var giftList = listOf<Gift>()
     private var brandInfoList = mutableMapOf<String, List<Document>>()
     private var nearestDoc: Document? = null
+    private var pageIndex = 0
+    private var isInitialCameraMoved = false
 
     init {
         observeGiftList()
@@ -124,35 +125,26 @@ class MapViewModel @Inject constructor(
     fun getNearestDoc() = this.nearestDoc
 
     fun updateCameraPosition(position: CameraPosition) {
-//        if (isCameraPositionEqual(position)) return
         _cameraPosition.value = position
     }
 
     fun updateCurrentLocation(location: LatLng) {
-        Log.d("위치위치", "${location.latitude} / ${location.longitude}")
-//        if (isCurrentLocationEqual(location)) return
         _currentLocation.value = location
-    }
-
-    private fun isCameraPositionEqual(a: CameraPosition?): Boolean {
-        val b = _cameraPosition.value
-        if (a == null || b == null) return false
-
-        return a.target.latitude == b.target.latitude &&
-                a.target.longitude == b.target.longitude &&
-                a.zoom == b.zoom &&
-                a.tilt == b.tilt &&
-                a.bearing == b.bearing
-    }
-
-    private fun isCurrentLocationEqual(a: LatLng?): Boolean {
-        val b = _currentLocation.value
-        if (a == null || b == null) return false
-
-        return a.latitude == b.latitude && a.longitude == b.longitude
     }
 
     fun selectMarker(index: Int) {
         _selectedMarkerIndex.value = index
     }
+
+    fun getIsInitialCameraMoved() = this.isInitialCameraMoved
+
+    fun setIsInitialCameraMoved(isInitialCameraMoved: Boolean) {
+        this.isInitialCameraMoved = isInitialCameraMoved
+    }
+
+    fun setPageIndex(pageIndex: Int) {
+        this.pageIndex = pageIndex
+    }
+
+    fun getPageIndex() = this.pageIndex
 }

@@ -1,6 +1,5 @@
 package com.sumi.pockon.ui.map
 
-import android.annotation.SuppressLint
 import android.os.Bundle
 import android.os.Looper
 import androidx.activity.compose.BackHandler
@@ -21,8 +20,10 @@ import androidx.compose.material.icons.filled.MyLocation
 import androidx.compose.material.icons.filled.Remove
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
@@ -31,12 +32,9 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
-import androidx.fragment.app.FragmentContainerView
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.DefaultLifecycleObserver
 import androidx.lifecycle.LifecycleOwner
@@ -49,7 +47,6 @@ import com.google.android.gms.location.LocationServices
 import com.google.android.gms.location.Priority
 import com.google.android.gms.tasks.CancellationTokenSource
 import com.naver.maps.geometry.LatLng
-import com.naver.maps.map.CameraAnimation
 import com.naver.maps.map.CameraPosition
 import com.naver.maps.map.CameraUpdate
 import com.naver.maps.map.LocationTrackingMode
@@ -60,6 +57,8 @@ import com.naver.maps.map.util.MarkerIcons
 import com.sumi.pockon.R
 import com.sumi.pockon.data.model.Document
 import com.sumi.pockon.data.model.Gift
+import com.sumi.pockon.ui.detail.DetailScreen
+import com.sumi.pockon.ui.home.checkLocationPermission
 import com.sumi.pockon.ui.list.GiftItem
 import com.sumi.pockon.ui.loading.LoadingScreen
 import com.sumi.pockon.util.formatString
@@ -69,92 +68,71 @@ import com.sumi.pockon.util.getDday
 fun MapScreen(onBack: () -> Unit, onDetail: (String) -> Unit) {
     val mapViewModel = hiltViewModel<MapViewModel>()
     val context = LocalContext.current
-//    var point by rememberSaveable { mutableStateOf<List<Gift>>(listOf()) }
-    val hasFragmentBeenSet = remember { mutableStateOf(false) }
-    val fragmentContainerView = remember {
-        FragmentContainerView(context).apply {
-            id = R.id.fragment_container_view
-        }
-    }
+    var detailGift by rememberSaveable { mutableStateOf<Gift?>(null) }
+    var isTopScroll by rememberSaveable { mutableStateOf<Boolean?>(false) }
     val fusedLocationClient = remember {
         LocationServices.getFusedLocationProviderClient(context)
     }
 
     Box(modifier = Modifier.fillMaxSize()) {
-        NaverMapWithLiveLocation(
-            fusedLocationClient = fusedLocationClient,
-            displayInfoList = mapViewModel.displayInfoList.value,
-            selectedIndex = mapViewModel.selectedMarkerIndex.value,
-            nearestDoc = mapViewModel.getNearestDoc(),
-            cameraPosition = mapViewModel.cameraPosition.value,
-            currentLocation = mapViewModel.currentLocation.value,
-            onCameraChanged = {
-                mapViewModel.updateCameraPosition(it)
-            },
-            onLocationUpdate = {
-                mapViewModel.updateCurrentLocation(it)
-            },
-            onClick = { index ->
-                mapViewModel.selectMarker(index)
-//                point = giftList
+        if (detailGift != null) {
+            // 상세보기
+            DetailScreen(id = detailGift!!.id) {
+                detailGift = null
             }
-        )
-//        AndroidView(
-//            modifier = Modifier.fillMaxSize(),
-//            factory = {
-//                fragmentContainerView
-//            },
-//            update = {
-//                if (!hasFragmentBeenSet.value) {
-//                    val baseContext = (it.context as ContextWrapper).baseContext
-//                    val fragmentManager = (baseContext as FragmentActivity).supportFragmentManager
-//
-//                    val fragment = MapFragment().apply {
-//                        setOnClickCallback { giftList ->
-//                            point = giftList
-//                        }
-//                    }
-//
-//                    fragmentManager.commit {
-//                        replace(R.id.fragment_container_view, fragment)
-//                        addToBackStack(null)
-//                    }
-//                    hasFragmentBeenSet.value = true
-//                }
-//            }
-//        )
+        } else {
+            NaverMapWithLiveLocation(
+                fusedLocationClient = fusedLocationClient,
+                mapViewModel = mapViewModel,
+                isTopScroll = {
+                    isTopScroll = it
+                }
+            )
 
-        if (mapViewModel.displayInfoList.value?.isNotEmpty() == true) {
-            mapViewModel.selectedMarkerIndex.value?.let { index ->
-                val point = mapViewModel.displayInfoList.value?.get(index)?.second
-                if ((point?.size ?: 0) < 1) return
-                val pagerState = rememberPagerState(pageCount = { point!!.size })
-                HorizontalPager(
-                    state = pagerState,
-                    pageSize = PageSize.Fill,
-                    contentPadding = PaddingValues(horizontal = 15.dp), // 좌우 여백 추가
-                    pageSpacing = 5.dp, // 각 페이지 사이 여백 추가
-                    modifier = Modifier
-                        .padding(bottom = 20.dp)
-                        .fillMaxWidth()
-                        .height(120.dp)
-                        .align(Alignment.BottomCenter)
-                ) { pageIndex ->
-                    val gift = point!![pageIndex]
-                    GiftItem(isEdit = false,
-                        gift = gift,
-                        formattedEndDate = formatString(gift.endDt),
-                        dDay = getDday(gift.endDt),
-                        isCheck = false,
-                        onClick = {
-                            // 상세보기 이동
-                            onDetail(gift.id)
+            // 뷰페이저
+            if (mapViewModel.displayInfoList.value?.isNotEmpty() == true) {
+                mapViewModel.selectedMarkerIndex.value?.let { index ->
+                    val point = mapViewModel.displayInfoList.value?.get(index)?.second
+                    if ((point?.size ?: 0) < 1) return
+                    val pagerState = rememberPagerState(pageCount = { point!!.size })
+                    // 상세 보기에서 돌아올 때 기존 페이지 유지
+                    LaunchedEffect(Unit) {
+                        pagerState.scrollToPage(mapViewModel.getPageIndex())
+                    }
+                    LaunchedEffect(isTopScroll) {
+                        if (isTopScroll == true) {
+                            pagerState.scrollToPage(0)
+                            isTopScroll = false
                         }
-                    )
+                    }
+                    HorizontalPager(
+                        state = pagerState,
+                        pageSize = PageSize.Fill,
+                        contentPadding = PaddingValues(horizontal = 15.dp), // 좌우 여백 추가
+                        pageSpacing = 5.dp, // 각 페이지 사이 여백 추가
+                        modifier = Modifier
+                            .padding(bottom = 20.dp)
+                            .fillMaxWidth()
+                            .height(120.dp)
+                            .align(Alignment.BottomCenter)
+                    ) { pageIndex ->
+                        val gift = point!![pageIndex]
+                        GiftItem(isEdit = false,
+                            gift = gift,
+                            formattedEndDate = formatString(gift.endDt),
+                            dDay = getDday(gift.endDt),
+                            isCheck = false,
+                            onClick = {
+                                // 상세보기 이동
+                                onDetail(gift.id)
+                                mapViewModel.setPageIndex(pagerState.currentPage)
+                            }
+                        )
+                    }
                 }
             }
+            if (mapViewModel.currentLocation.value == null) LoadingScreen()
         }
-        if (mapViewModel.currentLocation.value == null) LoadingScreen()
     }
 
     BackHandler {
@@ -162,24 +140,16 @@ fun MapScreen(onBack: () -> Unit, onDetail: (String) -> Unit) {
     }
 }
 
-@SuppressLint("MissingPermission")
 @Composable
 fun NaverMapWithLiveLocation(
     fusedLocationClient: FusedLocationProviderClient,
-    displayInfoList: List<Pair<Document, List<Gift>>>?,
-    selectedIndex: Int?,
-    nearestDoc: Document?,
-    cameraPosition: CameraPosition?,
-    currentLocation: LatLng?,
-    onCameraChanged: (CameraPosition) -> Unit,
-    onLocationUpdate: (LatLng) -> Unit,
-    onClick: (Int) -> Unit
+    mapViewModel: MapViewModel,
+    isTopScroll: (Boolean) -> Unit
 ) {
+    val context = LocalContext.current
     val mapView = rememberMapViewWithLifecycle()
-    var isInitialCameraMoved by remember { mutableStateOf(false) }
     val locationRef = remember { mutableStateOf<CircleOverlay?>(null) }
     val markerRefs = remember { mutableStateListOf<Marker?>() }
-//    val markerList = remember { mutableStateListOf<Marker>() }
 
     // 위치 업데이트를 DisposableEffect로 관리
     DisposableEffect(Unit) {
@@ -187,43 +157,40 @@ fun NaverMapWithLiveLocation(
             override fun onLocationResult(result: LocationResult) {
                 result.lastLocation?.let { location ->
                     val latLng = LatLng(location.latitude, location.longitude)
-                    onLocationUpdate(latLng)
+                    mapViewModel.updateCurrentLocation(latLng)
+                }
+            }
+        }
+
+        if (checkLocationPermission(context)) {
+            // 1. 먼저 단발성으로 빠르게 현재 위치 가져오기
+            fusedLocationClient.getCurrentLocation(
+                Priority.PRIORITY_HIGH_ACCURACY,
+                CancellationTokenSource().token
+            ).addOnSuccessListener { location ->
+                location?.let {
+                    val latLng = LatLng(it.latitude, it.longitude)
+                    mapViewModel.updateCurrentLocation(latLng)
                     // 카메라 이동은 최초 1회만
-                    if (!isInitialCameraMoved) {
-                        onCameraChanged(CameraPosition(latLng, 14.0))
-                        isInitialCameraMoved = true
-                    }
+                    if (!mapViewModel.getIsInitialCameraMoved()) mapViewModel.updateCameraPosition(
+                        CameraPosition(latLng, 14.0)
+                    )
+                    mapViewModel.setIsInitialCameraMoved(true)
                 }
             }
+
+            // 2. 이후 주기적인 위치 업데이트 요청
+            val locationRequest = LocationRequest.Builder(
+                Priority.PRIORITY_HIGH_ACCURACY,
+                2000L // 2초마다 위치 업데이트
+            ).build()
+
+            fusedLocationClient.requestLocationUpdates(
+                locationRequest,
+                callback,
+                Looper.getMainLooper()
+            )
         }
-
-        // 1. 먼저 단발성으로 빠르게 현재 위치 가져오기
-        fusedLocationClient.getCurrentLocation(
-            Priority.PRIORITY_HIGH_ACCURACY,
-            CancellationTokenSource().token
-        ).addOnSuccessListener { location ->
-            location?.let {
-                val latLng = LatLng(it.latitude, it.longitude)
-                onLocationUpdate(latLng)
-                // 카메라 이동은 최초 1회만
-                if (!isInitialCameraMoved) {
-                    onCameraChanged(CameraPosition(latLng, 14.0))
-                    isInitialCameraMoved = true
-                }
-            }
-        }
-
-        // 2. 이후 주기적인 위치 업데이트 요청
-        val locationRequest = LocationRequest.Builder(
-            Priority.PRIORITY_HIGH_ACCURACY,
-            2000L // 2초마다 위치 업데이트
-        ).build()
-
-        fusedLocationClient.requestLocationUpdates(
-            locationRequest,
-            callback,
-            Looper.getMainLooper()
-        )
 
         onDispose {
             fusedLocationClient.removeLocationUpdates(callback)
@@ -236,92 +203,64 @@ fun NaverMapWithLiveLocation(
                 naverMap.uiSettings.isLocationButtonEnabled = false
                 naverMap.uiSettings.isZoomControlEnabled = false
 
-                if (cameraPosition != null) {
-                    val update = CameraUpdate.toCameraPosition(cameraPosition)
+                mapViewModel.cameraPosition.value?.let { position ->
+                    val update = CameraUpdate.toCameraPosition(position)
                     naverMap.moveCamera(update)
                 }
 
                 naverMap.addOnCameraChangeListener { _, _ ->
-                    onCameraChanged(naverMap.cameraPosition)
+                    mapViewModel.updateCameraPosition(naverMap.cameraPosition)
                 }
 
-                // 실시간 내 위치 마커 - 도형으로 표시
-                currentLocation?.let { latLng ->
+                // 실시간 내 위치 마커
+                mapViewModel.currentLocation.value?.let { latLng ->
                     if (locationRef.value == null) {
-                        // 정확도 범위 원 (얕은 파란색)
-                        val accuracyCircle = CircleOverlay().apply {
-                            center = latLng
-                            radius = 30.0 // 위치 정확도 반영 (ex. 30m)
-                            color = Color(0x330096FF).copy(0.2f).toArgb() // 연한 파란색 (#0096FF 20% 투명)
-                            outlineColor = Color(0x550096FF).toArgb() // 테두리 약간 진하게
-                            outlineWidth = 2
-                            map = naverMap
-                        }
-
-// 중앙 점 (진한 파란색 점)
-                        val centerDot = CircleOverlay().apply {
-                            center = latLng
-                            radius = 6.0 // 반지름 6m = 화면에서 점처럼 보임
-                            color = Color(0xFF0096FF.toInt()).toArgb() // 진한 파란색
-                            outlineColor = Color.White.toArgb()
-                            outlineWidth = 2
-                            map = naverMap
-                        }
-//                        locationRef.value = CircleOverlay().apply {
-//                            center = latLng
-//                            radius = 15.0 // 반지름 (미터 단위)
-//                            color = Color.Blue.copy(alpha = 0.8f).toArgb()
-//                            outlineColor = Color.Blue.toArgb()
-//                            outlineWidth = 2
-//                            map = naverMap
-//                        }
-                    } else {
-                        (locationRef.value)?.center = latLng
+                        val locationOverlay = naverMap.locationOverlay
+                        locationOverlay.isVisible = true
+                        locationOverlay.position = latLng
                     }
                 }
 
                 // 마커 초기화
-                if (markerRefs.size != displayInfoList?.size) {
+                if (markerRefs.size != mapViewModel.displayInfoList.value?.size) {
                     markerRefs.clear()
-                    if (displayInfoList != null) {
+                    mapViewModel.displayInfoList.value?.let { displayInfoList ->
                         markerRefs.addAll(List(displayInfoList.size) { null })
                     }
                 }
 
                 // 마커 표시
-                displayInfoList?.forEachIndexed { index, info ->
+                mapViewModel.displayInfoList.value?.forEachIndexed { index, info ->
                     val marker = markerRefs[index] ?: Marker().apply {
                         position = LatLng(info.first.y.toDouble(), info.first.x.toDouble())
-                        width = if (index == selectedIndex) 80 else 70
-                        height = if (index == selectedIndex) 110 else 100
+                        width = if (index == mapViewModel.selectedMarkerIndex.value) 80 else 70
+                        height = if (index == mapViewModel.selectedMarkerIndex.value) 110 else 100
                         captionText = info.first.placeName
                         captionTextSize = 9F
                         captionRequestedWidth = 200
                         map = naverMap
                         tag = info.first
                         icon = MarkerIcons.BLACK
-                        iconTintColor = if (index == selectedIndex) android.graphics.Color.RED else android.graphics.Color.parseColor("#00db77")
+                        iconTintColor = if (index == mapViewModel.selectedMarkerIndex.value) android.graphics.Color.RED else android.graphics.Color.parseColor("#00db77")
                         setOnClickListener { overlay ->
                             val document = overlay.tag as? Document ?: return@setOnClickListener false
-                            val clickedIndex = displayInfoList.indexOfFirst { it.first.id == document.id }
-                            if (clickedIndex == -1) return@setOnClickListener false
-                            onClick.invoke(clickedIndex)
-                            displayInfoList.forEachIndexed { index, _ ->
+                            val clickedIndex = mapViewModel.displayInfoList.value?.indexOfFirst { it.first.id == document.id }
+                            if (clickedIndex == -1 || clickedIndex == null) return@setOnClickListener false
+                            mapViewModel.selectMarker(clickedIndex)
+                            isTopScroll(true)
+                            mapViewModel.displayInfoList.value?.forEachIndexed { index, _ ->
                                 val marker = markerRefs.getOrNull(index)
                                 if (index == clickedIndex) {
                                     // 선택된 마커 강조
                                     marker?.apply {
                                         iconTintColor = android.graphics.Color.RED
-                                        width = 80
-                                        height = 110
+                                        width = 75
+                                        height = 105
                                     }
-
-                                    // ViewPager 업데이트 필요 시 콜백
-//                                    onClick?.invoke(displayInfoList[index].second)
 
                                     // 카메라 이동
                                     val latLng = LatLng(document.y.toDouble(), document.x.toDouble())
-                                    onCameraChanged(
+                                    mapViewModel.updateCameraPosition(
                                         CameraPosition(
                                             latLng,
                                             14.0
@@ -338,13 +277,9 @@ fun NaverMapWithLiveLocation(
                             }
                             true
                         }
-//                        if (nearestDoc?.x == info.first.x && nearestDoc?.y == info.first.y) {
-//                            onClick.invoke(info.second)
-//                        }
                     }
                     markerRefs[index] = marker
                 }
-
                 naverMap.locationTrackingMode = LocationTrackingMode.Follow
             }
         }
@@ -355,8 +290,8 @@ fun NaverMapWithLiveLocation(
                 mapView.getMapAsync { map ->
                     fusedLocationClient.lastLocation.addOnSuccessListener { location ->
                         location?.let {
-                            onLocationUpdate(LatLng(it.latitude, it.longitude))
-                            onCameraChanged(
+                            mapViewModel.updateCurrentLocation(LatLng(it.latitude, it.longitude))
+                            mapViewModel.updateCameraPosition(
                                 CameraPosition(
                                     LatLng(it.latitude, it.longitude),
                                     14.0
@@ -369,11 +304,10 @@ fun NaverMapWithLiveLocation(
             modifier = Modifier
                 .align(Alignment.BottomEnd)
                 .padding(end = 16.dp, bottom = 200.dp)
-                .background(Color.White, shape = CircleShape)
+                .background(MaterialTheme.colorScheme.background, shape = CircleShape)
         ) {
-            Icon(Icons.Default.MyLocation, contentDescription = "내 위치", tint = Color.Black)
+            Icon(Icons.Default.MyLocation, contentDescription = "my location", tint = MaterialTheme.colorScheme.onPrimary)
         }
-
 
         // 확대 버튼
         IconButton(
@@ -386,9 +320,9 @@ fun NaverMapWithLiveLocation(
             modifier = Modifier
                 .align(Alignment.BottomEnd)
                 .padding(end = 16.dp, bottom = 260.dp)
-                .background(Color.White, shape = CircleShape)
+                .background(MaterialTheme.colorScheme.background, shape = CircleShape)
         ) {
-            Icon(Icons.Default.Add, contentDescription = "확대", tint = Color.Black)
+            Icon(Icons.Default.Add, contentDescription = "zoom in", tint = MaterialTheme.colorScheme.onPrimary)
         }
 
         // 축소 버튼
@@ -402,9 +336,9 @@ fun NaverMapWithLiveLocation(
             modifier = Modifier
                 .align(Alignment.BottomEnd)
                 .padding(end = 16.dp, bottom = 320.dp)
-                .background(Color.White, shape = CircleShape)
+                .background(MaterialTheme.colorScheme.background, shape = CircleShape)
         ) {
-            Icon(Icons.Default.Remove, contentDescription = "축소", tint = Color.Black)
+            Icon(Icons.Default.Remove, contentDescription = "zoom out", tint = MaterialTheme.colorScheme.onPrimary)
         }
     }
 }

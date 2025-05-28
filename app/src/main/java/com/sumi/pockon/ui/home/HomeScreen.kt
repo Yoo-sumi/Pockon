@@ -5,6 +5,7 @@ import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.location.Location
+import android.location.LocationManager
 import android.net.Uri
 import android.provider.Settings
 import androidx.appcompat.app.AlertDialog
@@ -50,6 +51,8 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.drawBehind
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.colorResource
@@ -132,12 +135,7 @@ fun HomeScreen(
                                     // 권한 체크
                                     if (!homeViewModel.isNetworkConnected()) {
                                         isShowNoInternetDialog = true
-                                    } else if (checkLocationPermission(context)) {
-                                        getLocation(context, fusedLocationClient) { // 위치 동기화
-                                            longitude = it?.longitude
-                                            latitude = it?.latitude
-                                        }
-                                    } else {
+                                    } else if (!checkLocationPermission(context)) {
                                         AlertDialog.Builder(context)
                                             .setTitle(context.getString(R.string.txt_alert))
                                             .setMessage(context.getString(R.string.msg_no_location_permission))
@@ -150,6 +148,20 @@ fun HomeScreen(
                                                 context.startActivity(intent)
                                             }
                                             .show()
+                                    } else if (!isLocationEnabled(context)) {
+                                        AlertDialog.Builder(context)
+                                            .setTitle(context.getString(R.string.txt_alert))
+                                            .setMessage(context.getString(R.string.msg_no_location_permission))
+                                            .setPositiveButton(context.getString(R.string.btn_confirm)) { dialog, which ->
+                                                val intent = Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS)
+                                                context.startActivity(intent)
+                                            }
+                                            .show()
+                                    } else {
+                                        getLocation(context, fusedLocationClient) { // 위치 동기화
+                                            longitude = it?.longitude
+                                            latitude = it?.latitude
+                                        }
                                     }
                                 },
                                 modifier = Modifier
@@ -304,8 +316,19 @@ fun HomeGiftItem(
                     .background(MaterialTheme.colorScheme.secondaryContainer)
                     .width(160.dp)
             ) {
+                val lightGray = colorResource(id = R.color.light_gray)
                 AsyncImage(
-                    modifier = Modifier.size(160.dp),
+                    modifier = Modifier
+                        .size(160.dp)
+                        .drawBehind {
+                            val strokeWidth = 1.5.dp.toPx()
+                            drawLine(
+                                color = lightGray,
+                                start = Offset(0f, size.height),
+                                end = Offset(size.width, size.height),
+                                strokeWidth = strokeWidth
+                            )
+                        },
                     model = gift.photo,
                     contentDescription = "add photo",
                     contentScale = ContentScale.Crop
@@ -487,7 +510,7 @@ fun HomeScreenTopBar() {
 }
 
 /** 위치 권한 체크 */
-private fun checkLocationPermission(context: Context): Boolean {
+fun checkLocationPermission(context: Context): Boolean {
     val permissions = arrayOf(
         Manifest.permission.ACCESS_FINE_LOCATION,
         Manifest.permission.ACCESS_COARSE_LOCATION
@@ -499,4 +522,11 @@ private fun checkLocationPermission(context: Context): Boolean {
                 it
             ) == PackageManager.PERMISSION_GRANTED
         }
+}
+
+/** 위치 활성화 체크 */
+fun isLocationEnabled(context: Context): Boolean {
+    val locationManager = context.getSystemService(Context.LOCATION_SERVICE) as LocationManager
+    return locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER) ||
+            locationManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER)
 }

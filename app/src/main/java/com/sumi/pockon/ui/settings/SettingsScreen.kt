@@ -268,12 +268,12 @@ fun SettingsScreen(
                     }
 
                     // 저작권 표기
-                    SettingItem(
-                        text = stringResource(id = R.string.txt_copyright),
-                        onClick = {
-                            moveCopyrightScreen()
-                        }
-                    )
+//                    SettingItem(
+//                        text = stringResource(id = R.string.txt_copyright),
+//                        onClick = {
+//                            moveCopyrightScreen()
+//                        }
+//                    )
                 }
             }
         }

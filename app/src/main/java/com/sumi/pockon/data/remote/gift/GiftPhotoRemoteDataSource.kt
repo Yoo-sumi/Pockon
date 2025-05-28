@@ -31,12 +31,16 @@ class GiftPhotoRemoteDataSource @Inject constructor(
             val fileRef = storageRef.child("${uid}/${id}.enc")
             fileRef.getBytes(Long.MAX_VALUE)
                 .continueWith { task ->
-                    val encrypted = task.result
-                    try {
-                        val decrypted = CryptoManager.decrypt(encrypted, key)
-                        val bitmap = BitmapFactory.decodeByteArray(decrypted, 0, decrypted.size)
-                        id to bitmap
-                    } catch (e: Exception) {
+                    if (task.isSuccessful) {
+                        val encrypted = task.result
+                        try {
+                            val decrypted = CryptoManager.decrypt(encrypted, key)
+                            val bitmap = BitmapFactory.decodeByteArray(decrypted, 0, decrypted.size)
+                            id to bitmap
+                        } catch (e: Exception) {
+                            id to null
+                        }
+                    } else {
                         id to null
                     }
                 }
@@ -47,7 +51,7 @@ class GiftPhotoRemoteDataSource @Inject constructor(
                 val resultMap = results.toMap()
                 onComplete(resultMap)
             }
-            .addOnFailureListener { e ->
+            .addOnFailureListener {
                 onComplete(emptyMap())
             }
     }

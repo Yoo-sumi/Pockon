@@ -94,6 +94,8 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Card
 import androidx.compose.material3.CheckboxDefaults
+import androidx.compose.ui.draw.drawBehind
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.rememberNestedScrollInteropConnection
 import androidx.compose.ui.text.style.TextOverflow
@@ -442,8 +444,18 @@ fun GiftItem(
                         .size(120.dp)
                         .background(MaterialTheme.colorScheme.background)
                 ) {
+                    val lightGray = colorResource(id = R.color.light_gray)
                     AsyncImage(
-                        modifier = Modifier.fillMaxSize(),
+                        modifier = Modifier.fillMaxSize()
+                            .drawBehind {
+                                val strokeWidth = 1.5.dp.toPx()
+                                drawLine(
+                                    color = lightGray,
+                                    start = Offset(size.width, 0f),
+                                    end = Offset(size.width, size.height),
+                                    strokeWidth = strokeWidth
+                                )
+                            },
                         model = gift.photo,
                         contentDescription = "photo",
                         contentScale = ContentScale.Crop

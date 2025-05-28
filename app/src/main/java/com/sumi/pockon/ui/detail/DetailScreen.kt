@@ -32,7 +32,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.layout.wrapContentWidth
@@ -590,9 +589,9 @@ fun GiftImage(isEdit: Boolean, selectedImage: Bitmap?, usedDt: String, onClick: 
             if (selectedImage == null) {
                 Image(
                     modifier = Modifier
-                        .width(80.dp)
-                        .height(80.dp),
-                    painter = painterResource(id = R.drawable.ic_add_photo),
+                        .width(90.dp)
+                        .height(90.dp),
+                    painter = painterResource(id = R.drawable.ic_add_photo_40),
                     contentDescription = "add photo",
                     contentScale = ContentScale.Crop
                 )
@@ -958,7 +957,7 @@ fun GiftBottomSheet(image: Bitmap?, isVisible: Boolean, onDismiss: (Boolean) -> 
                     if (image == null) {
                         Image(
                             modifier = Modifier.fillMaxWidth(),
-                            painter = painterResource(id = R.drawable.ic_add_photo),
+                            painter = painterResource(id = R.drawable.ic_add_photo_40),
                             contentDescription = "use photo",
                             contentScale = ContentScale.Crop
                         )

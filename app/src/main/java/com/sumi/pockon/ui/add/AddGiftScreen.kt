@@ -353,9 +353,9 @@ fun GiftImage(
             if (selectedImage == null) {
                 Image(
                     modifier = Modifier
-                        .width(80.dp)
-                        .height(80.dp),
-                    painter = painterResource(id = R.drawable.ic_add_photo),
+                        .width(90.dp)
+                        .height(90.dp),
+                    painter = painterResource(id = R.drawable.ic_add_photo_40),
                     contentDescription = "add photo",
                     contentScale = ContentScale.Crop
                 )
