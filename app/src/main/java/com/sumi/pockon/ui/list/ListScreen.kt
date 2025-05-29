@@ -257,6 +257,8 @@ fun ListScreen(onDetail: (String) -> Unit, onAdd: () -> Unit, isLoading: (Boolea
                             ) {
                                 Text(
                                     fontSize = 18.sp,
+                                    color = MaterialTheme.colorScheme.outline,
+                                    fontWeight = FontWeight.Bold,
                                     text = stringResource(id = R.string.txt_no_gift),
                                 )
                             }

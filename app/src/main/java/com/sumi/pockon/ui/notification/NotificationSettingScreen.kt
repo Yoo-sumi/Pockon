@@ -12,14 +12,16 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.layout.wrapContentWidth
-import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Check
@@ -57,54 +59,60 @@ import java.util.Locale
 fun NotificationSettingScreen(onBack: () -> Unit) {
     val notificationSettingViewModel = hiltViewModel<NotificationSettingViewModel>()
     val day = notificationSettingViewModel.getDayList()
+    val scrollState = rememberScrollState()
 
     BackHandler {
-        notificationSettingViewModel.changeNotiEndDt()
         onBack()
     }
 
-    Column {
+    Column(modifier = Modifier.fillMaxSize()) {
         NotificationSettingScreenTopBar {
-            notificationSettingViewModel.changeNotiEndDt()
             onBack()
         }
-        Text(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(start = 15.dp, end = 15.dp, top = 10.dp, bottom = 10.dp),
-            text = stringResource(id = R.string.txt_noti_of_imminent_use_select),
-        )
-        Box(
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(0.5.dp)
-                .background(MaterialTheme.colorScheme.outline)
-        )
-        Box(
-            modifier = Modifier
-                .clickable {
-                    notificationSettingViewModel.toggleIsShowTimePickerWheelDialog()
-                }
+
+        Column(
+            Modifier.verticalScroll(scrollState)
         ) {
             Text(
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(start = 15.dp, end = 15.dp, top = 10.dp, bottom = 10.dp),
-                text = stringResource(id = R.string.txt_noti_end_dt_time, notificationSettingViewModel.seletedTime.value),
+                text = stringResource(id = R.string.txt_noti_of_imminent_use_select),
             )
-        }
-        Box(
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(0.5.dp)
-                .background(MaterialTheme.colorScheme.outline)
-        )
-        LazyColumn {
-            items(day.size) { idx ->
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(0.5.dp)
+                    .background(MaterialTheme.colorScheme.outline)
+            )
+            Box(
+                modifier = Modifier
+                    .clickable {
+                        notificationSettingViewModel.toggleIsShowTimePickerWheelDialog()
+                    }
+            ) {
+                Text(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(start = 15.dp, end = 15.dp, top = 10.dp, bottom = 10.dp),
+                    text = stringResource(
+                        id = R.string.txt_noti_end_dt_time,
+                        notificationSettingViewModel.seletedTime.value
+                    ),
+                )
+            }
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(0.5.dp)
+                    .background(MaterialTheme.colorScheme.outline)
+            )
+            repeat(day.size) { idx ->
                 Column(
                     modifier = Modifier
                         .clickable {
                             notificationSettingViewModel.setSeletedDay(day[idx])
+                            notificationSettingViewModel.changeNotiEndDt()
                         }
                 ) {
                     Box(

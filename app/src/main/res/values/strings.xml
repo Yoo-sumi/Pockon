@@ -24,6 +24,7 @@
     <string name="txt_no_gift">사용 가능한 기프티콘이 없어요.</string>
     <string name="txt_no_favorite_gift">아직 찜한 기프티콘이 없어요.</string>
     <string name="txt_no_near_gift">지금은 근처에 사용처가 없어요.</string>
+    <string name="txt_no_used_gift">사용 완료된 기프티콘이 없어요.</string>
     <string name="txt_used_stamp">사용완료\n%1$s</string>
     <string name="txt_create_pin">PIN 번호를 생성해 주세요.</string>
     <string name="txt_check_pin">PIN 번호를 한 번 더 입력해 주세요.</string>

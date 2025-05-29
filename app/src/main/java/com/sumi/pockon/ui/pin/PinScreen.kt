@@ -9,13 +9,15 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.defaultMinSize
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.wrapContentSize
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.outlined.ArrowBack
@@ -47,94 +49,92 @@ fun PinScreen(onSuccess: () -> Unit) {
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .background(colorResource(id = R.color.background)),
-        horizontalAlignment = Alignment.CenterHorizontally
+            .background(colorResource(id = R.color.background))
+            .verticalScroll(rememberScrollState()),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.SpaceBetween
     ) {
         Box(
-            modifier = Modifier.fillMaxSize()
+            modifier = Modifier
+                .height(100.dp)
+                .fillMaxWidth(),
+            contentAlignment = Alignment.TopStart
         ) {
-            Column(
-                modifier = Modifier
-                    .fillMaxWidth(),
-                horizontalAlignment = Alignment.CenterHorizontally
-            ) {
-                Box(
+            if (pinViewModel.mode.value == 1) {
+                Icon(
+                    imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                    contentDescription = "Back",
                     modifier = Modifier
-                        .height(100.dp)
-                        .fillMaxWidth(),
-                    contentAlignment = Alignment.TopStart
-                ) {
-                    if (pinViewModel.mode.value == 1) {
-                        Icon(
-                            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                            contentDescription = "Back",
-                            modifier = Modifier
-                                .padding(15.dp)
-                                .clickable {
-                                    pinViewModel.setMode(0)
-                                },
-                            tint = colorResource(id = R.color.onPrimary)
-                        )
-                    }
-                }
-
-                Text(
-                    text = stringResource(id = pinViewModel.getTitle()),
-                    style = typography.titleMedium,
-                    modifier = Modifier.padding(16.dp),
-                    color = colorResource(id = R.color.onPrimary)
+                        .padding(15.dp)
+                        .clickable {
+                            pinViewModel.setMode(0)
+                        },
+                    tint = colorResource(id = R.color.onPrimary)
                 )
-
-                Spacer(modifier = Modifier.height(30.dp))
-
-                if (pinViewModel.showSuccess.value && pinViewModel.mode.value != 0) { // pin auth success
-                    if (pinViewModel.mode.value != 4) {
-                        Icon(
-                            imageVector = Icons.Default.Check,
-                            contentDescription = "Success",
-                            modifier = Modifier
-                                .size(30.dp)
-                        )
-                    }
-                    onSuccess()
-                } else { // pin circle shape
-                    Row {
-                        (0 until pinViewModel.getPinSize()).forEach {
-                            val bgColor =
-                                if (pinViewModel.inputPin.size > it) R.color.onPrimary else R.color.background
-                            Box(
-                                modifier = Modifier
-                                    .padding(8.dp)
-                                    .size(15.dp)
-                                    .clip(shape = CircleShape)
-                                    .border(
-                                        width = 2.dp,
-                                        color = colorResource(id = R.color.onPrimary),
-                                        shape = CircleShape
-                                    )
-                                    .background(colorResource(bgColor))
-                            )
-                        }
-                    }
-                }
-
-                // error msg
-                Text(
-                    text = pinViewModel.error.value?.let { stringResource(id = it) } ?: "",
-                    color = MaterialTheme.colorScheme.error,
-                    modifier = Modifier.padding(16.dp)
-                )
-
-                Spacer(modifier = Modifier.height(50.dp))
             }
+        }
 
+        Text(
+            text = stringResource(id = pinViewModel.getTitle()),
+            style = typography.titleMedium,
+            modifier = Modifier.padding(16.dp),
+            color = colorResource(id = R.color.onPrimary)
+        )
+
+        Spacer(modifier = Modifier.height(30.dp))
+
+        if (pinViewModel.showSuccess.value && pinViewModel.mode.value != 0) { // pin auth success
+            if (pinViewModel.mode.value != 4) {
+                Icon(
+                    imageVector = Icons.Default.Check,
+                    contentDescription = "Success",
+                    modifier = Modifier
+                        .size(30.dp)
+                )
+            }
+            onSuccess()
+        } else { // pin circle shape
+            Row {
+                (0 until pinViewModel.getPinSize()).forEach {
+                    val bgColor =
+                        if (pinViewModel.inputPin.size > it) R.color.onPrimary else R.color.background
+                    Box(
+                        modifier = Modifier
+                            .padding(8.dp)
+                            .size(15.dp)
+                            .clip(shape = CircleShape)
+                            .border(
+                                width = 2.dp,
+                                color = colorResource(id = R.color.onPrimary),
+                                shape = CircleShape
+                            )
+                            .background(colorResource(bgColor))
+                    )
+                }
+            }
+        }
+
+        // error msg
+        Text(
+            text = pinViewModel.error.value?.let { stringResource(id = it) } ?: "",
+            color = MaterialTheme.colorScheme.error,
+            modifier = Modifier.padding(16.dp)
+        )
+
+        Spacer(modifier = Modifier.height(50.dp))
+
+
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(bottom = 20.dp),
+            contentAlignment = Alignment.BottomCenter
+        ) {
             // pin keypad
             Column(
-                modifier = Modifier
-                    .wrapContentSize()
-                    .align(Alignment.BottomCenter)
-                    .padding(bottom = 20.dp),
-                horizontalAlignment = Alignment.CenterHorizontally
+                modifier = Modifier.fillMaxHeight(),
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.Bottom
             ) {
                 if (pinViewModel.mode.value != 2) {
                     Text(

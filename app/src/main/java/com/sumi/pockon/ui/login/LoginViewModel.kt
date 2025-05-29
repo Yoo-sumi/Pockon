@@ -50,6 +50,7 @@ class LoginViewModel @Inject constructor(
     }
 
     fun loginAsGuest() {
+        isPinUse = true
         _isLogin.postValue(true)
         preferenceRepository.saveUid(UUID.randomUUID().toString())
         preferenceRepository.saveIsGuestMode(true)
@@ -68,6 +69,7 @@ class LoginViewModel @Inject constructor(
                 _isLogin.postValue(false)
                 _isFail.postValue(true)
             } else {
+                isPinUse = true
                 _isLogin.postValue(true)
                 preferenceRepository.saveUid(it)
                 preferenceRepository.saveEmail(email)
@@ -94,6 +96,7 @@ class LoginViewModel @Inject constructor(
                     _isLogin.postValue(false)
                     _isFail.postValue(true)
                 } else {
+                    isPinUse = true
                     _isLogin.postValue(true)
                     preferenceRepository.saveUid(it)
                     preferenceRepository.saveEmail(credential.id)
