@@ -12,6 +12,7 @@ import com.sumi.pockon.data.repository.BrandSearchRepository
 import com.sumi.pockon.data.repository.GiftRepository
 import com.sumi.pockon.data.model.Document
 import com.sumi.pockon.data.model.Gift
+import com.sumi.pockon.util.getDdayInt
 import com.sumi.pockon.util.loadImageFromPath
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
@@ -103,7 +104,7 @@ class MapViewModel @Inject constructor(
 
         val markerInGiftList = ArrayList<Pair<Document, List<Gift>>>()
         mappingList.forEach { (document, keywordList) ->
-            val filterGiftList = giftList.filter { keywordList.contains(it.brand) }
+            val filterGiftList = giftList.filter { keywordList.contains(it.brand) && getDdayInt(it.endDt) >= 0 }
             val sortedList = filterGiftList.sortedWith(
                 compareBy(
                     { it.brand },     // 브랜드명 순
