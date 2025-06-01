@@ -76,6 +76,9 @@ android {
 }
 
 dependencies {
+    // mlkit
+    implementation("com.google.mlkit:text-recognition-korean:16.0.1")
+
     // material-icons-extended
     implementation(libs.androidx.material.icons.extended.v161)
 

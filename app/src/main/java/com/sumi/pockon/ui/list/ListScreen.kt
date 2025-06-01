@@ -465,10 +465,11 @@ fun GiftItem(
                 }
 
                 Column(
+                    verticalArrangement = Arrangement.Center,
+                    horizontalAlignment = Alignment.CenterHorizontally,
                     modifier = Modifier
                         .fillMaxSize()
-                        .padding(20.dp)
-                        .align(Alignment.Bottom)
+                        .padding(10.dp)
                         .verticalScroll(scrollState)
                         .nestedScroll(rememberNestedScrollInteropConnection())
                 ) {
@@ -476,13 +477,14 @@ fun GiftItem(
                         modifier = Modifier.fillMaxWidth(),
                         text = gift.brand,
                         maxLines = 1,
+                        style = MaterialTheme.typography.bodyMedium,
                         overflow = TextOverflow.Ellipsis,
                         color = MaterialTheme.colorScheme.onPrimary
                     )
                     Text(
                         modifier = Modifier.fillMaxWidth(),
                         fontWeight = FontWeight.Bold,
-                        fontSize = 20.sp,
+                        style = MaterialTheme.typography.bodyLarge,
                         text = gift.name,
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis,
@@ -492,6 +494,7 @@ fun GiftItem(
                         modifier = Modifier.fillMaxWidth(),
                         textAlign = TextAlign.Right,
                         text = "~ $formattedEndDate",
+                        style = MaterialTheme.typography.bodyMedium,
                         color = MaterialTheme.colorScheme.onPrimary
                     )
                 }

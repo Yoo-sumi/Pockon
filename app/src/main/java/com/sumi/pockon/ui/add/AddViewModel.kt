@@ -5,15 +5,19 @@ import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.google.mlkit.vision.text.TextRecognition
+import com.google.mlkit.vision.text.korean.KoreanTextRecognizerOptions
 import com.sumi.pockon.R
 import com.sumi.pockon.data.repository.PreferenceRepository
 import com.sumi.pockon.data.repository.GiftRepository
 import com.sumi.pockon.data.model.Gift
 import com.sumi.pockon.data.repository.AlarmRepository
+import com.sumi.pockon.util.GifticonParser
 import com.sumi.pockon.util.NetworkMonitor
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import java.io.IOException
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
@@ -119,6 +123,7 @@ class AddViewModel @Inject constructor(
 
     fun setPhoto(photo: Bitmap?) {
         _photo.value = photo
+        photo?.let { analyzeImage(it) }
     }
 
     fun changeDatePickerState() {
@@ -158,5 +163,24 @@ class AddViewModel @Inject constructor(
 
     fun chgCheckedCash() {
         _isCheckedCash.value = !_isCheckedCash.value
+    }
+
+    private fun analyzeImage(bitmap: Bitmap) {
+        viewModelScope.launch {
+            try {
+                val recognizer = TextRecognition.getClient(KoreanTextRecognizerOptions.Builder().build())
+                recognizer.process(bitmap, 0)
+                    .addOnSuccessListener {
+                        val info = GifticonParser.parse(it.text)
+                        _name.value = info.name
+                        _brand.value = info.brand
+                        _cash.value = info.cash
+                        _endDate.value = info.endDate
+                        if (_cash.value.isNotEmpty()) {
+                            _isCheckedCash.value = true
+                        }
+                    }
+            } catch (_: IOException) { }
+        }
     }
 }
