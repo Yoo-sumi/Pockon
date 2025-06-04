@@ -168,6 +168,7 @@ fun NotificationSettingScreen(onBack: () -> Unit) {
                     onConfirm = {
                         notificationSettingViewModel.confirmTime()
                         notificationSettingViewModel.toggleIsShowTimePickerWheelDialog()
+                        notificationSettingViewModel.changeNotiEndDt()
                     }
                 )
             }
