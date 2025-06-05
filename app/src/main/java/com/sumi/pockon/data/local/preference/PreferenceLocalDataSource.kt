@@ -24,6 +24,8 @@ class PreferenceLocalDataSource @Inject constructor(
 
     fun isFirstLogin() = prefs.getBoolean(SharedPreferenceKeys.FIRST_LOGIN, true)
 
+    fun isPermRationale() = prefs.getBoolean(SharedPreferenceKeys.PERM_RATIONALE, false)
+
     fun isNotiEndDt() = prefs.getBoolean(SharedPreferenceKeys.NOTI_END_DT, true)
 
     fun getNotiEndDtDay() = prefs.getInt(SharedPreferenceKeys.NOTI_END_DT_DAY, 0)
@@ -62,6 +64,10 @@ class PreferenceLocalDataSource @Inject constructor(
 
     fun saveIsFirstLogin(isFirstLogin: Boolean) {
         prefs.edit().putBoolean(SharedPreferenceKeys.FIRST_LOGIN, isFirstLogin).apply()
+    }
+
+    fun saveIsPermRationale(isPermRationale: Boolean) {
+        prefs.edit().putBoolean(SharedPreferenceKeys.PERM_RATIONALE, isPermRationale).apply()
     }
 
     fun saveIsNotiEndDt(isNotiEndDtDay: Boolean) {

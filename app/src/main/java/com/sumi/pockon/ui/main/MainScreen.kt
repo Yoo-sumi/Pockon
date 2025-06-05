@@ -102,7 +102,6 @@ fun BottomNavigationBar(
     }
 
     var isShowIndicator by rememberSaveable { mutableStateOf(false) }
-    var showDialog by rememberSaveable { mutableStateOf(true) }
 
     Scaffold(
         modifier = Modifier.fillMaxSize(),
@@ -272,14 +271,15 @@ fun BottomNavigationBar(
     }
 
     // 권한 체크
-    if (showDialog) {
+    val notGranted = checkPermission(context)
+    if (notGranted.isNotEmpty() && !mainViewModel.isPermRationale.value) {
         PermissionExplanationDialog(
             onRequestPermission = {
-                showDialog = false
-                checkPermissionsAndRequest(context, launcherPermissions)
+                mainViewModel.saveIsPermRationale()
+                launcherPermissions.launch(notGranted)
             },
             onDismissRequest = {
-                showDialog = false
+                mainViewModel.saveIsPermRationale()
             }
         )
     }
@@ -289,10 +289,7 @@ fun BottomNavigationBar(
 }
 
 /** 앨범, 위치, 알림 권한 체크 */
-fun checkPermissionsAndRequest(
-    context: Context,
-    launcher: ManagedActivityResultLauncher<Array<String>, Map<String, Boolean>>
-) {
+private fun checkPermission(context: Context): Array<String> {
     val permissions = if (Build.VERSION.SDK_INT >= 33) {
         arrayOf(
             Manifest.permission.POST_NOTIFICATIONS,
@@ -308,12 +305,16 @@ fun checkPermissionsAndRequest(
         )
     }
 
-    val notGranted = permissions.filter {
-        ContextCompat.checkSelfPermission(context, it) != PackageManager.PERMISSION_GRANTED
-    }
-
-    if (notGranted.isNotEmpty()) {
-        launcher.launch(notGranted.toTypedArray())
+    return if (!permissions.all {
+            ContextCompat.checkSelfPermission(
+                context,
+                it
+            ) == PackageManager.PERMISSION_GRANTED
+        })
+    {
+        permissions
+    } else {
+        arrayOf()
     }
 }
 

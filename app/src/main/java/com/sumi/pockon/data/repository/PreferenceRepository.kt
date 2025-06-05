@@ -23,6 +23,8 @@ class PreferenceRepository @Inject constructor(
 
     fun isFirstLogin() = preferenceLocalDataSource.isFirstLogin()
 
+    fun isPermRationale() = preferenceLocalDataSource.isPermRationale()
+
     fun isNotiEndDt() = preferenceLocalDataSource.isNotiEndDt()
 
     fun getNotiEndDtDay() = preferenceLocalDataSource.getNotiEndDtDay()
@@ -45,6 +47,8 @@ class PreferenceRepository @Inject constructor(
     fun saveIsGuestMode(isGuestMode: Boolean) = preferenceLocalDataSource.saveIsGuestMode(isGuestMode)
 
     fun saveIsFirstLogin(isFirstLogin: Boolean) = preferenceLocalDataSource.saveIsFirstLogin(isFirstLogin)
+
+    fun saveIsPermRationale(isPermRationale: Boolean) = preferenceLocalDataSource.saveIsPermRationale(isPermRationale)
 
     fun saveNotiEndDtDay(day: Int) = preferenceLocalDataSource.saveNotiEndDtDay(day)
 
