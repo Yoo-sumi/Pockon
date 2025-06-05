@@ -26,6 +26,7 @@ import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Settings
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.NavigationBar
@@ -33,13 +34,14 @@ import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.NavigationBarItemDefaults
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
@@ -100,6 +102,7 @@ fun BottomNavigationBar(
     }
 
     var isShowIndicator by rememberSaveable { mutableStateOf(false) }
+    var showDialog by rememberSaveable { mutableStateOf(true) }
 
     Scaffold(
         modifier = Modifier.fillMaxSize(),
@@ -269,15 +272,24 @@ fun BottomNavigationBar(
     }
 
     // 권한 체크
-    CheckPermission(context, launcherPermissions)
+    if (showDialog) {
+        PermissionExplanationDialog(
+            onRequestPermission = {
+                showDialog = false
+                checkPermissionsAndRequest(context, launcherPermissions)
+            },
+            onDismissRequest = {
+                showDialog = false
+            }
+        )
+    }
 
     // Loading Indicator
     if (isShowIndicator) LoadingScreen()
 }
 
-/** 앨범, 위치 권한 체크 */
-@Composable
-private fun CheckPermission(
+/** 앨범, 위치, 알림 권한 체크 */
+fun checkPermissionsAndRequest(
     context: Context,
     launcher: ManagedActivityResultLauncher<Array<String>, Map<String, Boolean>>
 ) {
@@ -296,17 +308,50 @@ private fun CheckPermission(
         )
     }
 
-    if (!permissions.all {
-            ContextCompat.checkSelfPermission(
-                context,
-                it
-            ) == PackageManager.PERMISSION_GRANTED
-        }) {
-        LaunchedEffect(Unit) {
-            launcher.launch(permissions)
-        }
+    val notGranted = permissions.filter {
+        ContextCompat.checkSelfPermission(context, it) != PackageManager.PERMISSION_GRANTED
+    }
+
+    if (notGranted.isNotEmpty()) {
+        launcher.launch(notGranted.toTypedArray())
     }
 }
+
+@Composable
+fun PermissionExplanationDialog(
+    onRequestPermission: () -> Unit,
+    onDismissRequest: () -> Unit
+) {
+    val permissionsText = if (Build.VERSION.SDK_INT >= 33) {
+        stringResource(R.string.permission_explanation_api_33_up).trimIndent()
+    } else {
+        stringResource(R.string.permission_explanation_api_32_down).trimIndent()
+    }
+
+    AlertDialog(
+        onDismissRequest = onDismissRequest,
+        title = { Text(text = stringResource(R.string.dialog_permission_title)) },
+        text = { Text(text = permissionsText) },
+        confirmButton = {
+            TextButton(onClick = onRequestPermission) {
+                Text(
+                    text = stringResource(R.string.dialog_permission_confirm),
+                    color = MaterialTheme.colorScheme.onPrimary
+                )
+            }
+        },
+        dismissButton = {
+            TextButton(onClick = onDismissRequest) {
+                Text(
+                    text = stringResource(R.string.btn_cancel),
+                    color = Color.Gray
+                )
+            }
+        }
+    )
+}
+
+
 
 sealed class Screen(val route: String, val icon: ImageVector, @StringRes val label: Int) {
     data object Home : Screen("home", Icons.Filled.Home, R.string.home)

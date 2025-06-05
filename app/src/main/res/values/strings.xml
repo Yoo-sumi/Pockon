@@ -66,7 +66,7 @@
     <string name="msg_noti_end_dt">기프티콘 만료일 %d일 전이에요.</string>
     <string name="msg_login_fail">로그인에 실패했어요.</string>
     <string name="msg_pin_auth_fail">PIN 번호가 일치하지 않아요.</string>
-    <string name="msg_no_photo_permission">사진을 불러오려면 권한이 필요해요.\n설정에서 권한을 허용해 주세요!</string>
+    <string name="msg_no_photo_permission">사진을 불러오려면 권한이 필요해요.\n설정에서 사진 권한을 허용해 주세요!</string>
     <string name="msg_no_notification_permission">알림을 받으려면 권한이 필요해요.\n설정에서 알림 권한을 허용해 주세요!</string>
     <string name="msg_no_internet">인터넷이 연결되어 있지 않아요.\nWi-Fi나 모바일 데이터를 켜 주세요!</string>
     <string name="msg_no_location_permission">위치를 확인하려면 권한이 필요해요.\n설정에서 위치 권한을 허용해 주세요!</string>
@@ -139,4 +139,22 @@
     <string name="privacy_consent_required">개인정보 동의가 필요합니다.</string>
     <string name="btn_disagree">동의하지 않음</string>
     <string name="btn_agree">동의</string>
+
+    <string name="permission_explanation_api_33_up">
+    앱에서 원활한 기능 사용을 위해 아래 권한이 필요합니다:\n\n
+    1. 알림 권한: 기프티콘 만료 알림을 받기 위해 필요합니다.\n
+    2. 사진 권한: 기프티콘 사진을 불러오고 저장하기 위해 필요합니다.\n
+    3. 위치 권한: 근처 사용처 안내를 위해 필요합니다.\n\n
+    권한 요청을 허용해 주세요.
+    </string>
+
+    <string name="permission_explanation_api_32_down">
+    앱에서 원활한 기능 사용을 위해 아래 권한이 필요합니다:\n\n
+    1. 사진 권한: 기프티콘 사진을 불러오고 저장하기 위해 필요합니다.\n
+    2. 위치 권한: 근처 사용처 안내를 위해 필요합니다.\n\n
+    권한 요청을 허용해 주세요.
+    </string>
+
+    <string name="dialog_permission_title">권한 안내</string>
+    <string name="dialog_permission_confirm">권한 요청하기</string>
 </resources>
