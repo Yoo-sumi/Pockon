@@ -118,4 +118,25 @@
     <string name="txt_copyright">Copyright</string>
     <string name="txt_copyright_info">Icons made by [%s] from Flaticon</string>
     <string name="txt_copyright_info_url">(%s)</string>
+
+    <string name="privacy_content">
+    1. 수집하는 개인정보\n
+    - 구글 계정 정보(이메일, 프로필 등)\n
+    - 기프티콘 사진 및 관련 입력 정보(상품명, 유효기간 등)\n\n
+    2. 수집 목적\n
+    - 기프티콘 사진 저장 및 관리\n
+    - 위치 기반 사용처 안내\n
+    - 만료 임박 알림 제공\n
+    - 앱 기능 개선 및 통계 분석\n\n
+    3. 저장 및 관리\n
+    - Firebase에 안전하게 저장 및 관리됩니다.\n\n
+    4. 개인정보 보관 기간 및 권리\n
+    - 이용자의 요청 시 개인정보는 즉시 삭제 처리합니다.\n\n
+    5. 동의를 거부할 권리가 있으며, 동의 거부 시 서비스 이용에 제한이 있을 수 있습니다.
+    </string>
+    <string name="privacy_title">개인정보 수집 및 이용 동의서</string>
+    <string name="privacy_agree_text">개인정보 수집 및 이용에 동의합니다.</string>
+    <string name="privacy_consent_required">개인정보 동의가 필요합니다.</string>
+    <string name="btn_disagree">동의하지 않음</string>
+    <string name="btn_agree">동의</string>
 </resources>

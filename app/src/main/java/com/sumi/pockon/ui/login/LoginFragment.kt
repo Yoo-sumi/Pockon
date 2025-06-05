@@ -1,5 +1,6 @@
 package com.sumi.pockon.ui.login
 
+import android.app.AlertDialog
 import android.os.Build
 import android.os.Bundle
 import androidx.fragment.app.Fragment
@@ -8,6 +9,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.core.content.ContextCompat
 import androidx.fragment.app.viewModels
 import androidx.navigation.Navigation
 import com.google.android.gms.auth.api.signin.GoogleSignIn
@@ -49,11 +51,14 @@ class LoginFragment : Fragment() {
         }
 
         btnGoogle.setOnClickListener {
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
-                loginViewModel.loginForApiHigher()
-            } else {
-                loginViewModel.getSignInIntent { signInIntent ->
-                    signInLauncher.launch(signInIntent)
+            // 동의 팝업 띄우고 동의하면 로그인 시작
+            showPrivacyConsentDialog {
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
+                    loginViewModel.loginForApiHigher()
+                } else {
+                    loginViewModel.getSignInIntent { signInIntent ->
+                        signInLauncher.launch(signInIntent)
+                    }
                 }
             }
         }
@@ -90,5 +95,27 @@ class LoginFragment : Fragment() {
         }
 
         return binding.root
+    }
+
+    private fun showPrivacyConsentDialog(onAgree: () -> Unit) {
+        val dialog = AlertDialog.Builder(requireContext())
+            .setTitle(getString(R.string.privacy_title))
+            .setMessage(getString(R.string.privacy_content))
+            .setPositiveButton(getString(R.string.btn_agree)) { dialog, _ ->
+                dialog.dismiss()
+                onAgree()
+            }
+            .setNegativeButton(getString(R.string.btn_disagree)) { dialog, _ ->
+                dialog.dismiss()
+                Snackbar.make(binding.root, getString(R.string.privacy_consent_required), Snackbar.LENGTH_SHORT).show()
+            }
+            .setCancelable(false)
+            .create()
+
+        dialog.show()
+
+        dialog.getButton(AlertDialog.BUTTON_NEGATIVE)?.setTextColor(
+            ContextCompat.getColor(requireContext(), R.color.gray)
+        )
     }
 }
