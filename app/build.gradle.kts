@@ -21,8 +21,8 @@ android {
         applicationId = "com.sumi.pockon"
         minSdk = 24
         targetSdk = 34
-        versionCode = 10
-        versionName = "1.1.9"
+        versionCode = 12
+        versionName = "1.0.1"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables {

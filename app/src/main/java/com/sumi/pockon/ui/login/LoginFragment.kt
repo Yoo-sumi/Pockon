@@ -54,7 +54,13 @@ class LoginFragment : Fragment() {
             // 동의 팝업 띄우고 동의하면 로그인 시작
             showPrivacyConsentDialog {
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
-                    loginViewModel.loginForApiHigher()
+                    loginViewModel.loginForApiHigher {
+                        if (!it) {
+                            loginViewModel.getSignInIntent { signInIntent ->
+                                signInLauncher.launch(signInIntent)
+                            }
+                        }
+                    }
                 } else {
                     loginViewModel.getSignInIntent { signInIntent ->
                         signInLauncher.launch(signInIntent)

@@ -80,14 +80,14 @@ class LoginViewModel @Inject constructor(
         }
     }
 
-    fun loginForApiHigher() {
+    fun loginForApiHigher(onRetry: (Boolean) -> Unit) {
         _isLoading.postValue(true)
         viewModelScope.launch {
             val credential = loginRepository.getTokenForApiHigher()
             if (credential == null) {
                 _isLogin.postValue(false)
-                _isFail.postValue(true)
                 _isLoading.postValue(false)
+                onRetry(false)
                 return@launch
             }
 

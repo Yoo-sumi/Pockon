@@ -283,4 +283,16 @@ class DetailViewModel @Inject constructor(
 
         return msg
     }
+
+    fun init() {
+        _name.value = _gift.value.name
+        _brand.value = _gift.value.brand
+        _cash.value = _gift.value.cash
+        _endDate.value = _gift.value.endDt
+        _memo.value = _gift.value.memo
+        _usedDt.value = _gift.value.usedDt
+        _photo.value = _gift.value.photo
+        _isCheckedCash.value = _gift.value.cash.isNotEmpty()
+        _isFavorite.value = _gift.value.isFavorite
+    }
 }

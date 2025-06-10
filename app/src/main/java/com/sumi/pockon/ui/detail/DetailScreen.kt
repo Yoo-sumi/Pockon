@@ -216,7 +216,10 @@ fun DetailScreen(id: String, isEditMode: Boolean = true, onBack: () -> Unit) {
                                 )
                             } else {
                                 Text(
-                                    modifier = Modifier.clickable { detailViewModel.setIsEdit(false) },
+                                    modifier = Modifier.clickable {
+                                        detailViewModel.setIsEdit(false)
+                                        detailViewModel.init()
+                                    },
                                     text = stringResource(id = R.string.btn_cancel),
                                     fontSize = 14.sp
                                 )
@@ -527,7 +530,7 @@ fun InputDataTextField(
         value = value,
         textStyle = TextStyle(MaterialTheme.colorScheme.onPrimary),
         onValueChange = {
-            if (index in 0..1 && it.length > 20) return@OutlinedTextField
+            if (index == 0 && it.length > 100 || (index == 1 && it.length > 50)) return@OutlinedTextField
             if (index == 4 && it.length > 300) return@OutlinedTextField
             if (((it.length > 9 || it == "00") && index == 2) || (it.length > 8 && index == 3)) return@OutlinedTextField
             // 공백만 입력했는지 확인 (중간 공백 허용, 전체 공백은 차단)
