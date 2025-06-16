@@ -48,30 +48,166 @@
 
 ---
 
-## 📸 스크린샷 (Screenshots)
-### 1. 홈 화면
-**설명**: Pockon의 첫 번째 화면으로, 사용자는 받은 기프티콘들을 한눈에 확인할 수 있습니다. 직관적인 UI로 기프티콘 관리가 용이합니다.
-![홈 화면](링크 또는 이미지 경로)
+## 📸 화면 및 기능 소개
+### 1. **로그인 화면**  
+구글 로그인과 게스트 모드를 지원하며, 로그인 후 PIN 설정으로 보안을 강화할 수 있습니다.
+#### 1) 로그인 선택 화면
+- 구글 계정 로그인 또는 게스트 모드 접속을 지원합니다.
+- 구글 계정 로그인 시 개인정보 수집 및 이용 동의서를 필수로 동의 받아야 서비스를 이용할 수 있습니다.
+- 게스트 모드 접속 시 동의서 없이 즉시 이용 가능합니다.
+<p float="left">
+  <img src="https://github.com/user-attachments/assets/029750c3-dd09-40b9-ab43-1f7c6f19aa68" width="250" />
+  <img src="https://github.com/user-attachments/assets/a3789fe9-deb8-4533-bf31-8abe89400af8" width="250" />
+  <img src="https://github.com/user-attachments/assets/971865f0-5b85-4e71-a5fc-7d2a0b158465" width="250" />
+</p>
 
-### 2. 기프티콘 추가 및 관리
-**설명**: 새로운 기프티콘을 쉽게 추가할 수 있으며, 기프티콘의 사진과 만료일을 입력하여 관리할 수 있습니다.
-![기프티콘 추가](링크 또는 이미지 경로)
+#### 2) PIN 로그인
+- PIN 설정 후부터는 앱 실행 시 PIN 입력을 통해 잠금 해제가 필요합니다.
+<p float="left">
+  <img src="https://github.com/user-attachments/assets/d92e4027-82f4-45ce-958e-017cfeb77529" width="250" />
+  <img src="https://github.com/user-attachments/assets/ab470c2b-26a5-4a94-ae13-acc769b772ea" width="250" />
+</p>
 
-### 3. 기프티콘 만료 알림 기능
-**설명**: 기프티콘의 만료일을 놓치지 않도록 자동 알림 기능을 제공합니다. 알림을 통해 만료일 임박한 기프티콘을 놓치지 않게 도와줍니다.
-![만료 알림](링크 또는 이미지 경로)
+### 2. **홈 화면**  
+사용자의 저장된 기프티콘을 효율적으로 관리할 수 있도록, 근처에서 사용 가능한 기프티콘과 찜한 기프티콘을 구분해 보여줍니다.<br>
+<p float="left">
+  <img src="https://github.com/user-attachments/assets/a5f4a567-9161-4842-97cd-84d470dd36cf" width="250" />
+</p>
 
-### 4. 근처 사용처 안내
-**설명**: 사용자가 현재 위치를 기준으로 근처에서 사용할 수 있는 기프티콘을 빠르게 확인할 수 있습니다. 지도와 함께 사용처 정보를 제공합니다.
-![근처 사용처](링크 또는 이미지 경로)
+#### 1) 지도 보기 및 사용처 확인
+- 홈 화면의 ‘지도 보기’ 버튼 클릭 시, 현재 위치 기준으로 근처 사용 가능한 매장이 지도에 마커로 표시됩니다.
+- 마커 클릭 시, 해당 매장에서 사용할 수 있는 기프티콘 목록을 뷰페이저 형식으로 스와이프하며 확인할 수 있습니다.
+<p float="left">
+  <img src="https://github.com/user-attachments/assets/14f011a5-5db3-4f96-9652-d5c968719ea9" width="250" />
+</p>
 
-### 5. SwipeRefresh 기능
-**설명**: SwipeRefresh를 이용해 기프티콘 목록을 쉽게 새로 고칠 수 있습니다. 최신 기프티콘 상태를 즉시 확인할 수 있습니다.
-![SwipeRefresh 기능](링크 또는 이미지 경로)
+#### 2) 찜한 기프티콘 관리
+- 사용자는 기프티콘의 사용 가능 여부, 만료 여부와 관계없이 자유롭게 즐겨찾기(찜) 등록이 가능합니다.
+- 찜한 기프티콘은 홈 화면에서 별도 섹션으로 구분되어 손쉽게 모아볼 수 있어, 원하는 기프티콘을 빠르게 찾을 수 있습니다.
+<p float="left">
+  <img src="https://github.com/user-attachments/assets/3d22ee94-ff7d-424c-a41a-be3ae8237f80" width="250" />
+</p>
 
-### 6. 설정 화면 및 기타 기능
-**설명**: 알림 설정, 위치 설정 등 사용자 맞춤형 옵션을 제공합니다. 설정 화면을 통해 기프티콘 관리 환경을 개인화할 수 있습니다.
-![설정 화면](링크 또는 이미지 경로)
+
+### 3. **기프티콘 목록 화면**  
+사용자가 등록한 기프티콘을 편리하게 관리할 수 있는 목록 화면입니다.
+- 다양한 정렬 기능을 제공해 최신순, 만료일순, 가나다순으로 원하는 기준에 따라 목록을 정렬할 수 있습니다.
+- 체크 박스 선택 기능을 통해 여러 기프티콘을 한꺼번에 선택하여 전체 삭제 또는 선택 삭제가 가능합니다.
+- 상단에는 브랜드별 카테고리 탭이 있어, 원하는 브랜드를 선택해 해당 브랜드 기프티콘만 쉽게 필터링할 수 있습니다.
+<p float="left">
+  <img src="https://github.com/user-attachments/assets/5ec7d5aa-e41d-4f48-89c1-9e094cb3a10c" width="250" />
+  <img src="https://github.com/user-attachments/assets/b72c0e0f-36fc-42a8-b6a3-8f842f134cc0" width="250" />
+  <img src="https://github.com/user-attachments/assets/e0d212fa-32b4-4e45-9bb9-96b23a968d54" width="250" />
+</p>
+
+- 스와이프 제스처로 빠른 조작이 가능한데,
+   오른쪽에서 왼쪽으로 스와이프 시 해당 기프티콘을 사용 완료 처리하고,
+   왼쪽에서 오른쪽으로 스와이프 시 해당 기프티콘을 삭제할 수 있습니다.
+- 화면을 아래로 당기면 새로고침 기능이 작동해 최신 데이터로 목록을 업데이트할 수 있습니다.
+ <p float="left">
+  <img src="https://github.com/user-attachments/assets/18ccf2d0-f12c-4342-9638-dcca2a04439c" width="250" />
+  <img src="https://github.com/user-attachments/assets/800d84e1-3598-40a1-a869-8aa9ae3cd470" width="250" />
+</p>
+
+#### 2) 찜한 기프티콘 관리
+- 사용자는 기프티콘의 사용 가능 여부, 만료 여부와 관계없이 자유롭게 즐겨찾기(찜) 등록이 가능합니다.
+- 찜한 기프티콘은 홈 화면에서 별도 섹션으로 구분되어 손쉽게 모아볼 수 있어, 원하는 기프티콘을 빠르게 찾을 수 있습니다.
+<p float="left">
+  <img src="https://github.com/user-attachments/assets/3d22ee94-ff7d-424c-a41a-be3ae8237f80" width="250" />
+</p>
+
+### 4. **기프티콘 추가 및 관리 화면**  
+사용자가 기프티콘을 손쉽게 등록하고 체계적으로 관리할 수 있는 화면입니다.
+
+#### 1) 상세 정보 등록 및 편집
+- 사진, 브랜드, 이름, 만료일, 메모, 금액(금액권) 등 상세 정보를 등록·편집할 수 있습니다.
+<p float="left">
+  <img src="https://github.com/user-attachments/assets/99a6422f-2d55-4587-a336-3ae0544e1780" width="250" />
+  <img src="https://github.com/user-attachments/assets/d0f8f009-18b4-4bf6-bfed-2e907afd44e2" width="250" />
+  <img src="https://github.com/user-attachments/assets/0fe93570-e974-445d-b871-7b75faad4512" width="250" />
+</p>
+
+#### 2) 사진 자동 인식(OCR 적용)
+- 기프티콘 사진을 업로드하면 브랜드명, 이름, 만료일, 금액 정보를 자동 추출해 초기값으로 설정합니다. 인식 정확도는 완벽하지 않지만 즉시 편집할 수 있어 사용 편의성을 높였습니다.
+<p align="left">
+  <img src="https://github.com/user-attachments/assets/0f560eb0-6b90-44fa-8077-bcde1c63e3bb" width="250"/>
+  <img src="https://github.com/user-attachments/assets/b06b748e-1344-44b2-9583-d558ce0df7ef" width="250"/>
+</p>
+
+#### 3) 사용 완료 및 바코드 확인
+- 사용 완료 버튼 클릭 시, 기프티콘 전체 이미지가 바텀 다이얼로그로 확대 표시됩니다.
+- 바텀 다이얼로그 내 이미지 클릭 시, 사진을 자유롭게 확대·축소할 수 있습니다.
+- 사용 완료 처리 시, 사용 일시가 이미지 상단에 오버레이 라벨로 표시되어 시각적으로 사용 상태를 명확하게 구분할 수 있습니다.
+<p align="left">
+  <img src="https://github.com/user-attachments/assets/8686fec8-6c48-469b-a818-d3075007045f" width="250"/>
+  <img src="https://github.com/user-attachments/assets/6107eeae-5fcc-46e1-a86e-fd0b6706fec5" width="250"/>
+</p>
+
+#### 4) 금액권 잔액 자동 계산
+- 금액권은 사용 금액 입력 시 잔액이 자동 계산되고, 잔액이 0원이 되면 자동으로 사용 완료 처리됩니다.
+<p align="left">
+  <img src="https://github.com/user-attachments/assets/73739fc2-ec8c-402a-906d-806b608f57cd" width="250"/>
+</p>
+
+
+### 4. **설정 화면**  
+사용자의 계정 정보 및 앱 사용 환경을 관리할 수 있는 화면입니다.
+#### 사용자 계정 정보 표시
+- 로그인한 사용자 이름과 이메일을 확인할 수 있습니다.
+<p float="left">
+  <img src="https://github.com/user-attachments/assets/08ac182d-7947-4772-94d3-1a81fb8d58d7" width="250" />
+</p>
+
+#### 사용 내역 조회
+- 사용 완료된 기프티콘 내역을 확인할 수 있습니다.
+- 개별 선택 및 전체 삭제가 가능합니다.
+<p float="left">
+  <img src="https://github.com/user-attachments/assets/75030c0a-dbeb-41cf-b112-7df8a7441330" width="250" />
+  <img src="https://github.com/user-attachments/assets/f1a66dbb-f3ba-4c14-a4f6-d22ba4f47ded" width="250" />
+</p>
+
+#### 만료 임박 알림 설정
+- 기프티콘 만료일 알림을 ON/OFF로 설정할 수 있습니다.
+- 사용자가 원하는 시간대와 만료일 기준 시점을 선택하여 알림을 받을 수 있습니다.
+<p float="left">
+  <img src="https://github.com/user-attachments/assets/01dd692b-ee9a-469f-9f80-70ccaa54af9a" width="250" />
+  <img src="https://github.com/user-attachments/assets/40d5ff63-ea1b-4b43-8128-09ac8cabc77d" width="250" />
+  <img src="https://github.com/user-attachments/assets/2848f9f4-a552-4a28-8f85-850040f36e30" width="250" />
+</p>
+
+#### PIN(비밀번호) 사용 설정
+- 앱 실행 시 PIN 입력 요구를 ON/OFF로 설정할 수 있습니다.
+- ON 설정 시 즉시 비밀번호 생성 화면으로 이동하여 PIN을 생성할 수 있습니다.
+<p float="left">
+  <img src="https://github.com/user-attachments/assets/5f16c45c-a0ab-4330-9c0c-cd0cb808284f" width="250" />
+  <img src="https://github.com/user-attachments/assets/d894ddee-6632-428d-b8a4-188ae449a3a4" width="250" />
+</p>
+
+#### 로그아웃 및 회원 탈퇴 기능 제공
+- 현재 계정에서 로그아웃하거나 계정을 탈퇴하고 데이터를 삭제할 수 있습니다.
+- 게스트 모드에서는 ‘로그아웃’ 및 ‘회원 탈퇴’ 메뉴가 표시되지 않으며, ‘게스트 모드 종료’ 메뉴만 제공됩니다.
+<p float="left">
+  <img src="https://github.com/user-attachments/assets/9833236a-f1ed-41ac-ac24-a1361a1ce86f" width="250" />
+  <img src="https://github.com/user-attachments/assets/c35041fc-e8ef-4ee3-822d-1d1d2e2fd92e" width="250" /> 
+  <img src="https://github.com/user-attachments/assets/faee1d3e-fb84-4028-a404-85bb55bf3fae" width="250" />
+</p>
+
+
+### 5. **다크모드 및 화면 회전 지원**  
+#### 다크모드 지원
+- 시스템 설정에 따라 앱 테마가 라이트/다크 모드로 자동 전환됩니다.
+<p float="left">
+  <img src="https://github.com/user-attachments/assets/9cdb1740-42b8-43a6-a23c-0b74da0c6e64" width="250" />
+  <img src="https://github.com/user-attachments/assets/9b5ee5d0-ecd3-486f-a724-57009ec8a31c" width="250" />
+  <img src="https://github.com/user-attachments/assets/41a4a00d-75ab-4b82-a9d5-0d152a254b57" width="250" />
+</p>
+
+#### 화면 회전 지원
+- 화면 회전 시 ViewModel 상태를 통해 데이터가 유지되도록 설계하였으며, 화면 회전에도 입력 데이터 및 화면 구성이 초기화되지 않도록 안정성에 신경 썼습니다.
+<p float="left">
+  <img src="https://github.com/user-attachments/assets/7c4f5213-a448-4403-b532-196c4c4078ce" width="250" />
+  <img src="https://github.com/user-attachments/assets/252bbf72-12be-4060-b306-ecb07c0cefb6" width="250" />
+</p>
 
 
 ---
