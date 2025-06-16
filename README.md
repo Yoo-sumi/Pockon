@@ -1,4 +1,13 @@
-<h1 align="center">🎁 Pockon - 기프티콘 관리 앱</h1>
+<h1 align="center">🎁 Pockon - 내 손안의 기프티콘 매니저</h1>
+
+---
+
+## 🚀 정식 출시 · 바로 사용하기
+**Pockon - 내 손안의 기프티콘 매니저**  
+구글 플레이 스토어에 정식 출시된 앱입니다.  
+지금 바로 다운로드하여 직접 사용해보세요!
+
+👉 [구글 플레이 스토어에서 다운로드](https://play.google.com/store/apps/details?id=com.sumi.pockon)
 
 ---
 
@@ -35,16 +44,6 @@
 | **백엔드**       | Firebase (Cloud Firestore, Firebase Auth, Firebase Storage)           |
 | **JSON 처리**    | Gson                                                  |
 | **이미지 로딩**  | Coil                                                  |
-
----
-
-## ⚙️ 설치 방법 (Installation)
-1. 이 프로젝트를 클론합니다:<br>
-   `git clone https://github.com/username/pockon.git`
-2. Android Studio에서 프로젝트를 엽니다.
-3. 필요한 의존성 파일을 설치합니다:<br>
-   `./gradlew build`
-4. 에뮬레이터나 실제 디바이스에서 앱을 실행합니다.
 
 ---
 
@@ -203,6 +202,16 @@
   <img src="https://github.com/user-attachments/assets/7c4f5213-a448-4403-b532-196c4c4078ce" width="250" />
   <img src="https://github.com/user-attachments/assets/252bbf72-12be-4060-b306-ecb07c0cefb6" width="250" />
 </p>
+
+---
+
+## ⚙️ 설치 방법 (Installation)
+1. 이 프로젝트를 클론합니다:<br>
+   `git clone https://github.com/username/pockon.git`
+2. Android Studio에서 프로젝트를 엽니다.
+3. 필요한 의존성 파일을 설치합니다:<br>
+   `./gradlew build`
+4. 에뮬레이터나 실제 디바이스에서 앱을 실행합니다.
 
 ---
 
