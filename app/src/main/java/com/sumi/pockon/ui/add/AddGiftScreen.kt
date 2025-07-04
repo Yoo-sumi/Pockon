@@ -1,6 +1,7 @@
 package com.sumi.pockon.ui.add
 
 import android.Manifest
+import android.annotation.SuppressLint
 import android.app.DatePickerDialog
 import android.content.Context
 import android.content.DialogInterface
@@ -79,6 +80,7 @@ import java.util.Calendar
 import java.util.Locale
 import java.util.TimeZone
 
+@SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @Composable
 fun AddGifticon(onBack: (Boolean) -> Unit) {
     val addViewModel = hiltViewModel<AddViewModel>()
@@ -117,7 +119,7 @@ fun AddGifticon(onBack: (Boolean) -> Unit) {
         },
         modifier = Modifier
             .fillMaxSize()
-    ) { innerPadding ->
+    ) { _ ->
         Column {
             AddGiftScreenTopBar {
                 onBack(false)
@@ -126,7 +128,6 @@ fun AddGifticon(onBack: (Boolean) -> Unit) {
                 modifier = Modifier
                     .weight(1f)
                     .background(MaterialTheme.colorScheme.background)
-                    .padding(innerPadding)
                     .verticalScroll(scrollSate)
                     .padding(top = 5.dp, bottom = 5.dp, start = 25.dp, end = 25.dp)
             ) {

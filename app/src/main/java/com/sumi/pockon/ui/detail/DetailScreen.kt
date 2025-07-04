@@ -1,5 +1,6 @@
 package com.sumi.pockon.ui.detail
 
+import android.annotation.SuppressLint
 import android.content.Intent
 import android.graphics.Bitmap
 import android.net.Uri
@@ -111,6 +112,7 @@ import com.sumi.pockon.util.getBitmapFromUri
 import com.sumi.pockon.util.thousandSeparatorTransformation
 import kotlinx.coroutines.launch
 
+@SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @Composable
 fun DetailScreen(id: String, isEditMode: Boolean = true, onBack: () -> Unit) {
     val detailViewModel = hiltViewModel<DetailViewModel>()
@@ -160,11 +162,10 @@ fun DetailScreen(id: String, isEditMode: Boolean = true, onBack: () -> Unit) {
         },
         modifier = Modifier
             .fillMaxSize()
-    ) { innerPadding ->
+    ) { _ ->
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(innerPadding)
                 .background(MaterialTheme.colorScheme.background)
         ) {
             // topbar
@@ -1012,50 +1013,37 @@ fun GiftBottomSheet(image: Bitmap?, isVisible: Boolean, onDismiss: (Boolean) -> 
 fun ImageFullScreenDialog(image: Bitmap?, onDismiss: () -> Unit) {
     var scale by remember { mutableFloatStateOf(1f) }
 
-    Column(
+    Box(
         modifier = Modifier
             .fillMaxSize()
             .background(Color.Black)
     ) {
-        var currentScale by remember { mutableFloatStateOf(scale) }
-
-        Box(modifier = Modifier
-            .fillMaxWidth()
-            .height(50.dp)) {
-            IconButton(
-                onClick = onDismiss,
-                modifier = Modifier.align(Alignment.CenterEnd)
-            ) {
-                Icon(
-                    imageVector = Icons.Default.Close,
-                    contentDescription = "Close",
-                    tint = Color.White
-                )
-            }
-        }
-
         Image(
             painter = rememberAsyncImagePainter(image),
             contentDescription = "Full Screen Gifticon",
             modifier = Modifier
                 .fillMaxSize()
-                .weight(1f)
                 .pointerInput(Unit) {
-                    detectTransformGestures { _, pan, zoom, _ ->
-                        currentScale *= zoom
-                        currentScale = currentScale.coerceIn(0.5f, 3f) // 제한된 확대/축소
-                        scale = currentScale
+                    detectTransformGestures { _, _, zoom, _ ->
+                        scale = (scale * zoom).coerceIn(0.5f, 3f)
                     }
                 }
                 .graphicsLayer(
-                    scaleX = currentScale,
-                    scaleY = currentScale,
-                    alpha = 1f
+                    scaleX = scale,
+                    scaleY = scale
                 )
         )
 
-        Box(modifier = Modifier
-            .fillMaxWidth()
-            .height(50.dp))
+        IconButton(
+            onClick = onDismiss,
+            modifier = Modifier
+                .align(Alignment.TopEnd)
+        ) {
+            Icon(
+                imageVector = Icons.Default.Close,
+                contentDescription = "Close",
+                tint = Color.White
+            )
+        }
     }
 }

@@ -21,7 +21,7 @@
     <string name="txt_end_date">만료일</string>
     <string name="txt_memo">메모</string>
     <string name="txt_won">₩</string>
-    <string name="txt_no_gift">사용 가능한 기프티콘이 없어요.</string>
+    <string name="txt_no_gift">정리할 기프티콘을 추가해주세요.</string>
     <string name="txt_no_favorite_gift">아직 찜한 기프티콘이 없어요.</string>
     <string name="txt_no_near_gift">지금은 근처에 사용처가 없어요.</string>
     <string name="txt_no_used_gift">사용 완료된 기프티콘이 없어요.</string>

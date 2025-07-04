@@ -15,14 +15,14 @@ plugins {
 
 android {
     namespace = "com.sumi.pockon"
-    compileSdk = 34
+    compileSdk = 35
 
     defaultConfig {
         applicationId = "com.sumi.pockon"
         minSdk = 24
-        targetSdk = 34
-        versionCode = 12
-        versionName = "1.0.1"
+        targetSdk = 35
+        versionCode = 17
+        versionName = "1.0.2"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables {
@@ -140,7 +140,7 @@ dependencies {
     implementation(libs.androidx.constraintlayout)
 
     // LocalDateTime Api 26 lower
-    coreLibraryDesugaring("com.android.tools:desugar_jdk_libs:1.1.5")
+    coreLibraryDesugaring("com.android.tools:desugar_jdk_libs:2.1.5")
 
     // gson
     implementation("com.google.code.gson:gson:2.10.1")

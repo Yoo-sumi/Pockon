@@ -1,5 +1,6 @@
 package com.sumi.pockon.ui.used
 
+import android.annotation.SuppressLint
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -69,6 +70,7 @@ import com.sumi.pockon.ui.list.ConfirmDialog
 import com.sumi.pockon.util.formatString
 import kotlinx.coroutines.launch
 
+@SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @Composable
 fun UsedScreen(onDetail: (String) -> Unit, onBack: () -> Unit) {
     val usedViewModel = hiltViewModel<UsedViewModel>()
@@ -83,13 +85,12 @@ fun UsedScreen(onDetail: (String) -> Unit, onBack: () -> Unit) {
 
     Scaffold(
         snackbarHost = {
-        SnackbarHost(hostState = snackbarHostState)
+            SnackbarHost(hostState = snackbarHostState)
         }
-    ) { innerPadding ->
+    ) { _ ->
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(innerPadding),
         ) {
             // topbar
             Box(

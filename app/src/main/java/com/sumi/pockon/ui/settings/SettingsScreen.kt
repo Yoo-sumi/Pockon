@@ -1,6 +1,7 @@
 package com.sumi.pockon.ui.settings
 
 import android.Manifest
+import android.annotation.SuppressLint
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
@@ -65,6 +66,7 @@ import com.sumi.pockon.R
 import com.sumi.pockon.ui.list.ConfirmDialog
 import kotlinx.coroutines.launch
 
+@SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @Composable
 fun SettingsScreen(
     onUsedGift: () -> Unit,
@@ -129,7 +131,6 @@ fun SettingsScreen(
             SettingScreenTopBar()
             Column(
                 modifier = Modifier
-                    .padding(innerPadding)
                     .fillMaxSize()
                     .background(MaterialTheme.colorScheme.background)
                     .verticalScroll(scrollState)

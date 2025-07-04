@@ -54,7 +54,7 @@ class PinViewModel @Inject constructor(
     }
 
     fun removeLastPin() {
-        inputPin.removeLast()
+        inputPin.removeAt(inputPin.lastIndex)
     }
 
     fun getTitle(): Int {

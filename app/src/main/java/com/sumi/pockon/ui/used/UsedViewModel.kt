@@ -7,6 +7,7 @@ import androidx.lifecycle.viewModelScope
 import com.sumi.pockon.data.repository.PreferenceRepository
 import com.sumi.pockon.data.repository.GiftRepository
 import com.sumi.pockon.data.model.Gift
+import com.sumi.pockon.util.NetworkMonitor
 import com.sumi.pockon.util.loadImageFromPath
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
@@ -19,7 +20,8 @@ import javax.inject.Inject
 @HiltViewModel
 class UsedViewModel @Inject constructor(
     private val giftRepository: GiftRepository,
-    private val preferenceRepository: PreferenceRepository
+    private val preferenceRepository: PreferenceRepository,
+    private val networkMonitor: NetworkMonitor
 ) : ViewModel() {
 
     private var uid = preferenceRepository.getUid()
@@ -87,6 +89,11 @@ class UsedViewModel @Inject constructor(
 
     // 선택 삭제/전체 삭제
     fun deleteSelection(onComplete: (Boolean) -> Unit) {
+        if (!isGuestMode && !networkMonitor.isConnected()) {
+            onComplete(false)
+            return
+        }
+
         _isShowIndicator.value = true
         val resultList = ArrayList<Boolean>()
         _checkedGiftList.value.forEach { giftId ->

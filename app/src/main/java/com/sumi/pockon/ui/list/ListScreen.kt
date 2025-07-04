@@ -1,5 +1,6 @@
 package com.sumi.pockon.ui.list
 
+import android.annotation.SuppressLint
 import androidx.appcompat.app.AlertDialog
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.tween
@@ -100,6 +101,7 @@ import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.rememberNestedScrollInteropConnection
 import androidx.compose.ui.text.style.TextOverflow
 
+@SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @Composable
 fun ListScreen(onDetail: (String) -> Unit, onAdd: () -> Unit, isLoading: (Boolean) -> Unit) {
     val listViewModel = hiltViewModel<ListViewModel>()
@@ -195,7 +197,7 @@ fun ListScreen(onDetail: (String) -> Unit, onAdd: () -> Unit, isLoading: (Boolea
         snackbarHost = {
             SnackbarHost(hostState = snackbarHostState)
         }
-    ) { innerPadding ->
+    ) { _ ->
         val title = if (isEdit && listViewModel.checkedGiftList.value.isEmpty()) {
             R.string.btn_cancel
         } else if (isEdit && listViewModel.checkedGiftList.value.isNotEmpty()) {
@@ -206,7 +208,6 @@ fun ListScreen(onDetail: (String) -> Unit, onAdd: () -> Unit, isLoading: (Boolea
         Box(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(innerPadding)
         ) {
             Column {
                 ListScreenTopBar(
@@ -259,6 +260,7 @@ fun ListScreen(onDetail: (String) -> Unit, onAdd: () -> Unit, isLoading: (Boolea
                                     fontSize = 18.sp,
                                     color = MaterialTheme.colorScheme.outline,
                                     fontWeight = FontWeight.Bold,
+                                    textAlign = TextAlign.Center,
                                     text = stringResource(id = R.string.txt_no_gift),
                                 )
                             }
